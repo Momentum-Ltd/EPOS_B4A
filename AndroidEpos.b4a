@@ -1,0 +1,357 @@
+﻿Build1=Default,arena.Epos
+Build2=CentreImages,arena.Epos,CENTRE_LOGOS
+File1=AppMenuLogo.png
+File10=frmCreateAccount.bal
+File11=frmHome.bal
+File12=frmPlaceOrder.bal
+File13=frmQueryNewInstall.bal
+File14=frmselectitem.bal
+File15=frmsyncdatabase.bal
+File16=frmValidateCentreSelection3.bal
+File17=frmValidateDevice.bal
+File18=Home-icon.png
+File19=ic_cached_white_24dp.png
+File2=cardSelectCentreDetails2.bal
+File20=IconSilhouette.png
+File21=ImageNotAvailableSmall.png
+File22=SuperOrderLogo.png
+File23=SuperOrderTextTransSmall.png
+File24=TapHouseRound.png
+File3=Contacts-icon.png
+File4=frmAbout.bal
+File5=frmASelectPlayCentre3.bal
+File6=frmCardEntry.bal
+File7=frmChangeAccountInfo.bal
+File8=frmChangeSettings.bal
+File9=frmCheckAccountStatus.bal
+FileGroup1=Default Group
+FileGroup10=Default Group
+FileGroup11=Default Group
+FileGroup12=Default Group
+FileGroup13=Default Group
+FileGroup14=Default Group
+FileGroup15=Default Group
+FileGroup16=Default Group
+FileGroup17=Default Group
+FileGroup18=Default Group
+FileGroup19=Default Group
+FileGroup2=Default Group
+FileGroup20=Default Group
+FileGroup21=Default Group
+FileGroup22=Default Group
+FileGroup23=Default Group
+FileGroup24=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+FileGroup6=Default Group
+FileGroup7=Default Group
+FileGroup8=Default Group
+FileGroup9=Default Group
+Group=Activities
+Library1=core
+Library10=dialogs
+Library11=stringutils
+Library12=runtimepermissions
+Library13=firebasenotifications
+Library14=okhttputils2
+Library15=json
+Library16=fusedlocationprovider
+Library17=gps
+Library18=xcustomlistview
+Library19=okhttp
+Library2=xmlsax
+Library20=stdactionbar
+Library21=xml2map
+Library22=xui views
+Library23=xui
+Library3=randomaccessfile
+Library4=xmlbuilder
+Library5=network
+Library6=phone
+Library7=javaobject
+Library8=contentresolver
+Library9=mlwifi
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="28"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~
+Module1=About
+Module10=CheckAccountStatus
+Module11=clsCentreInfo
+Module12=clsConfigSettings
+Module13=clsConnect
+Module14=clsCustomerBill
+Module15=clsCustomerInfo
+Module16=clsCustomerOrderItemRec
+Module17=clsDataBaseTables
+Module18=clsDescriptionTableRec
+Module19=clsDeviceInfo
+Module2=aCardEntry
+Module20=clsEposApiHelper
+Module21=clsEposBalanceCheckRec
+Module22=clsEposCustomerBillByItem
+Module23=clsEposCustomerDetails
+Module24=clsEposCustomerInfo
+Module25=clsEposCustomerOrder
+Module26=clsEposCustomerOrderResponse
+Module27=clsEposCustomerPayment
+Module28=clsEposLocationRec
+Module29=clsEposMessageRec
+Module3=aHome
+Module30=clsEposOrderInfo
+Module31=clsEposOrderStatus
+Module32=clsEposOrderStatusList
+Module33=clsEposWebCentreLocationRec
+Module34=clsEposWebCommsMessageRec
+Module35=clsEposWebCustomerRec
+Module36=clsEposWebLocationCoordinates
+Module37=clsGoodsTableRec
+Module38=clsGroupCategoryTableRec
+Module39=clsLocation
+Module4=aPlaceOrder
+Module40=clsMainCategoryTableRec
+Module41=clsMyData
+Module42=clsNotifications
+Module43=clsOrderPaymentRec
+Module44=clsOrderStartResponse
+Module45=clsOrderStatusRec
+Module46=clsOrderSummary
+Module47=clsOrderSummaryRec
+Module48=clsOrderTableRec
+Module49=clsPreparationTableRec
+Module5=aSelectItem
+Module50=clsProgress
+Module51=clsProgressDialog
+Module52=clsProgressIndicator
+Module53=clsReportErrors
+Module54=clsServer
+Module55=clsSizeOptionTableRec
+Module56=clsSizePriceTableRec
+Module57=clsStripe
+Module58=clsStripeCardRec
+Module59=clsStripeTokenRec
+Module6=aSelectPlayCentre3
+Module60=clsSubCategoryTableRec
+Module61=ConnectionHelper
+Module62=CreateAccount
+Module63=FirebaseMessaging
+Module64=hAbout
+Module65=hCardEntry
+Module66=hChangeAccountInfo
+Module67=hChangeSettings
+Module68=hCheckAccountStatus
+Module69=hCreateAccount
+Module7=aSyncDatabase
+Module70=hHome
+Module71=hPlaceOrder
+Module72=hQueryNewInstall
+Module73=hSelectItem
+Module74=hSelectPlayCentre3
+Module75=hSyncDatabase
+Module76=hValidateCentreSelection2
+Module77=hValidateDevice
+Module78=modConvert
+Module79=modEposApp
+Module8=ChangeAccountInfo
+Module80=modEposWeb
+Module81=NB6
+Module82=QueryNewInstall
+Module83=srvNotification
+Module84=srvPhoneTotal
+Module85=Starter
+Module86=svcTestSequence
+Module87=TemplateActivity
+Module88=TemplateClass
+Module89=TemplateCode
+Module9=ChangeSettings
+Module90=TemplateService
+Module91=TemplateXactivity
+Module92=TemplateXhelper
+Module93=TestStartAt
+Module94=ValidateCentreSelection2
+Module95=ValidateDevice
+NumberOfFiles=24
+NumberOfLibraries=23
+NumberOfModules=95
+Version=10
+@EndOfDesignText@
+
+' This is the Main form (currently unused for other than for startup procedures and for project documentation).
+'
+#Region Documentation
+
+	' Form Version Documentation:
+	' Name......: Main
+	' Release...: 172                                                                                                                                                                                
+	' Date......: 09/08/20
+	'
+	' History
+	'
+	' For releases v1-24, see release v28.
+	' For releases v25-45, see release v48.
+	' For releases v46-62, see release v67. 
+	' For releases v63-77, see release v77.
+	' For releases v78-87, see release v87.
+	' For releases v88-97  see release v97.
+	' For releases v98-109 see release v110
+	' For releases v110 - 120 see release v122.
+	' For releases v121 - 129 see release v130
+	' For releases v130 - 138 see release v139.
+	' For releases v139 - 144 see release v145.
+	' For releases v145 - 151 see release v153
+	' for releases v152 - 162 see release v163
+	'
+	' Date......: 02/07/20
+	' Release...: 163
+	' Overview..: Added: #0341 - Settings protection added. 
+	' Amendee...: D Morris.
+	' Details...: Mod: clsConfigSettings_v17, hChangeSettings_v12.
+	'
+	' Date......: 05/06/20
+	' Release...: 164
+	' Overview..: Bufix: #0439 - Download menu timeout problem. 
+	' Amendee...: D Morris.
+	' Details...:  Mod: hSyncDatabase_v9.
+	'
+	' Date......: 09/07/20
+	' Release...: 165
+	' Overview..: Bugfix: Input filter causing system to lockup.
+	'			  Bugfix: Query New Install screen back button problem.
+	'			     Mod: Activate account - check junk folder added.
+	' Amendee...: D Morris.
+	' Details...: Mod: hCreateAccount_v14, hValidateDevice_v14, hChangeAccountInfo_v13, QueryNewInstall_v6,
+	'				  	hCheckAccountStatus_v16.
+	'
+	' Date......: 14/07/20
+	' Release...: 166
+	' Overview..: Investigation into GPS problem (and corrections to compile under VBA V9.9 and V10.0). 
+	' Amendee...: D Morris.
+	' Details...: Added: clsLocation_v1.
+	'			    Mod: hSelectPlayCentre2_v4, hShowOrderStatusList_v18, hSelectPlayCentre_v18.
+	'
+	' Date......: 17/07/20
+	' Release...: 167
+	' Overview..: Start on new UI theme (First phase changing buttons to Orange with rounded corners.. 
+	' Amendee...: D Morris.
+	' Details...: FORMS Changed: frmValidCentreSelection2_v2, frmTaskSelect2_v2, frmPlaceOrder_v3, frmSelectItem_v5 
+	'								- buttons changed to swiftbuttons and colour changed.
+	'				 Mods: hValidateCentreSelection_v21, hTaskSelect_v27, hPlaceOrder_v18, hSelectItem_v12.
+	'
+	' Date......: 19/07/20
+	' Release...: 168
+	' Overview..: New UI theme phase 2 secondary forms changed to orange buttons. 
+	' Amendee...: D Morris
+	' Details...: FORMS: frmQueryNewInstall_v3, frmCreateAccount_v3, frmValidateDevice_v3, frmCardEntry_v7, frmChangeAccountInfo_v3.
+	'			   Mods: hQueryNewInstall_v5, hCreateAccount_v15, hValidateDevice_v15, hCardEntry_v14, hChangeAccountInfo_v14.
+	'
+	' Date......: 23/07/20
+	' Release...: 169
+	' Overview..: New UI startup.
+	' Amendee...: D Morris
+	' Details...: Added: clsProgressIndicator_v1.
+	'			  Forms: frmCheckAccountStatus_v5, frmQueryNewInstall_v4, frmCreateAccount_v4, frmValidateDevice_v4.
+	'			    Mod: QueryNewInstall_v7, CreateAccount_v7, ValidateDevice_v5.
+	'			    Mod: hCheckAccountStatus_v17, hQueryNewInstall_v6, hCreateAccount_v16, hValidateDevice_v16,
+	'						modEposWeb_v11.
+	'
+	' Date......: 25/07/20
+	' Release...: 170
+	' Overview..: Improvements to Startup/create/setup screens. 
+	' Amendee...: D Morris
+	' Details...: Forms: frmCreateAccount_v5, frmValidateDevice_v5, frmQueryNewInstall_v5.
+	'
+	' Date......: 03/08/20
+	' Release...: 171
+	' Overview..: UI to select centre (with distance)
+	'			  Bugfix: #0488 Settings back key problem.
+	' Amendee...: D Morris
+	' Details...: Forms: cardSelectCentreDetails2_v1, frmASelectPlayCentre3_v1, frmValidateCentreSelect3_v1.
+	'			   Mods: hCheckAccountStatus_v18, hTaskSelect_v28, hShowOrderStatusList_v19, hShowBill_v20, 
+	'						Starter_v81, hSyncDatabase_v10, hAbout_v6, clsEposWebCentreLocationRec_v3, ModEposApp_v26.
+	'				New: hSelectPlayCentre3_v1, aSelectPlayCentre3_v1, hValidateCentreSelection2_v1, ValidateCentreSelection2_v1,
+	'			 Bugfix: ChangeSettings_v14.
+	'
+	' Date......: 09/08/20
+	' Release...: 172
+	' Overview..: Mod: Validate centre page - Confirm centre text added.
+	' Amendee...: D Morris
+	' Details...:    FORMS: frmValidateCentreSelection3_v2, frmASelectPlayCentre3_v2 - changes requested by Richard
+	'							cardSelectCentreDetail2_v2, frmValidateCentreSelection3_v3.
+	'				   New: frmHome_v1, hHome_v1, aHome_v1.
+	'				   Mod: hValidateCentreSelection2_v2, Starter_v82, ValidateCentreSelection2_v2,
+	'							aCardEntry_v8. hSyncDatabase_v11, srvNotification_v6, hCardEntry_v15, FirebaseMessaging_v7,
+	'							hPlaceOrder_v19, hSelectPlayCentre3_v3.			
+	'		      Obsolete: hTaskSelect_v28, aTaskSelect_v8, hShowOrderStatusList_v17, aShowOrderStatusList_v9, 
+	'							frmTaskSelect_v2, frmShowOrderStatusList_v1, hShowBill_v20, aShowBill_v9, frmShowBill_v1.
+	'                     
+	'			
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: 
+	' Amendee...: 
+	' Details...: 
+	'
+	' TODO: Detect xml deserialization problems - see clsOrderStatusRec() for example
+	'
+#End Region  Documentation
+
+#Region  Project Attributes
+
+	#ApplicationLabel: SuperOrder
+	#VersionCode: 172
+	#VersionName: 1.0.0.172
+	#SupportedOrientations: portrait
+	#CanInstallToExternalStorage: False
+	
+	' The following #AdditionalJar values are to allow access to the location services
+	#AdditionalJar: com.android.support:support-v4
+	#AdditionalJar: com.google.android.gms:play-services-location
+	
+#End Region  Project Attributes
+
+#Region  Activity Attributes
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region  Activity Attributes
+
+#Region  Mandatory Subroutines & Data
+ 
+Sub Process_Globals
+'	Private xui As XUI
+End Sub
+
+Sub Globals
+	' Currently none
+End Sub
+
+
+#End Region  Mandatory Subroutines & Data
+
+#Region  Event Handlers
+
+Sub Activity_Create(FirstTime As Boolean)
+	StartService(svcTestSequence)
+	StartService(srvPhoneTotal)
+	StartService(srvNotification)
+	StartActivity(CheckAccountStatus)	' New web startup (preferred operation)
+End Sub
+
+Sub Activity_Resume
+	' Currently nothing
+End Sub
+
+Sub Activity_Pause(UserClosed As Boolean)
+	' Currently nothing
+End Sub
+
+#End Region  Event Handlers
+
+#Region  Public Subroutines
+
+
+#End Region  Public Subroutines
+
+
+#Region  Local Subroutines
+
+
+#End Region  Local Subroutines

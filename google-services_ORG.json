@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1003870344311",
+    "firebase_url": "https://superorder-9ab63.firebaseio.com",
+    "project_id": "superorder-9ab63",
+    "storage_bucket": "superorder-9ab63.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1003870344311:android:e5bab76805106195",
+        "android_client_info": {
+          "package_name": "arena.Epos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1003870344311-or7jkd2oplmpvn4f67mcb7pcsjiogjdv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1UBDK8leQkzt7KYIseTOJg1iOAZSf4vs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1003870344311-or7jkd2oplmpvn4f67mcb7pcsjiogjdv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
