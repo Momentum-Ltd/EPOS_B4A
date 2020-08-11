@@ -10,14 +10,20 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 1
-	' Date......: 08/08/20
+	' Release...: 2
+	' Date......: 11/08/20
 	'
 	' History
 	' Date......: 08/08/20
 	' Release...: 1
 	' Created by: D Morris 
 	' Details...: based on hShowOrderStatusList_v19 and hTaskSelect_v28.
+	'
+	' Date......: 11/08/20
+	' Release...: 2
+	' Overview..: Revised how controls are inhibited.
+	' Amendee...: D Morris.
+	' Details...: Mod: controls now inhibited/enabled when Show/HideProgress() called.
 	'			
 	' Date......: 
 	' Release...: 
@@ -265,7 +271,6 @@ End Sub
 
 ' Populates the listview with each of the orders and their status in the specified XML string.
 Public Sub pHandleOrderStatusList(orderStatusStr As String)
-	ProgressHide
 #if B4A
 	Dim xmlStr As String = orderStatusStr.SubString(modEposApp.EPOS_ORDERSTATUSLIST.Length) ' TODO - check if the XML string is valid?
 #else ' B4I
@@ -304,8 +309,7 @@ Public Sub pHandleOrderStatusList(orderStatusStr As String)
 		lvwOrderSummary.AddItem("Error reading order list", "Please retry", invalidItem)
 #End If
 	End If
-	
-	ViewControl(True)
+	ProgressHide
 End Sub
 
 ' Handles customer request to leave the Centre.
@@ -336,7 +340,6 @@ End Sub
 
 ' Sends to the Server the message which requests the customer's order status list.
 public Sub pSendRequestForOrderStatusList
-	ViewControl(False)
 	lvwOrderSummary.Clear ' Clear down previous displayed information.
 	ProgressShow("Getting your order status, please wait...")
 	Dim msg As String = modEposApp.EPOS_ORDERSTATUSLIST & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
@@ -406,7 +409,6 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 #End If
 		End If
 	End If
-	ViewControl(True)
 End Sub
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
@@ -527,12 +529,14 @@ End Sub
 
 ' Show the process box
 Private Sub ProgressHide
+	ViewControl(True)
 	lblShowOrder.Visible = True
 	progressbox.Hide
 End Sub
 
 ' Hide The process box.
 Private Sub ProgressShow(message As String)
+	ViewControl(False)
 	lblShowOrder.Visible = False
 	progressbox.Show(message)
 End Sub
@@ -593,7 +597,6 @@ End Sub
 
 ' Starts the order placing procedure. .
 Private Sub lStartPlaceOrder()
-	ViewControl(False)
 	ProgressShow("Starting your order, please wait...") 
 	Wait For (CheckConnection(False)) complete(centreConnectionOk As Boolean)
 	If centreConnectionOk Then
@@ -621,19 +624,11 @@ Private Sub lStartPlaceOrder()
 #End If			
 		End If
 	End If
-	ViewControl(True)
 End Sub
 
 ' Enable/disable views
 ' pEnableView = true view operation enabled.
 Private Sub ViewControl( pEnableViews As Boolean)
-#if B4A
-#else ' B4i
-'TODO DM - not sure I like the controls greyed out!
-'	btnPlaceOrder.Enabled = enableViews	
-'	btnLeaveCentre.Enabled = enableViews
-'	lblBackButton.Enabled = enableViews
-#End If
 	enableViews = pEnableViews
 End Sub
 #End Region  Local Subroutines

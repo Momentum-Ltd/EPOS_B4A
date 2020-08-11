@@ -180,8 +180,8 @@ Version=10
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 172-                                                                                                                                                                                
-	' Date......: 10/08/20
+	' Release...: 173                                                                                                                                                                                
+	' Date......: 11/08/20
 	'
 	' History
 	'
@@ -282,13 +282,12 @@ Version=10
 	'		      Obsolete: hTaskSelect_v28, aTaskSelect_v8, hShowOrderStatusList_v17, aShowOrderStatusList_v9, 
 	'							frmTaskSelect_v2, frmShowOrderStatusList_v1, hShowBill_v20, aShowBill_v9, frmShowBill_v1.
 	'
-	' Date......: 
-	' Release...: 
-	' Overview..: Check github operation. 
+	' Date......: 11/08/20
+	' Release...: 173
+	' Overview..: Bugfix: #0490 - crash when double click confirm.
+	'			     Mod: Home page account icon removed from titlebar.
 	' Amendee...: D Morris.
-	' Details...: Mod: Another line to check operation.
-	'                     
-	'			
+	' Details...: Mod: fix in helpers hValidateCentreSelection2_v3, hHome_v2. frmHome_v2.
 	'
 	' Date......: 
 	' Release...: 
@@ -303,8 +302,8 @@ Version=10
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 172
-	#VersionName: 1.0.0.172
+	#VersionCode: 173
+	#VersionName: 1.0.0.173
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

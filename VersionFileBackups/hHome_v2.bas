@@ -10,14 +10,20 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 
-	' Date......: 05/08/20
+	' Release...: 2
+	' Date......: 11/08/20
 	'
 	' History
-	' Date......: 
-	' Release...: 
+	' Date......: 08/08/20
+	' Release...: 1
 	' Created by: D Morris 
 	' Details...: based on hShowOrderStatusList_v19 and hTaskSelect_v28.
+	'
+	' Date......: 11/08/20
+	' Release...: 2
+	' Overview..: Revised how controls are inhibited.
+	' Amendee...: D Morris.
+	' Details...: Mod: controls now inhibited/enabled when Show/HideProgress() called.
 	'			
 	' Date......: 
 	' Release...: 
@@ -35,6 +41,7 @@ Sub Class_Globals
 	
 	' Local variables
 	Private mPressedOrderStatus As clsEposOrderStatus 	' Stores the data of the order that was most recently-clicked in the listview
+	Private enableViews As Boolean						' When set views (controls) are enabled.
 	
 	' Local constants
 	Private Const DEFAULT_TIME_STAMP As Int = 1
@@ -45,7 +52,7 @@ Sub Class_Globals
 	Private imgCentrePicture As B4XView					' Holder for the center's picture
 	Private imgSuperorder As B4XView 					' SuperOrder header icon.
 	Private indLoading As B4XLoadingIndicator			' Loading indicator
-	Private lblBackButton As Label						' Back button
+	Private lblBackButton As B4XView					' Back button
 	Private lblCentreName As B4XView					' Centre name	
 	Private lblShowOrder As Label						' Instruction to show order information.
 #if B4A
@@ -71,42 +78,55 @@ End Sub
 
 #Region  Event Handlers
 ' Handle back button
+
 private Sub lblBackButton_Click
-	LeaveCentre
+	If enableViews = True Then
+		LeaveCentre		
+	End If
+
 End Sub
 
 ' Handles the Leave Centre button.
 Private Sub btnLeaveCentre_Click
-	xui.Msgbox2Async("Are you sure?", "Leaving this centre", "Yes", "", "No", Null)
-	Wait For msgbox_result(result As Int)
-	If result = xui.DialogResponse_Positive Then
-		Starter.myData.centre.signedOn = False ' log off centre.
-		Dim msg As String = modEposApp.EPOS_DISCONNECT & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
-#if B4A
-		CallSubDelayed2(Starter, "pSendMessage", msg )
-		StartActivity(aSelectPlayCentre3)
-#else 'B4I
-		Main.SendMessage(msg)
-		xTaskSelect.ClrPageTitle()	' fixes page title operation.
-		frmXSelectPlayCentre3.Show				
-#end if
+	If enableViews = True Then
+		xui.Msgbox2Async("Are you sure?", "Leaving this centre", "Yes", "", "No", Null)
+		Wait For msgbox_result(result As Int)
+		If result = xui.DialogResponse_Positive Then
+			Starter.myData.centre.signedOn = False ' log off centre.
+			Dim msg As String = modEposApp.EPOS_DISCONNECT & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
+	#if B4A
+			CallSubDelayed2(Starter, "pSendMessage", msg )
+			StartActivity(aSelectPlayCentre3)
+	#else 'B4I
+			Main.SendMessage(msg)
+	'		xTaskSelect.ClrPageTitle()	' fixes page title operation.
+			frmXSelectPlayCentre3.Show				
+	#end if		
+	End If
+
 	End If
 End Sub
 
 ' Handles the Click event of the Place Order button.
 Private Sub btnPlaceOrder_Click
-	' Clear old order data (in case e.g. the Make Order form's 'Back' nav-button was previously used, avoiding the order being cleared)
-	Starter.customerOrderInfo.orderList.Clear
-	Starter.customerOrderInfo.orderMessage = ""
-	lStartPlaceOrder
+	If enableViews = True Then
+		' Clear old order data (in case e.g. the Make Order form's 'Back' nav-button was previously used, avoiding the order being cleared)
+		Starter.customerOrderInfo.orderList.Clear
+		Starter.customerOrderInfo.orderMessage = ""
+		lStartPlaceOrder	
+	End If
 End Sub
 
 ' Handles refresh display button.
 Private Sub imgRefresh_Click
-	pSendRequestForOrderStatusList
+	If enableViews = True Then
+		pSendRequestForOrderStatusList		
+	End If
+
 End Sub
 
 ' Click on SuperOrder Icon to show the dialog progress box.
+' This is always enabled.
 Private Sub pnlShowDialog_Click
 	progressbox.ShowDialog
 End Sub
@@ -117,28 +137,34 @@ Private Sub lvwOrderSummary_ItemClick(Position As Int, Value As Object)
 #else ' B4I
 Private Sub lvwOrderSummary_ItemClick(Value As Object, Index As Int)
 #End If
-	Dim statusObj As clsEposOrderStatus = Value
-	If statusObj.orderId <> 0 Then ' Only proceed if the order is valid (the return value is set to 0 for items which display error messages)
-		mPressedOrderStatus = statusObj
-		ProgressShow("Getting the order details, please wait...")
-		Dim msg As String = modEposApp.EPOS_ORDER_QUERY & _
-									"," & modEposWeb.ConvertToString(Starter.myData.customer.customerId) & _
-									"," & modEposWeb.ConvertToString(statusObj.orderId)
-#if B4A
-		CallSub2(Starter, "pSendMessage", msg)
-#else ' B4I
-		Main.SendMessage(msg)
-#End If
+	If enableViews = True Then
+		Dim statusObj As clsEposOrderStatus = Value
+		If statusObj.orderId <> 0 Then ' Only proceed if the order is valid (the return value is set to 0 for items which display error messages)
+			mPressedOrderStatus = statusObj
+			ProgressShow("Getting the order details, please wait...")
+			Dim msg As String = modEposApp.EPOS_ORDER_QUERY & _
+										"," & modEposWeb.ConvertToString(Starter.myData.customer.customerId) & _
+										"," & modEposWeb.ConvertToString(statusObj.orderId)
+	#if B4A
+			CallSub2(Starter, "pSendMessage", msg)
+	#else ' B4I
+			Main.SendMessage(msg)
+	#End If
+		End If		
 	End If
+
 End Sub
 
 ' Progress dialog has timed out
 Private Sub progressbox_Timeout()
 	Dim tempLocationRec As clsEposWebCentreLocationRec
+	
 	tempLocationRec.Initialize
 	tempLocationRec.centreName = Starter.myData.centre.name
 	tempLocationRec.centreOpen = True
 	tempLocationRec.id = Starter.myData.centre.centreId
+
+	ViewControl(True)
 #if B4A
 	CallSubDelayed2(ValidateCentreSelection2, "ValidateSelection", tempLocationRec)
 #else ' B4I
@@ -234,7 +260,7 @@ Public Sub HandleOrderStart(orderStartStr As String)
 		#if B4A
 		StartActivity(aPlaceOrder)
 #else ' B4I
-		xTaskSelect.ClrPageTitle()	' fixes page title operation.
+'		xTaskSelect.ClrPageTitle()	' fixes page title operation.
 		xPlaceOrder.Show
 #end if
 	Else ' Not allowed to place an order - display the reason why
@@ -245,7 +271,6 @@ End Sub
 
 ' Populates the listview with each of the orders and their status in the specified XML string.
 Public Sub pHandleOrderStatusList(orderStatusStr As String)
-	ProgressHide
 #if B4A
 	Dim xmlStr As String = orderStatusStr.SubString(modEposApp.EPOS_ORDERSTATUSLIST.Length) ' TODO - check if the XML string is valid?
 #else ' B4I
@@ -284,6 +309,7 @@ Public Sub pHandleOrderStatusList(orderStatusStr As String)
 		lvwOrderSummary.AddItem("Error reading order list", "Please retry", invalidItem)
 #End If
 	End If
+	ProgressHide
 End Sub
 
 ' Handles customer request to leave the Centre.
@@ -503,12 +529,14 @@ End Sub
 
 ' Show the process box
 Private Sub ProgressHide
+	ViewControl(True)
 	lblShowOrder.Visible = True
 	progressbox.Hide
 End Sub
 
 ' Hide The process box.
 Private Sub ProgressShow(message As String)
+	ViewControl(False)
 	lblShowOrder.Visible = False
 	progressbox.Show(message)
 End Sub
@@ -591,11 +619,16 @@ Private Sub lStartPlaceOrder()
 #if B4A
 			CallSubDelayed(aSyncDatabase, "pSyncDataBase")
 #Else
-			xTaskSelect.ClrPageTitle()	' fixes page title operation.
+'			xTaskSelect.ClrPageTitle()	' fixes page title operation.
 			xSyncDatabase.show
 #End If			
 		End If
 	End If
 End Sub
 
+' Enable/disable views
+' pEnableView = true view operation enabled.
+Private Sub ViewControl( pEnableViews As Boolean)
+	enableViews = pEnableViews
+End Sub
 #End Region  Local Subroutines
