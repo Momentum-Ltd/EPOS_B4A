@@ -45,8 +45,8 @@ Version=7.3
 	' Amendee...: D Morris.
 	' Details...: Mod: lHandleCustomerDetailsMsg(), lHandleOpenTabConfirm().
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/08/20
+	' Release...: 82
 	' Overview..: Mod: Validate centre page - Confirm centre text added.
 	' Amendee...: D Morris
 	' Details...:  Mods: lNotifyStatus() - Now updates status when order completed. 
@@ -126,6 +126,7 @@ Sub Globals
 End Sub
 
 Sub Service_Create
+	
 '	externalFolder = runtimePerms.GetSafeDirDefaultExternal("eposLogs") ' This should happen as early as possible (for exceptions)
 	LogFile.Initialize	' Initialize Logging system.
 	Dim testSocket As ServerSocket : testSocket.Initialize(51000, "testSocket") ' To get this devices's IP address

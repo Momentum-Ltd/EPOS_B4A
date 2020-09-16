@@ -171,7 +171,7 @@ Module95=ValidateDevice
 NumberOfFiles=24
 NumberOfLibraries=23
 NumberOfModules=95
-Version=10
+Version=10.2
 @EndOfDesignText@
 
 ' This is the Main form (currently unused for other than for startup procedures and for project documentation).
@@ -180,8 +180,8 @@ Version=10
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 173                                                                                                                                                                                
-	' Date......: 11/08/20
+	' Release...: 174                                                                                                                                                                               
+	' Date......: 16/09/20
 	'
 	' History
 	'
@@ -270,7 +270,7 @@ Version=10
 	'			 Bugfix: ChangeSettings_v14.
 	'
 	' Date......: 09/08/20
-	' Release...: 172
+	' Release...: 172 (Full release).
 	' Overview..: Mod: Validate centre page - Confirm centre text added.
 	' Amendee...: D Morris
 	' Details...:    FORMS: frmValidateCentreSelection3_v2, frmASelectPlayCentre3_v2 - changes requested by Richard
@@ -289,6 +289,13 @@ Version=10
 	' Amendee...: D Morris.
 	' Details...: Mod: fix in helpers hValidateCentreSelection2_v3, hHome_v2. frmHome_v2.
 	'
+	' Date......: 16/09/20
+	' Release...: 174
+	' Overview..: Bugfix: 0497 (Android)  - Problem with centre's web url. 
+	' Amendee...: D Morris
+	' Details...: Mod: hValidateCentreSelection2_v4, Starter_v83.
+	'					NOTE: This version will not run in debug - See https://www.b4x.com/android/forum/threads/debug-problem-java-lang-runtimeexception-unable-to-create-service.122368/#post-764749
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -302,8 +309,8 @@ Version=10
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 173
-	#VersionName: 1.0.0.173
+	#VersionCode: 174
+	#VersionName: 1.0.0.174
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

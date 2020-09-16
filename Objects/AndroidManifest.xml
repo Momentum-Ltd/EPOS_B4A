@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="173"
-	android:versionName="1.0.0.173"
+	android:versionCode="174"
+	android:versionName="1.0.0.174"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="28"/>
@@ -16,14 +16,14 @@
 	android:maxSdkVersion="18" />
 	<permission android:name="arena.Epos.permission.C2D_MESSAGE"
 	  android:protectionLevel="signature" />
+	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
-	<uses-permission android:name="android.permission.VIBRATE"/>
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
@@ -66,7 +66,7 @@
 		            android:exported="false"
 		            android:permission="android.permission.BIND_JOB_SERVICE" />
 		
-		 <service android:name="com.google.firebase.components.ComponentDiscoveryService" >
+		 <service android:name="com.google.firebase.components.ComponentDiscoveryService"  android:directBootAware="true" >
 		            <meta-data
 		                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
 		                android:value="com.google.firebase.components.ComponentRegistrar" />
@@ -89,11 +89,19 @@
 		   			 <meta-data
 		                android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar"
 		                android:value="com.google.firebase.components.ComponentRegistrar" />
+		             <meta-data
+		                android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar"
+		                android:value="com.google.firebase.components.ComponentRegistrar" />
+		              <meta-data
+		                android:name="com.google.firebase.components:com.google.firebase.crashlytics.CrashlyticsRegistrar"
+		                android:value="com.google.firebase.components.ComponentRegistrar" />
+		               
 		</service>
 		   <provider
 		  android:authorities="arena.Epos.firebaseinitprovider"
 		  android:name="com.google.firebase.provider.FirebaseInitProvider"
 		  android:exported="false"
+		   android:directBootAware="true"
 		  android:initOrder="100" />
 		  
 		   <receiver
@@ -120,6 +128,7 @@
 		  </service>
 		<service
 		  android:name="com.google.firebase.messaging.FirebaseMessagingService"
+		    android:directBootAware="true"
 		  android:exported="true">
 		  <intent-filter android:priority="-500">
 		  <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -145,6 +154,10 @@
 			</intent-filter>
 			
 		</activity>
+		<service android:name=".starter">
+		</service>
+		<receiver android:name=".starter$starter_BR">
+		</receiver>
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
@@ -240,10 +253,6 @@
 		<service android:name=".srvphonetotal">
 		</service>
 		<receiver android:name=".srvphonetotal$srvphonetotal_BR">
-		</receiver>
-		<service android:name=".starter">
-		</service>
-		<receiver android:name=".starter$starter_BR">
 		</receiver>
 		<service android:name=".svctestsequence">
 		</service>
