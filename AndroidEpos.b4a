@@ -1,5 +1,5 @@
 ﻿Build1=Default,arena.Epos
-Build2=CentreImages,arena.Epos,CENTRE_LOGOS
+Build2=CentreImages,arena.Epos,CENTRE_LOGOS,INCLUDE_SOCKET_CODE
 File1=AppMenuLogo.png
 File10=frmCreateAccount.bal
 File11=frmHome.bal
@@ -180,7 +180,7 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 174                                                                                                                                                                               
+	' Release...: 175                                                                                                                                                                               
 	' Date......: 16/09/20
 	'
 	' History
@@ -296,6 +296,15 @@ Version=10.2
 	' Details...: Mod: hValidateCentreSelection2_v4, Starter_v83.
 	'					NOTE: This version will not run in debug - See https://www.b4x.com/android/forum/threads/debug-problem-java-lang-runtimeexception-unable-to-create-service.122368/#post-764749
 	'
+	' Date......: 16/09/20
+	' Release...: 175 
+	' Overview..: Investigation in unable to run in debug (see release 1.0.0.174).
+	'			  Bugfix: #0498 - Not displaying correct centre after switching.
+	' Amendee...: D Morris
+	' Details...:  Support for INCLUDE_SOCKET_CODE - see Starter.
+	'					Mod: Starter.v84 
+	'			   Bugfix: #0498 - not sure how (has been compiled with B4A V10.2).
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -309,8 +318,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 174
-	#VersionName: 1.0.0.174
+	#VersionCode: 175
+	#VersionName: 1.0.0.175
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
