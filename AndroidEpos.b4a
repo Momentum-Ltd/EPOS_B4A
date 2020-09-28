@@ -180,8 +180,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 175                                                                                                                                                                               
-	' Date......: 16/09/20
+	' Release...: 176                                                                                                                                                                               
+	' Date......: 28/09/20
 	'
 	' History
 	'
@@ -299,11 +299,18 @@ Version=10.2
 	' Date......: 16/09/20
 	' Release...: 175 
 	' Overview..: Investigation in unable to run in debug (see release 1.0.0.174).
-	'			  Bugfix: #0498 - Not displaying correct centre after switching.
+	'			  Bugfix: #0498 - Not displaying correct centre after switching (not fixed see not below).
 	' Amendee...: D Morris
 	' Details...:  Support for INCLUDE_SOCKET_CODE - see Starter.
 	'					Mod: Starter.v84 
-	'			   Bugfix: #0498 - not sure how (has been compiled with B4A V10.2).
+	'			   Bugfix: #0498 - has been compiled with B4A V10.2.
+	'			   Note: Worked with locally loaded code but would not work when code installed from Google Play Store. 
+	'		
+	' Date......: 28/09/20
+	' Release...: 176
+	' Overview..: Bugfix: #0498 - Not displaying correct centre after switching (Second attempt to fix).
+	' Amendee...: D Morris
+	' Details...: Mod: aHome_v2. hHome_v3.
 	'		
 	' Date......: 
 	' Release...: 
@@ -318,8 +325,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 175
-	#VersionName: 1.0.0.175
+	#VersionCode: 176
+	#VersionName: 1.0.0.176
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
