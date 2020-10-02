@@ -180,8 +180,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 176                                                                                                                                                                               
-	' Date......: 28/09/20
+	' Release...: 177                                                                                                                                                                               
+	' Date......: 02/10/20
 	'
 	' History
 	'
@@ -205,7 +205,7 @@ Version=10.2
 	' Amendee...: D Morris.
 	' Details...: Mod: clsConfigSettings_v17, hChangeSettings_v12.
 	'
-	' Date......: 05/06/20
+	' Date......: 05/07/20
 	' Release...: 164
 	' Overview..: Bufix: #0439 - Download menu timeout problem. 
 	' Amendee...: D Morris.
@@ -299,7 +299,7 @@ Version=10.2
 	' Date......: 16/09/20
 	' Release...: 175 
 	' Overview..: Investigation in unable to run in debug (see release 1.0.0.174).
-	'			  Bugfix: #0498 - Not displaying correct centre after switching (not fixed see not below).
+	'			  Bugfix: #0498 - Not displaying correct centre after switching (not fixed see below).
 	' Amendee...: D Morris
 	' Details...:  Support for INCLUDE_SOCKET_CODE - see Starter.
 	'					Mod: Starter.v84 
@@ -311,6 +311,13 @@ Version=10.2
 	' Overview..: Bugfix: #0498 - Not displaying correct centre after switching (Second attempt to fix).
 	' Amendee...: D Morris
 	' Details...: Mod: aHome_v2. hHome_v3.
+	'		
+	' Date......: 02/10/20
+	' Release...: 177
+	' Overview..: Bugfix: #0500 - Validate Centre screen not showing picture after communication timeout.
+	'			     Mod: Support for Centre Web site with full URL.
+	' Amendee...: D Morris
+	' Details...: Mod: hValidateCentreSelection2_v5, Starter_v85, hHome_v3, hSelectPlayCentre3_v4, ValidateCentreSelection2_v3.
 	'		
 	' Date......: 
 	' Release...: 
@@ -325,8 +332,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 176
-	#VersionName: 1.0.0.176
+	#VersionCode: 177
+	#VersionName: 1.0.0.177
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

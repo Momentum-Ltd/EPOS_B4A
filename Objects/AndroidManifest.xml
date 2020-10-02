@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="176"
-	android:versionName="1.0.0.176"
+	android:versionCode="177"
+	android:versionName="1.0.0.177"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="28"/>
@@ -161,7 +161,7 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
-			android:name=".ahome"
+			android:name=".validatecentreselection2"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -176,6 +176,13 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".acardentry"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".ahome"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -280,13 +287,6 @@
 		</service>
 		<receiver android:name=".teststartat$teststartat_BR">
 		</receiver>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".validatecentreselection2"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
