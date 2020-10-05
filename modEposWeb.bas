@@ -11,80 +11,26 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: modEposWeb
-	' Release...: 10-
-	' Date......: 23/07/20
+	' Release...: 11
+	' Date......: 05/10/20
 	'
 	' History
 	' Date......: 01/07/19
 	' Release...: 1
 	' Created by: D Morris
 	' Details...: First release to support version tracking
-		'
-	' Date......: 30/07/19
-	' Release...: 2
-	' Overview..: URLs added.
-	' Amendee...: D Morris
-	' Details...: Added: URL_PRIVACY_POLICY and URL_WEB_SERVER_API.
-		'
-	' Date......: 03/08/19
-	' Release...: 3
-	' Overview..: More URL's supported.
-	' Amendee...: D Morris
-	' Details...: Added: New constants based on SELECT_XXXX_API and URL_XXXX_API 
-		'
-	' Date......: 09/08/19
-	' Release...: 4
-	' Overview..: Support for device type.
-	' Amendee...: D Morris
-	' Details...: Added: API_DEVICE_TYPE.
-		'
-	' Date......: 03/02/20
-	' Release...: 5
-	' Overview..: Support for fliter input fields.
-	' Amendee...: D Morris
-	' Details...:  Added: FilterStringInput() and TextBoxFilter() to filter text.
 	'
-	' Date......: 26/04/20
-	' Release...: 6
-	' Overview..: Bug #0186: Problem moving accounts support for new customerId (with embedded rev).
-	' Amendee...: D Morris
-	' Details...:   Added: CUSTOMERID_LEGACY_THRESHOLD, API_INCREV.
-	'				  Mod: Constants rearranged.
-	'				  Mod: TextBoxFilter()
-	'			    Added: BuildApiCustomerId(), ConvertApiIdToCustomerId(), ConvertApiIdtoRev(),
-	'						ConvertApiId(), ConvertCustomerId(), ConvertToString(), FilterEmailInput(),
-	'						TextBoxFilterEmail(), 
+	' History 2 - 10 see v10.
 	'
-	' Date......: 13/05/20
-	' Release...: 7
-	' Overview..: Issue #0315 remove compiler warnings.
-	' Amendee...: D Morris.
-	' Details...: Mod:	TextBoxFilterUsingPattern() parameter "old" removed.	
-	'					TextBoxFilterUsingPattern() now uses the matchPattern argument.
+	' Date......: 05/10/20
+	' Release...: 11
+	' Overview..: Privacy url changed and support for test centres.
+	' Amendee...: D Morris
+	' Details...:   Mod: URL_PRIVACY_POLICY changed to superorder.co.uk.
+	'			  Added: API_SEARCH_RADIUS, API_SHOW_TEST_CENTRES.
+	'               Mod: URL_WEB_SERVER_2_API changed to http:
 	'
-	' Date......: 11/06/20
-	' Release...: 8
-	' Overview..: Work to support a second Server.
-	' Amendee...: D Morris
-	' Details...: Mod: URL_WEB_SERVER_API 
-	'
-	' Date......: 28/06/20
-	' Release...: 9
-	' Overview..: Add #0395 Select centre pictures (More work to download from Web Server).
-	' Amendee...: D Morris
-	' Details...:  Added: WEB_DIR_IMG, URL_WEB_SERVER_1 and URL_WEB_SERVER_2.
-	'			
-	' Date......: 13/07/20
-	' Release...: 10
-	' Overview..: Warning removed.
-	' Amendee...: D Morris
-	' Details...: 	 Mod: TextBoxFilterUsingPattern() fixed unused variable warning.
-	'
-	' Date......: 
-	' Release...: 
-	' Overview..: Privacy url changed.
-	' Amendee...: D Morris
-	' Details...: Mod: URL_PRIVACY_POLICY changed to superorder.co.uk
+	' NOTE:URL_WEB_SERVER_2 and URL_WEB_SERVER_2_API set to http://...
 	'
 	' Date......: 
 	' Release...: 
@@ -123,11 +69,11 @@ Sub Process_Globals
 
 	''' <summary>Web Server URL.</summary>
 	Public Const URL_WEB_SERVER_1 As String = "https://www.superord.co.uk"
-	Public Const URL_WEB_SERVER_2 As String = "https://www.superorderapp.co.uk"
+	Public Const URL_WEB_SERVER_2 As String = "http://www.superorderapp.co.uk"
 
 	''' <summary>Web Server API prefix.</summary>
 	Public Const URL_WEB_SERVER_1_API As String = "https://www.superord.co.uk/api"
-	Public Const URL_WEB_SERVER_2_API As String = "https://www.superorderapp.co.uk/api"
+	Public Const URL_WEB_SERVER_2_API As String = "http://www.superorderapp.co.uk/api"
 	
 '	''' <summary> Web Server Centre API URL prefix.</summary>
 '	Public Const URL_CENTRE_API As String = URL_WEB_SERVER_API & CONTROLLER_CENTRE_API
@@ -164,6 +110,12 @@ Sub Process_Globals
 
 	''' <summary>API call search parameter for specifying the update limit.</summary>
 	Public Const API_MAX_LIMIT As String = "MAX"
+		
+	''' <summary>API call to specify the search radius."</summary>
+	Public Const API_SEARCH_RADIUS As String = "RAD"
+
+	''' <summary>API call show test centres in searches."</summary>
+	Public Const API_SHOW_TEST_CENTRES As String = "TEST"
 
 	''' <summary>API call search parameter for emails.</summary>
 	Public Const API_EMAIL As String = "EMAIL"

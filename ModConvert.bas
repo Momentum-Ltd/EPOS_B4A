@@ -11,8 +11,8 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: ModConvert
-	' Release...: 13
-	' Date......: 13/05/20   
+	' Release...: 14
+	' Date......: 05/10/20   
 	'
 	' History
 	' 	Version v1 = 9 see version ModConvert_v9.
@@ -57,6 +57,13 @@ Version=7.3
 	' Amendee...: D Morris.
 	' Details...: Added: ConvertMessageStatusIntToString(), ConvertMessageStatusToInt().
 	'
+	' Date......: 05/10/20
+	' Release...: 14
+	' Overview..: Support for km/miles conversions.
+	' Amendee...: D Morris.
+	' Details...: Added CVT_KM_TO_MILES and CVT_MILES_TO_KM
+	'					ConvertKmToMiles() and ConvertMilesToKm().
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -80,9 +87,12 @@ Sub Process_Globals
 	Public Const payStatusCardNotAccepted As Int = 6, payStatusCreateCardAccProblem As Int = 7, payStatusCardProblem As Int = 8
 	Public Const payStatusSaveCard As Int = 9
 	
-		Type intByRef(value As Int)
+	' Conversion constants for km/miles
+	Public Const CVT_KM_TO_MILES As Float = 0.62137119
+	Public Const CVT_MILES_TO_KM As Float = 1.609344
 	
-	
+	Type intByRef(value As Int)
+		
 End Sub
 
 #End Region
@@ -166,6 +176,11 @@ Public Sub ConvertDailyIdToCustomerNumber(dailyIdNumber As String, customerNumbe
     Return dailyIdValid
 End Sub
 
+' Convert km to miles.
+Public Sub ConvertKmToMiles(kmDistance As Float) As Float
+	Return kmDistance * CVT_KM_TO_MILES
+End Sub
+
 ' Convert EPSO message status enum (sent by Server) to int message status value.
 Public Sub ConvertMessageStatusToInt(value As String) As Int
 	Dim messageStatusInt As Int
@@ -192,6 +207,11 @@ Public Sub ConvertMessageStatusIntToString(messageStatusInt As Int) As String
 			messageStatus = "unknown"' Default 
 	End Select
 	Return messageStatus
+End Sub
+
+' Convert miles to km
+Public Sub ConvertMilesToKm(milesDistance As Float) As Float
+	Return milesDistance * CVT_MILES_TO_KM
 End Sub
 
 ' Convert payment status int to enum string (for sending to the Server).

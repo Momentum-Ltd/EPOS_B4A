@@ -493,7 +493,12 @@ Private Sub DisplayNearbyCentres(pCurrentLocation As Location)
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
 	Dim urlStr As String = Starter.server.URL_CENTRE_API & _
 	"?" & modEposWeb.API_LATITUDE & "=" & pCurrentLocation.Latitude & _
-							"&" & modEposWeb.API_LONGITUDE & "=" & pCurrentLocation.Longitude
+							"&" & modEposWeb.API_LONGITUDE & "=" & pCurrentLocation.Longitude & _
+							"&" & modEposWeb.API_MAX_LIMIT & "=" & Starter.settings.maxCentres & _
+							"&" & modEposWeb.API_SEARCH_RADIUS & "=" & Starter.settings.searchRadius 	
+	If Starter.settings.showTestCentres = True Then ' Include Test Centres?
+		urlStr = urlStr & "&" & modEposWeb.API_SHOW_TEST_CENTRES & "=1"
+	End If
 	job.Download(urlStr)
 	Wait For (job) JobDone(job As HttpJob)
 	ProgressHide

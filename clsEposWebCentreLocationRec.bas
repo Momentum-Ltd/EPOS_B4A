@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: clsEposWebCentreLocationRec
-	' Release...: 3
-	' Date......: 02/08/20
+	' Release...: 4
+	' Date......: 05/10/20
 	'
 	' History
 	' Date......: 06/06/19
@@ -32,6 +32,12 @@ Version=9.01
 	' Amendee...: D Morris
 	' Details...: Added: distance element.
 	'					 ConvertDistanceToString().
+	'
+	' Date......: 05/10/20
+	' Release...: 4
+	' Overview..: Support for units (km/miles).
+	' Amendee...: D Morris
+	' Details...: Mod: ConvertDistanceToString() now displays distance in km/miles.
 	'
 	' Date......: 
 	' Release...: 
@@ -66,10 +72,15 @@ End Sub
 #Region  Public Subroutines
 
 ' Convert distance value to the appropriate string.
+' Not pDistance is always km.
 Public Sub ConvertDistanceToString(pDistance As Float) As String
 	Dim distanceStrg As String = ""
 	If pDistance >= 0 Then
-		distanceStrg = NumberFormat(pDistance, 1, 1) & "km"
+		If Starter.settings.unitKm = True Then
+			distanceStrg = NumberFormat(pDistance, 1, 1) & "km"		
+		Else
+			distanceStrg = NumberFormat(modConvert.ConvertKmToMiles(pDistance), 1, 1) & "ml" 	
+		End If
 	else if pDistance = modEposApp.CENTRE_DISTANCE_NA Then
 		distanceStrg = "N.A."
 	Else
@@ -77,7 +88,6 @@ Public Sub ConvertDistanceToString(pDistance As Float) As String
 	End If
 	Return distanceStrg
 End Sub
-
 
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize()

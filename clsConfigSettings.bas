@@ -11,8 +11,8 @@ Version=8.28
 #Region  Documentation
 	'
 	' Name......: clsConfigSettings
-	' Release...: 17
-	' Date......: 02/07/20
+	' Release...: 18
+	' Date......: 05/10/20
 	'
 	' History
 	' Date......: 06/07/18
@@ -79,6 +79,13 @@ Version=8.28
 	' Amendee...: D Morris
 	' Details...:  Bugfix: LoadSettings(). SaveSettings().
 	'
+	' Date......: 05/10/20
+	' Release...: 18
+	' Overview..: Add: Support for test centrs and search parameters.
+	' Amendee...: D Morris.
+	' Details...: Added: Support for maxCentres, searchRadius, showTestCentres and unitKm.
+	'			    Mod: LoadDefaults() now public.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -111,10 +118,16 @@ Sub Class_Globals
 	Private Const DFT_TESTMODE As Boolean = False
 	Private Const DFT_WIFI_HYSTERESIS As Int = 10
 	Private Const DFT_WIFI_LOW_THRESHOLD As Int = 30
+	' New values 
+	Private Const DFT_MAX_CENTRES As Int = 20
+	Private Const DFT_SEARCH_RADIUS As Int = 250
+	Private Const DFT_SHOW_TEST_CENTRES As Boolean = False
+	Private Const DFT_UNIT_KM As Boolean = False ' Miles selected
+	
+	
 	Private const MAPKEY_ALL_FCM_NOTIFICATION As String = "allFcnNotification"
 	Private Const MAPKEY_ALLOW_UCN As String = "allowEntryOfUCN"
 	Private Const MAPKEY_CONNECTION_TIMEOUT As String = "connectionTimeout"
-	' Private Const MAPKEY_NEW_WEB_STARTUP As String = "newWebStartup"
 	Private Const MAPKEY_RECONNECT_TIMEOUT As String = "reconnectTimeout"
 	Private Const MAPKEY_SERVER_API_URL As String = "serverApiUrl"	
 	Private Const MAPKEY_SERVER_CHECK_INTERVAL As String = "serverCheckInterval"
@@ -124,6 +137,13 @@ Sub Class_Globals
 	Private Const MAPKEY_WEB_ONLY_COMMS As String = "webOnlyComms"	
 	Private Const MAPKEY_WIFI_HYSTERESIS As String = "wifiHysteresis"
 	Private Const MAPKEY_WIFI_LOW_THRESHOLD As String = "wifiLowThreshold"
+	' New values
+	Private Const MAPKEY_MAX_CENTRES As String = "maxCentres"
+	Private Const MAPKEY_SEARCH_RADIUS As String = "seachRadius"
+	Private Const MAPKEY_SHOW_TEST_CENTRES As String = "showTestCentres"
+	Private Const MAPKEY_UNIT_KM As String = "unitKm"
+	
+	
 	Private Const SETTINGS_FILENAME As String = "ConfigSettings.map"
 	
 	' Public variables
@@ -131,7 +151,6 @@ Sub Class_Globals
 	Public allowEntryOfUCN As Boolean 		' Whether the user can enter their Unique Customer Number when connecting (otherwise, Daily ID)
 	Public connectionTimeout As Int 		' The length of time (in seconds) before timeout, when first connecting to the server
 	Public enableStreamLineSignon As Boolean ' Whether to use the streamlined sign-on operation (this is currently redundant)
-'	Public newWebStartup As Boolean	' Enable new web startup operation.
 	Public reconnectTimeout As Int 			' The length of time (in seconds) before timeout, when automatically reconnecting to the server
 	Public serverApiUrl As String 			' Server API URL	
 	Public serverCheckInterval As Int 		' The length of time (in seconds) between automatic checks if the server is online
@@ -141,6 +160,12 @@ Sub Class_Globals
 	Public webOnlyComms As Boolean 			' All communications via the Web Server.	
 	Public wifiHysteresis As Int 			' The additional percentage to be added to the Low Threshold warning, to act as hysteresis
 	Public wifiLowThreshold As Int 			' The Wifi connection percentage at which to register a Low Wifi warning
+	
+	' New Values
+	Public maxCentres As Int				' Maximum number of centres displayed in a search.
+	Public searchRadius As Int				' Search radius (km/miles).
+	Public showTestCentres As Boolean		' When set test Centres are shown in search results.
+	Public unitKm As Boolean				' When set units are shown in km.
 End Sub
 
 #End Region  Mandatory Subroutines & Data
@@ -149,8 +174,29 @@ End Sub
 
 ' Initializes the app settings object, setting all its members to their default values.
 Public Sub Initialize
-	' Set up values to their defaults
-	LoadDefaults
+	LoadDefaults	' Set up values to their defaults
+End Sub
+
+' Load default settings.
+public Sub LoadDefaults
+	allFcmNotification = DFT_ALL_FCM_NOTIVICATION
+	allowEntryOfUCN = DFT_ALLOW_UCN
+	connectionTimeout = DFT_CONNECTION_TIMEOUT
+	enableStreamLineSignon = DFT_STREAMLINE_SIGNON
+	reconnectTimeout = DFT_RECONNECT_TIMEOUT
+	serverApiUrl = DFT_SERVER_API_URL
+	serverCheckInterval = DFT_SERVER_CHECK_INTERVAL
+	serverCheckTimeout = DFT_SERVER_CHECK_TIMEOUT
+	testMode = DFT_TESTMODE
+	wifiHysteresis = DFT_WIFI_HYSTERESIS
+	wifiLowThreshold = DFT_WIFI_LOW_THRESHOLD
+	webOnlyComms = DFT_WEB_ONLY_COMMS
+	
+	' New values
+	maxCentres = DFT_MAX_CENTRES
+	searchRadius = DFT_SEARCH_RADIUS
+	showTestCentres = DFT_SHOW_TEST_CENTRES
+	unitKm = DFT_UNIT_KM
 End Sub
 
 ' Loads the app settings from their file.
@@ -164,14 +210,10 @@ Public Sub LoadSettings
 		If File.Exists(File.DirLibrary, SETTINGS_FILENAME) Then
 			Dim mapConfig As Map = File.ReadMap(File.DirLibrary, SETTINGS_FILENAME)
 #End If
-	'		allFcmNotification = mapConfig.GetDefault(MAPKEY_ALL_FCM_NOTIFICATION, DFT_ALL_FCM_NOTIVICATION)
 			allFcmNotification = ReadBooleanStrgValue(mapConfig.GetDefault(MAPKEY_ALL_FCM_NOTIFICATION, WriteBooleanStrgValue(DFT_ALL_FCM_NOTIVICATION)))
-	'		allowEntryOfUCN = mapConfig.GetDefault(MAPKEY_ALLOW_UCN, DFT_ALLOW_UCN)
 			allowEntryOfUCN = ReadBooleanStrgValue(mapConfig.GetDefault(MAPKEY_ALLOW_UCN, WriteBooleanStrgValue(DFT_ALLOW_UCN)))
 			connectionTimeout = mapConfig.GetDefault(MAPKEY_CONNECTION_TIMEOUT, DFT_CONNECTION_TIMEOUT)
-	' 		enableStreamLineSignon = mapConfig.GetDefault(MAPKEY_STREAMLINE_SIGNON, DFT_STREAMLINE_SIGNON)
 			enableStreamLineSignon = ReadBooleanStrgValue( mapConfig.GetDefault(MAPKEY_STREAMLINE_SIGNON,WriteBooleanStrgValue( DFT_STREAMLINE_SIGNON)))
-		'	newWebStartup = mapConfig.GetDefault(MAPKEY_NEW_WEB_STARTUP, DFT_NEWWEBSTARTUP)
 			reconnectTimeout = mapConfig.GetDefault(MAPKEY_RECONNECT_TIMEOUT, DFT_RECONNECT_TIMEOUT)
 			serverApiUrl = mapConfig.GetDefault(MAPKEY_SERVER_API_URL, DFT_SERVER_API_URL)			
 			serverCheckInterval = mapConfig.GetDefault(MAPKEY_SERVER_CHECK_INTERVAL, DFT_SERVER_CHECK_INTERVAL)
@@ -183,6 +225,12 @@ Public Sub LoadSettings
 			wifiLowThreshold = mapConfig.GetDefault(MAPKEY_WIFI_LOW_THRESHOLD, DFT_WIFI_LOW_THRESHOLD)
 			
 			enableStreamLineSignon = DFT_STREAMLINE_SIGNON	' Now always true (redundant)
+			
+			' New values
+			maxCentres = mapConfig.GetDefault(MAPKEY_MAX_CENTRES, DFT_MAX_CENTRES)
+			searchRadius = mapConfig.GetDefault(MAPKEY_SEARCH_RADIUS, DFT_SEARCH_RADIUS)
+			showTestCentres = ReadBooleanStrgValue(mapConfig.GetDefault(MAPKEY_SHOW_TEST_CENTRES, WriteBooleanStrgValue(DFT_SHOW_TEST_CENTRES)))
+			unitKm = ReadBooleanStrgValue(mapConfig.GetDefault(MAPKEY_UNIT_KM, WriteBooleanStrgValue(DFT_UNIT_KM)))
 		End If		
 	Catch
 		Log(LastException)
@@ -207,12 +255,9 @@ End Sub
 Public Sub SaveSettings
 	Dim mapConfig As Map : mapConfig.Initialize
 	mapConfig.Put(MAPKEY_ALL_FCM_NOTIFICATION, WriteBooleanStrgValue(allFcmNotification))
-'	mapConfig.Put(MAPKEY_ALLOW_UCN, allowEntryOfUCN)
 	mapConfig.Put(MAPKEY_ALLOW_UCN, WriteBooleanStrgValue(allowEntryOfUCN))
 	mapConfig.Put(MAPKEY_CONNECTION_TIMEOUT, connectionTimeout)
-'	mapConfig.Put(MAPKEY_STREAMLINE_SIGNON, enableStreamLineSignon)
 	mapConfig.Put(MAPKEY_STREAMLINE_SIGNON, WriteBooleanStrgValue(enableStreamLineSignon))
-	' mapConfig.Put(MAPKEY_NEW_WEB_STARTUP, newWebStartup)
 	mapConfig.Put(MAPKEY_RECONNECT_TIMEOUT, reconnectTimeout)
 	mapConfig.Put(MAPKEY_SERVER_API_URL, serverApiUrl)
 	mapConfig.Put(MAPKEY_SERVER_CHECK_INTERVAL, serverCheckInterval)
@@ -221,6 +266,12 @@ Public Sub SaveSettings
 	mapConfig.Put(MAPKEY_WEB_ONLY_COMMS, WriteBooleanStrgValue(webOnlyComms))
 	mapConfig.Put(MAPKEY_WIFI_HYSTERESIS, wifiHysteresis)
 	mapConfig.Put(MAPKEY_WIFI_LOW_THRESHOLD, wifiLowThreshold)
+	
+	' New values
+	mapConfig.Put(MAPKEY_MAX_CENTRES, maxCentres)
+	mapConfig.Put(MAPKEY_SEARCH_RADIUS, searchRadius)
+	mapConfig.Put(MAPKEY_SHOW_TEST_CENTRES, WriteBooleanStrgValue(showTestCentres))
+	mapConfig.Put(MAPKEY_UNIT_KM, WriteBooleanStrgValue(unitKm))
 #if B4A
 	File.WriteMap(File.DirInternal, SETTINGS_FILENAME, mapConfig)
 #Else
@@ -232,22 +283,7 @@ End Sub
 
 #Region  Local Subroutines
 
-' Load default settings.
-private Sub LoadDefaults
-	allFcmNotification = DFT_ALL_FCM_NOTIVICATION
-	allowEntryOfUCN = DFT_ALLOW_UCN
-	connectionTimeout = DFT_CONNECTION_TIMEOUT
-	enableStreamLineSignon = DFT_STREAMLINE_SIGNON
-'	newWebStartup = DFT_NEWWEBSTARTUP
-	reconnectTimeout = DFT_RECONNECT_TIMEOUT
-	serverApiUrl = DFT_SERVER_API_URL	
-	serverCheckInterval = DFT_SERVER_CHECK_INTERVAL
-	serverCheckTimeout = DFT_SERVER_CHECK_TIMEOUT
-	testMode = DFT_TESTMODE
-	wifiHysteresis = DFT_WIFI_HYSTERESIS
-	wifiLowThreshold = DFT_WIFI_LOW_THRESHOLD
-	webOnlyComms = DFT_WEB_ONLY_COMMS
-End Sub
+
 
 ' Convert a map boolean string to boolean value.
 private Sub ReadBooleanStrgValue(booleanStrg As String) As Boolean

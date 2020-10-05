@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: ChangeSettings
-	' Release...: 14
-	' Date......: 02/08/20   
+	' Release...: 15
+	' Date......: 05/08/20   
 	'
 	' History
 	' Date......: 22/06/19
@@ -57,6 +57,12 @@ Version=9.01
 	' Amendee...: D Morris.
 	' Details...: Mod:  Activity_Keypress(), Activity_ActionBarHomeClick() - code to clean up before exit.
 	'			    
+	' Date......: 05/10/20
+	' Release...: 15
+	' Overview..: Mod: Support for new Change Settings.
+	' Amendee...: D Morris
+	' Details...: ModL Uses new hChangeSettings2 helper.
+	'			    
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -78,7 +84,7 @@ End Sub
 
 Sub Globals
 	Private bar As StdActionBar			' New title bar ' See note for v10
-	Private frm As hChangeSettings 		' This activity's helper class.
+	Private frm As hChangeSettings2 	' This activity's helper class.
 End Sub
 
 'Back button pressed (in titlebar).
@@ -118,12 +124,6 @@ End Sub
 #End Region  Mandatory Subroutines & Data
 
 #Region  Event Handlers
-
-'' Handles menu option to enter card information
-'Private Sub mnuCardEntry_Click()
-'	StartActivity(aCardEntry)
-'End Sub
-
 
 ' Menu option to show customer ID
 Private Sub mnuIdInformation_CLick
