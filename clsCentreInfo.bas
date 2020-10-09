@@ -10,7 +10,7 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsCentreInfo
-	' Release...: 10-
+	' Release...: 11
 	' Date......: 05/08/20
 	'
 	' History
@@ -35,8 +35,8 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...:  Added: picture with support code.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 05/08/20
+	' Release...: 11
 	' Overview..: Centre picture bitmap saved.
 	' Amendee...: D Morris.
 	' Details...:  Added: pictureBitMap

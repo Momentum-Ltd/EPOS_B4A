@@ -180,8 +180,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 178                                                                                                                                                                            
-	' Date......: 05/10/20
+	' Release...: 179                                                                                                                                                                            
+	' Date......: 09/10/20
 	'
 	' History
 	'
@@ -238,6 +238,13 @@ Version=10.2
 	'			  Mod: clsConfigSettings_v18, ChangeSettings_v15, modEposWeb_v11, clsEposWebCentreLocationRec_v4, ModConvert_v14.
 	'             Mod: Manifest updated to support non-https communications (don't appear to work).
 	'		
+	' Date......: 09/10/20
+	' Release...: 179
+	' Overview..: Bugfix: #0514 - Not displaying text part of messages.
+	'			  Bugfix: #0515 - Exception thrown if invalid card information entered.
+	' Amendee...: D Morris
+	' Details...:  Mod: Starter_v86, hCardEntry_v16.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -251,8 +258,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 178
-	#VersionName: 1.0.0.178
+	#VersionCode: 179
+	#VersionName: 1.0.0.179
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

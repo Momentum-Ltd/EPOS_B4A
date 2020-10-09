@@ -11,12 +11,12 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: clsProgress
-	' Release...: -
+	' Release...: 1
 	' Date......: 06/08/20
 	'
 	' History
-	' Date......: 
-	' Release...: 
+	' Date......: 06/08/20
+	' Release...: 1
 	' Created by: D Morris 
 	' Details...: Based on clsProgressDialog_v4 and clsProgressIndicator_v1.
 	'

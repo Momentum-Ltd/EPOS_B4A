@@ -19,8 +19,8 @@ Version=9.8
 	' Created by: D Morris
 	' Details...: First release to support version tracking.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 27/06/20
+	' Release...: 2
 	' Overview..: Add #0395 Select centre pictures (More work to download from Web Server).
 	' Amendee...: D Morris
 	' Details...:    Mod: SelectServerUrl() optimize to only save when URL has changed.

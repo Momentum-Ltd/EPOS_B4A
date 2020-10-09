@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 15
-	' Date......: 08/08/20
+	' Release...: 16
+	' Date......: 09/10/20
 	'
 	' History
 	' Date......: 13/10/19
@@ -20,59 +20,19 @@ Version=9.5
 	' Details...: First release to support version tracking.
 	'
 	' Versions 2 - 6 see v7
-	'
-	' Date......: 11/05/20
-	' Release...: 8
-	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
-	' Amendee...: D Morris.
-	' Details...:  Added: OnClose().
-	'
-	' Date......: 15/05/20
-	' Release...: 9
-	' Overview..: Support for cancel button dropped (no uses back button).
-	'			  Mod: Only shows Test card button if test setting selected. 
-	' Amendee...: D Morris.
-	' Details...:  Removed: btnCancel and associated code. 
-	' 
-	' Date......: 20/05/20
-	' Release...: 10
-	' Overview..: Bugfix: Card Entry not displaying Test data button.
-	' Amendee...: D Morris
-	' Details...:  Bugfix: ResumeOp() code fixed.
-	'
-	' Date......: 26/05/20
-	' Release...: 11
-	' Overview..: Mod: Card Entry form improved.
-	' Amendee...: D Morris.
-	' Details...: Mod: Long number and expiry date changed.
-	'
-	' Date......: 31/05/20
-	' Release...: 12
-	' Overview..: Bugfix: #0421 - Placing new orders when previous orders cancelled.
-	' Amendee...: D Morris
-	' Details...:  Mod: SendPayment() now private.
-	'			   Mod: ReportPaymentStatus() calls CardEntryAndPayment().
-	'		   Removed: CardEntryAndCharge(). 
-	'		     Added: CardEntryAndOrderPayment(), SendOrderPayment().
-	'			   Mod: SendCardTokenToServer() includes  orderId in processing.
-	'
-	' Date......: 11/06/20
-	' Release...: 13
-	' Overview..: Bugfix: #0423 On timeout when Server sending response to payment message.
-	' Amendee...: D Morris.
-	' Details...:  added: Handler for progress timeout - returns to Task select if triggered.
-	'
-	' Date......: 19/07/20
-	' Release...: 14
-	' Overview..: Start on new UI theme (First phase changing buttons to Orange with rounded corners.. 
-	' Amendee...: D Morris.
-	' Details...: Mod: Buttons changed to swiftbuttons.
+	'   	   7 - 14 see v15.
 	'
 	' Date......: 08/08/20
 	' Release...: 15
 	' Overview..: Support for new UI. 
 	' Amendee...: D Morris
 	' Details...: Mod: Changes to now exit to Centre Home page.
+	'
+	' Date......: 09/10/20
+	' Release...: 16
+	' Overview..: Bugfix: #0515 - Exception thrown if invalid card information entered.
+	' Amendee...: D Morris.
+	' Details...: Mod: SubmitCard() code fixed.
 	'
 	' Date......: 
 	' Release...: 
@@ -571,8 +531,10 @@ Private Sub SubmitCard
 	cardInfo.card.address_line1 = txtLine1.Text.Trim
 	cardInfo.card.address_zip = txtPostCode.Text.trim
 	cardInfo.card.cvc = txtCvc.Text.trim
-	cardInfo.card.exp_month = tempExpiry.SubString2(0, 2)
-	cardInfo.card.exp_year = tempExpiry.SubString(3)
+	If tempExpiry.Length >= 4 Then
+		cardInfo.card.exp_month = tempExpiry.SubString2(0, 2)
+		cardInfo.card.exp_year = tempExpiry.SubString(3)		
+	End If
 	cardInfo.card.name = txtName.Text.trim
 	cardInfo.card.number = FormatCardNumber(txtCardNumber.Text).Replace(" ", "")
 	ProgressShow("Checking your card...")

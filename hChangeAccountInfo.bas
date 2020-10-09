@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 14
-	' Date......: 19/07/20
+	' Release...: 15
+	' Date......: 09/10/20
 	'
 	' History
 	' Date......: 03/08/19
@@ -66,6 +66,12 @@ Version=9.3
 	' Overview..: Start on new UI theme (First phase changing buttons to Orange with rounded corners.. 
 	' Amendee...: D Morris.
 	' Details...: Mod: Buttons changed to swiftbuttons.
+	'					
+	' Date......: 09/10/20 
+	' Release...: 15
+	' Overview..: Bugfix: #0511 Screen locking into submit mode
+	' Amendee...: D Morris
+	' Details...: Mod: DisplayInfo() now handles which panels are visible.
 	'					
 	' Date......: 
 	' Release...: 
@@ -173,43 +179,14 @@ private Sub lblPrivacyPolicy_Click
 	modEposApp.DisplayPrivacyNotice
 End Sub
 
-'' Check Address for invalid characters.
-'Private Sub txtAddress_TextChanged(Old As String, New As String)
-'	modEposWeb.TextBoxFilter(txtAddress, Old, New)
-'End Sub
-''
-''' Detect the done button (password accepted)
-''Sub txtAuthorisePw_EnterPressed
-''	txtAuthorisePw.Text = modEposWeb.FilterStringInput(txtAuthorisePw.Text.trim)
-''	SubmitPassword
-''End Sub
-'
-'' Filter password for invalid text.
-'Sub txtAuthorisePw_TextChanged (Old As String, New As String)
-'	modEposWeb.TextBoxFilter(txtAuthorisePw, Old, New)
-'End Sub
-'
-'' Check Name for invalid characters.
-'private Sub txtName_TextChanged(Old As String, New As String)
-'	modEposWeb.TextBoxFilter(txtName, Old, New)
-'End Sub
-'
-'' Check txtPostCode for invalid characters.
-'private Sub txtPostCode_TextChanged(Old As String, New As String)
-'	modEposWeb.TextBoxFilter(txtPostCode, Old, New)
-'End Sub
-'
-'' Check txtPostCode for invalid characters.
-'private Sub txtTelephone_TextChanged(Old As String, New As String)
-'	' Removed for test.
-''	modEposWeb.TextBoxFilter(txtTelephone, Old, New)
-'End Sub
-
 #End Region  Event Handlers
 
 #Region  Public Subroutines
 ' Display information
 Public Sub DisplayInfo
+	pnlAuthorisation.Visible = False ' Ensure correct panel is displayed.
+	pnlEnterDetails.Visible = True
+	btnClear.mBase.Visible = True
 	ProgressShow("Getting your information")
 	Wait For (lGetLastestCustomerInfo) complete (infoOk As Boolean)
 	ProgressHide

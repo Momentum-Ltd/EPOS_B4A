@@ -374,8 +374,8 @@ public Sub pSendRequestForOrderStatusList
 #End If
 End Sub
 
-' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
+' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
 	pSendRequestForOrderStatusList ' Update displayed status list - just in case it changes.
 	notification.ShowMessageNotificationMsgBox(soundAndVibrate)
 End Sub

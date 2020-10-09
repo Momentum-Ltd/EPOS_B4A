@@ -11,8 +11,8 @@ Version=7.3
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 85
-	' Date......: 02/10/20
+	' Release...: 86
+	' Date......: 09/10/20
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -70,6 +70,12 @@ Version=7.3
 	' Overview..: Bugfix: #0500 - Validate Centre screen not showing picture after communication timeout.
 	' Amendee...: D Morris
 	' Details...: Mod: centreLocationRec added.
+	' 			  			    
+	' Date......: 09/10/20
+	' Release...: 86
+	' Overview..: Bugfix: #0514 - Not displaying text part of messages.
+	' Amendee...: D Morris
+	' Details...: Mod: lNotifyMessage() code fixed.
 	' 			  			    
 	' Date......: 
 	' Release...: 
@@ -657,7 +663,7 @@ Private Sub lNotifyMessage(inStrg As String)
 	Dim msgObj As clsEposMessageRec : msgObj.Initialize
 	msgObj = msgObj.XmlDeserialize(xmlStr)' TODO - need to determine if the deserialisation was successful?
 	Dim messageStr As String = "Received at " & DateTime.Time(DateTime.Now) & CRLF & _
-								 msgObj.headingTop & CRLF & CRLF & msgObj.headingBottom & CRLF
+								 msgObj.headingTop & CRLF & CRLF & msgObj.headingBottom & CRLF & CRLF & msgObj.message & CRLF
 	PrevMessage = messageStr
 	If msgObj.messageId <> 0 Then	' Send message delivery confirmation?
 		SendDeliveryMessage(msgObj.messageId)

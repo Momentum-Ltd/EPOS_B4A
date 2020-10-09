@@ -13,7 +13,7 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsMyData
-	' Release...: 3-
+	' Release...: 3
 	' Date......: 02/12/19
 	'
 	' History
