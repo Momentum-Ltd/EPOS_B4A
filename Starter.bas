@@ -97,7 +97,7 @@ Version=7.3
 Sub Process_Globals
 	
 	' Local constants:
-	Private Const DISCONNECT_THRESHOLD As Int = 5 						' The number of failed pings that determine the app recognising it is no longer connected. 
+	Private Const DISCONNECT_THRESHOLD As Int = 5 						' The number of failed pings that determine the app recognising it is no longer connected.
 	Private Const EOF_STRING As String  = "<EOF>" 						' The string that should appear at the end of a socket transmisssion.
 	Private const ERROR_COMMS_FILENAME As String = "EposCommsErrors.txt" ' The name of the file used to log comms errors.
 	Private Const ERROR_LIST_FILENAME As String = "EposErrorList.txt"	 ' The name of the file used to log exceptions.
@@ -165,7 +165,7 @@ Sub Service_Create
 	Dim testSocket As ServerSocket : testSocket.Initialize(51000, "testSocket") ' To get this devices's IP address
 	MyIpAddress = testSocket.GetMyIP
 	testSocket.Close
-#end if
+	#end if
 	settings.Initialize
 	settings.LoadSettings
 	ServerIP = modEposApp.SERVER_FIXED_IP
@@ -262,7 +262,7 @@ Private Sub Client_Connected(ConnectedSuccessfully As Boolean)
 #if INCLUDE_SOCKET_CODE
 			Astreams.Initialize(CltSock.InputStream,CltSock.OutputStream, "AStreams")
 #end if
-			Dim msg As String = modEposApp.EPOS_OPENTAB_RECONNECT & BuildEposCustomerDetailsXml		
+			Dim msg As String = modEposApp.EPOS_OPENTAB_RECONNECT & BuildEposCustomerDetailsXml
 			pSendMessage(msg)
 		Else ' Unsuccessful reconnect attempt
 			reconnectFailed = True
@@ -316,7 +316,7 @@ End Sub
 ' Write a report to the specified log file.
 Public Sub LogReport(logFileName As String, logText As String)
 	If LogFile.isInitialized = False Then	' Bit of protection just in case it is called before Service_Create() is complete
-		LogFile.Initialize	
+		LogFile.Initialize
 	End If
 	LogFile.LogReport(logFileName, logText)
 End Sub
@@ -329,7 +329,7 @@ Public Sub pConnectToServer
 	Else
 #if INCLUDE_SOCKET_CODE
 		CltSock.Initialize("Client") ' Connect to server as a client
-		CltSock.Connect(ServerIP, modEposApp.TCP_PORT_NUMBER, (settings.connectionTimeout * 1000))		
+		CltSock.Connect(ServerIP, modEposApp.TCP_PORT_NUMBER, (settings.connectionTimeout * 1000))
 #end if
 	End If
 End Sub
@@ -371,7 +371,7 @@ public Sub pProcessInputStrg(inputCommsStrg As String)
 			lHandleSyncDataResponse(inputCommsStrg)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_ACKN) Then
 			CallSubDelayed2(aPlaceOrder, "pHandleOrderAcknResponse", inputCommsStrg)
-		Else If inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_QUERY) Then		
+		Else If inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_QUERY) Then
 '			CallSubDelayed2(aShowOrderStatusList, "pHandleOrderInfo", inputCommsStrg)
 			CallSubDelayed2(aHome, "pHandleOrderInfo", inputCommsStrg)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_SEND) Then
@@ -409,20 +409,20 @@ End Sub
 
 ' Sends the specified message through the socket to the Server.
 Public Sub pSendMessage(msg As String) As ResumableSub
-	Dim statusCode As Int = 200 
+	Dim statusCode As Int = 200
 	If settings.webOnlyComms = False Then
 		Dim sNewLine As String
 		sNewLine = HEADER_STRING & msg & EOF_STRING ' & CRLF
 #if INCLUDE_SOCKET_CODE		
 		Dim buffer() As Byte
 		buffer = sNewLine.GetBytes("UTF8")
-		Astreams.Write(buffer)		
+		Astreams.Write(buffer)
 #end if
 	Else
 	
 		Dim job As HttpJob : job.Initialize("NewCustomer", Me)
 		' Smart string literals see https://www.b4x.com/android/forum/threads/b4x-smart-string-literal.50135/
-		' $"xml{msg}"$	' XML - Escapes the five XML entities (", ', <, >, &): - I Think!	
+		' $"xml{msg}"$	' XML - Escapes the five XML entities (", ', <, >, &): - I Think!
 		Dim newMsg As String
 		newMsg = msg.Replace(Chr(34) , "\""")
 		Dim tempMsg As String = """" & newMsg & """" '  Temp 4 quotes in row are required to put a quote around the message text.
@@ -434,21 +434,21 @@ Public Sub pSendMessage(msg As String) As ResumableSub
 											modEposWeb.API_CENTRE_ID  & "=" & centreIdStrg & "&"  & _
 											modEposWeb.API_CUSTOMER_ID & "=" & myData.customer.customerIdStr
 		job.PutString(urlString, tempMsg)
-		job.GetRequest.SetContentType("application/json;charset=UTF-8")	
+		job.GetRequest.SetContentType("application/json;charset=UTF-8")
 		Wait For (job) JobDone(job As HttpJob)
 		Log("Send Message response:" & job.Success & " Code:" & job.Response.StatusCode)
 		If job.Success And job.Response.StatusCode = 200 Then
-'Hack code removed until problem with HttpJob fixed see #0262 and #0291.			
+			'Hack code removed until problem with HttpJob fixed see #0262 and #0291.
 '		''	ToastMessageShow("Comms message sent to Web Server.", True)
 '		Else If job.Success And job.Response.StatusCode = 204 Then
 '			ToastMessageShow("Centre Closed", True)
 '		Else ' An error of some sort occurred
 '			Dim errorMsg As String = "An error occurred with the HTTP job: " & job.ErrorMessage
 '			ToastMessageShow(errorMsg, True)
-'
+			'
 		End If
-		statusCode = job.Response.StatusCode 
-		job.Release ' Must always be called after the job is complete, to free its resources	
+		statusCode = job.Response.StatusCode
+		job.Release ' Must always be called after the job is complete, to free its resources
 	End If
 	Return statusCode
 End Sub
@@ -462,7 +462,7 @@ Public Sub pSendMessageAndCheckReconnect(msgToSend As String) As ResumableSub
 		reconnectEnabled = True ' Start a reconnect
 		pConnectToServer
 	Else
-	'	pSendMessage(msgToSend)
+		'	pSendMessage(msgToSend)
 		Wait For (pSendMessage(msgToSend)) complete(statusCode As Int)
 		statusCodeResult = statusCode
 	End If
@@ -519,7 +519,7 @@ Private Sub lDisconnect
 			Sleep(2000) ' Just wait two seconds and always disconnect, regardless of ability to send the above message
 			Astreams.Close()
 			CltSock.Close()
-		End If	
+		End If
 #end if				
 	End If
 	IsConnected = False
@@ -566,8 +566,8 @@ Private Sub lHandleCustomerDetailsMsg(openTabCmdResponseStr As String)
 		DisconnectedCloseActivities = False
 		IsConnected = True
 		lStartAntiSleepPhoneModes ' Now it's connected, prevent the app from sleeping so that all messages get through
-		connect.StartServerChecking ' Start the regular polling for server only when connected		
-		' TODO Test code for EPOS_OPENTAB_REQUEST response 
+		connect.StartServerChecking ' Start the regular polling for server only when connected
+		' TODO Test code for EPOS_OPENTAB_REQUEST response
 		Log("TODO - Code needs testing starter.lHandleCustomerDetailsMsg()")
 		myData.centre.acceptCards = customerDetailsObj.acceptCards
 		myData.customer.address = customerDetailsObj.address
@@ -607,7 +607,7 @@ private Sub lHandleOpenTabConfirm(openTabConfirmResponse As String)
 				myData.centre.signedOn = True ' Flag signed on to this centre.
 				CallSubDelayed(ValidateCentreSelection2, "OpenTabConfirmResponse")
 			End If
-		End If		
+		End If
 	End If
 End Sub
 
@@ -620,7 +620,7 @@ private Sub	lHandlePaymentResponse(paymentResponse As String)
 #end if
 	Dim paymentInfo As clsEposCustomerPayment : paymentInfo.Initialize
 	paymentInfo = paymentInfo.XmlDeserialize(xmlStr)
-#if B4A
+	#if B4A
 	CallSubDelayed2( aCardEntry, "ReportPaymentStatus", paymentInfo)
 #else ' B4I
 '	xShowBill.ReportPaymentStatus(paymentInfo)
@@ -651,8 +651,8 @@ Private Sub lHandleUpdateCustomer(updateCustomerMsg As String)
 	'TODO - Needs fully testing
 	' Take fields from clsEposeCustomerInfo to update myData (note: customerId, email and house number are skipped)
 	myData.customer.address = newCustomerInfo.address
-	myData.customer.name = newCustomerInfo.name 
-	myData.customer.nickName = newCustomerInfo.nickName 
+	myData.customer.name = newCustomerInfo.name
+	myData.customer.nickName = newCustomerInfo.nickName
 	SendCustomerUpdateResponse(newCustomerInfo)
 End Sub
 
@@ -663,7 +663,7 @@ Private Sub lNotifyMessage(inStrg As String)
 	Dim msgObj As clsEposMessageRec : msgObj.Initialize
 	msgObj = msgObj.XmlDeserialize(xmlStr)' TODO - need to determine if the deserialisation was successful?
 	Dim messageStr As String = "Received at " & DateTime.Time(DateTime.Now) & CRLF & _
-								 msgObj.headingTop & CRLF & CRLF & msgObj.headingBottom & CRLF & CRLF & msgObj.message & CRLF
+	msgObj.headingTop & CRLF & CRLF & msgObj.headingBottom & CRLF & CRLF & msgObj.message & CRLF
 	PrevMessage = messageStr
 	If msgObj.messageId <> 0 Then	' Send message delivery confirmation?
 		SendDeliveryMessage(msgObj.messageId)
@@ -678,26 +678,26 @@ Private Sub lNotifyStatus(inStrg As String)
 	Dim xmlStr As String = inStrg.SubString(modEposApp.EPOS_ORDERSTATUS.Length) ' TODO - check if the XML string is valid?
 	Dim responseObj As clsEposOrderStatus :	responseObj.Initialize
 	responseObj = responseObj.XmlDeserialize(xmlStr)
-	If responseObj.status <> modConvert.statusUnknown Then ' XML has been deserialised OK	
+	If responseObj.status <> modConvert.statusUnknown Then ' XML has been deserialised OK
 		If responseObj.messageId <> 0 Then	' Send message delivery confirmation?
 			SendDeliveryMessage(responseObj.messageId)
 		End If
 		If responseObj.status = modConvert.statusReady And responseObj.deliverToTable = False Then
 			Dim tempStatus(2) As String = Array As String("Order #" & responseObj.orderId, "Your order is now ready. " & _
-													"Please go to the counter to collect it.")
+			"Please go to the counter to collect it.")
 			PrevStatusRec = responseObj
 			PrevStatus = tempStatus ' Always overwrite status storage with the most recent status
 			ShowStatusNotification
 		else if responseObj.status = modConvert.statusCollected And responseObj.deliverToTable = True Then ' Delivered to table?
-			Dim tempStatus(2) As String = Array As String("Order #" & responseObj.orderId, "Your order has been delivered.")			
+			Dim tempStatus(2) As String = Array As String("Order #" & responseObj.orderId, "Your order has been delivered.")
 			PrevStatusRec = responseObj
 			PrevStatus = tempStatus ' Always overwrite status storage with the most recent status
 			ShowStatusNotification
 		Else if IsPaused(aHome) = False Then ' Other status change?
 			CallSubDelayed2(aHome, "pUpdateOrderStatus", responseObj)
-		End If		
+		End If
 	Else ' XML deserialisation failed (or contains Unknown status, which is just as bad)
-	'	lAppendToExtLog(ERROR_LIST_FILENAME, "Received bad status message:" & CRLF & inStrg) ' Log the error
+		'	lAppendToExtLog(ERROR_LIST_FILENAME, "Received bad status message:" & CRLF & inStrg) ' Log the error
 		LogFile.LogReport(ERROR_LIST_FILENAME, "Received bad status message:" & CRLF & inStrg) ' Log the error
 	End If
 End Sub
@@ -709,14 +709,14 @@ Private Sub lPingHandle(txtPing As String)
 	rxMsg = txtPing.SubString(modEposApp.EPOS_PING.Length)
 	Dim fields() As String
 	fields = Regex.Split(",", rxMsg)
-	If fields.Length = 2 Then ' ping (response required)? 
+	If fields.Length = 2 Then ' ping (response required)?
 		DateTime.DateFormat = "HH:mm:ss"
-		Dim timeStamp As String = "Time:" & DateTime.Date(DateTime.Now)		
+		Dim timeStamp As String = "Time:" & DateTime.Date(DateTime.Now)
 		Dim txMsg As String = modEposApp.EPOS_PING & _
 								 modEposWeb.ConvertToString(myData.customer.customerId) & _
 								 "," & connect.GetWifiSignalStrength  & "%" & _
 								 "," & timeStamp
-		pSendMessage(txMsg)		
+		pSendMessage(txMsg)
 	Else ' response ping (no resposne expected)
 		connect.ServerCheckSuccess
 	End If

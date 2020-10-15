@@ -180,8 +180,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 180                                                                                                                                                                            
-	' Date......: 09/10/20
+	' Release...: 181                                                                                                                                                                          
+	' Date......: 15/10/20
 	'
 	' History
 	'
@@ -251,6 +251,13 @@ Version=10.2
 	' Amendee...: D Morris
 	' Details...: Mod: Manifest - targetSdkVersion="29".
 	'		
+	' Date......: 15/10/20
+	' Release...: 181
+	' Overview..: Bugfix: #0519 - Now periodically updates the Centre list.
+	'			  Bugfix: #0523 - Showing "Order #0" on manually entered orders.
+	' Amendee...: D Morris
+	' Details...: Mod:aSelectPlayCentre3_v2.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -264,8 +271,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 180
-	#VersionName: 1.0.0.180
+	#VersionCode: 181
+	#VersionName: 1.0.0.181
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
