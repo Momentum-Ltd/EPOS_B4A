@@ -145,32 +145,33 @@ Module71=hPlaceOrder
 Module72=hQueryNewInstall
 Module73=hSelectItem
 Module74=hSelectPlayCentre3
-Module75=hSyncDatabase
-Module76=hValidateCentreSelection2
-Module77=hValidateDevice
-Module78=modConvert
-Module79=modEposApp
+Module75=hSelectPlayCentre3_OLD
+Module76=hSyncDatabase
+Module77=hValidateCentreSelection2
+Module78=hValidateDevice
+Module79=modConvert
 Module8=ChangeAccountInfo
-Module80=modEposWeb
-Module81=NB6
-Module82=QueryNewInstall
-Module83=srvNotification
-Module84=srvPhoneTotal
-Module85=Starter
-Module86=svcTestSequence
-Module87=TemplateActivity
-Module88=TemplateClass
-Module89=TemplateCode
+Module80=modEposApp
+Module81=modEposWeb
+Module82=NB6
+Module83=QueryNewInstall
+Module84=srvNotification
+Module85=srvPhoneTotal
+Module86=Starter
+Module87=svcTestSequence
+Module88=TemplateActivity
+Module89=TemplateClass
 Module9=ChangeSettings
-Module90=TemplateService
-Module91=TemplateXactivity
-Module92=TemplateXhelper
-Module93=TestStartAt
-Module94=ValidateCentreSelection2
-Module95=ValidateDevice
+Module90=TemplateCode
+Module91=TemplateService
+Module92=TemplateXactivity
+Module93=TemplateXhelper
+Module94=TestStartAt
+Module95=ValidateCentreSelection2
+Module96=ValidateDevice
 NumberOfFiles=24
 NumberOfLibraries=23
-NumberOfModules=95
+NumberOfModules=96
 Version=10.2
 @EndOfDesignText@
 
@@ -180,8 +181,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 181                                                                                                                                                                          
-	' Date......: 15/10/20
+	' Release...: 182                                                                                                                                                                          
+	' Date......: 03/11/20
 	'
 	' History
 	'
@@ -258,6 +259,13 @@ Version=10.2
 	' Amendee...: D Morris
 	' Details...: Mod:aSelectPlayCentre3_v2.
 	'		
+	' Date......: 03/11/20
+	' Release...: 182
+	' Overview..: Bugfix: Server #2 unable to communication.
+	'			     Mod: Now uses new clsLocation to handle location.
+	' Amendee...: D Morris.
+	' Details...: mod: hHome_v6, modEposWeb_v12, aSelectPlayCentre3_v3, hSelectPlayCentre3_v6, clsLocation_v3.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -271,8 +279,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 181
-	#VersionName: 1.0.0.181
+	#VersionCode: 182
+	#VersionName: 1.0.0.182
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

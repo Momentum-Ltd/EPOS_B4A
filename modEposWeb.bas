@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: modEposWeb
-	' Release...: 11
-	' Date......: 05/10/20
+	' Release...: 12
+	' Date......: 02/11/20
 	'
 	' History
 	' Date......: 01/07/19
@@ -30,7 +30,11 @@ Version=9.01
 	'			  Added: API_SEARCH_RADIUS, API_SHOW_TEST_CENTRES.
 	'               Mod: URL_WEB_SERVER_2_API changed to http:
 	'
-	' NOTE:URL_WEB_SERVER_2 and URL_WEB_SERVER_2_API set to http://...
+	' Date......: 02/11/20
+	' Release...: 12
+	' Overview..: Problems with accessing Server #2.
+	' Amendee...: D Morris.
+	' Details...:   Mod: URL_WEB_SERVER_2 and URL_WEB_SERVER_2_API now https://...
 	'
 	' Date......: 
 	' Release...: 
@@ -69,11 +73,11 @@ Sub Process_Globals
 
 	''' <summary>Web Server URL.</summary>
 	Public Const URL_WEB_SERVER_1 As String = "https://www.superord.co.uk"
-	Public Const URL_WEB_SERVER_2 As String = "http://www.superorderapp.co.uk"
+	Public Const URL_WEB_SERVER_2 As String = "https://www.superorderapp.co.uk"
 
 	''' <summary>Web Server API prefix.</summary>
 	Public Const URL_WEB_SERVER_1_API As String = "https://www.superord.co.uk/api"
-	Public Const URL_WEB_SERVER_2_API As String = "http://www.superorderapp.co.uk/api"
+	Public Const URL_WEB_SERVER_2_API As String = "https://www.superorderapp.co.uk/api"
 	
 '	''' <summary> Web Server Centre API URL prefix.</summary>
 '	Public Const URL_CENTRE_API As String = URL_WEB_SERVER_API & CONTROLLER_CENTRE_API

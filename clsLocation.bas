@@ -11,14 +11,26 @@ Version=9.9
 #Region  Documentation
 	'
 	' Name......: clsLocation
-	' Release...: 1
-	' Date......: 12/07/20
+	' Release...: 3
+	' Date......: 02/11/20
 	'
 	' History
 	' Date......: 12/07/20
 	' Release...: 1
 	' Created by: D Morris
-	' Details...: First release to support version tracking
+	' Details...: First release to support version.
+	'
+	' Date......: 01/11/20
+	' Release...: 2
+	' Overview..: Support for iOS
+	' Amendee...: D Morris
+	' Details...: Working version for iOS.
+	'
+	' Date......: 02/11/20
+	' Release...: 3
+	' Overview..: Version for B4A.
+	' Amendee...: D Morris
+	' Details...: Working version for B4A.
 	'
 	' Date......: 
 	' Release...: 
@@ -31,95 +43,143 @@ Version=9.9
 #Region  Mandatory Subroutines & Data
 
 Sub Class_Globals
-	Private xui As XUI 'Ignore
-	Public FLP As FusedLocationProvider
+#if B4A
+	Private xui As XUI								'ignore (to remove warning) -  Required for X platform operation.
+	Public flp As FusedLocationProvider
 	Private flpStarted As Boolean
-	
+#else ' B4i
+	Private locManager As LocationManager
+	Private locationAvailable As Boolean
+	Private centresDisplayed As Boolean
+'	Private tmrAutoStartDisplayCentres As Timer
+#End If
 	' Required for event handling
-	Private mCallback As String ' Can't use "me"
+	Private mCallback As Object
 	Private mEvent As String
-
-
+	Private tmrLocationReadyTimeout As Timer
+	Private mCurrentLocation As Location	
+	Private LOCATION_RERDY_TIMEOUT As Int = 3000
 End Sub
+
+#Event: LocationReady
 
 ' Initialize and start 
 ' String used for call back ' Can't use "me" if used with starter server.
-Public Sub Initialize(callback As String, eventName As String)
+Public Sub Initialize(callback As Object, eventName As String)
 	mCallback = callback
 	mEvent = eventName
-	FLP.Initialize("flp")
-	Connect
-
+#if B4A
+	flp.Initialize("flp")
+	flp.Connect ' This will then be handled in either mLocator_ConnectionSuccess() or mLocator_ConnectionFailed()
+#else ' B4i
+	locManager.Initialize("locManager")
+#End If
+	mCurrentLocation.Initialize2(0,0)
+	tmrLocationReadyTimeout.Initialize("tmrLocationReadyTimeout", LOCATION_RERDY_TIMEOUT)
 End Sub
 
 #End Region  Mandatory Subroutines & Data
+
+
+
+#Region  Event Handlers
+
+'#if B4i
+'Private Sub EventName_LocationChanged (Location1 As Location)
+'	
+'End Sub
+'#End If
+
+
+#if B4A
 ' Handles Connection Success event.
 Private Sub flp_ConnectionSuccess
-	Log("Connected to location provider")
+	Log("Successfully connected to location services. Getting last known location...")
 End Sub
 
 ' Handles Connection Failed event.
-Sub flp_ConnectionFailed(ConnectionResult1 As Int)
-	Log("Failed to connect to location provider")
+Sub flp_ConnectionFailed(ConnectResult As Int)
+	Log("Failed to connect to location services. Reason code: " & ConnectResult)
+	xui.MsgboxAsync("An error occurred while trying to get your location. All centres will now be displayed.", "Cannot Get Location")
 End Sub
 
 ' Raised when location changed (new location available)
 ' See note in header about call from Starter service.
-Private Sub flp_LocationChanged (Location1 As Location)
-'	If xui.SubExists(mCallback, mEvent & "_LocationChanged", Location1) Then
-	CallSubDelayed2(mCallback, mEvent & "_LocationChanged", Location1)
-'	End If
+Private Sub flp_LocationChanged (thisLocation As Location)
+	tmrLocationReadyTimeout.Enabled = False
+	mCurrentLocation = thisLocation
+	If xui.SubExists(mCallback, mEvent & "_LocationReady", 0) Then
+		CallSubDelayed2(mCallback, mEvent & "_LocationReady", thisLocation)
+	End If
 End Sub
-#Region  Event Handlers
+#else ' B4i
+
+' iOS Location ready handler.
+private Sub locManager_LocationChanged (thisLocation As Location)
+	tmrLocationReadyTimeout.Enabled = False
+	mCurrentLocation = thisLocation
+	CallSub2(mCallback, mEvent & "_LocationReady" , thisLocation)
+End Sub
+
+' Raised when Authorizations status changed (raised when the location manager is intialiized).
+Private Sub LocManager_AuthorizationStatusChanged (Status As Int)
+	Log("Location authorization changed Status = " & Status)
+End Sub
+
+#End If
+
+
+' Location ready timeout
+Private Sub tmrLocationReadyTimeout_Tick
+	tmrLocationReadyTimeout.Enabled = False
+	CallSub2(mCallback, mEvent & "_LocationReady" , mCurrentLocation)
+End Sub
 
 #End Region  Event Handlers
 
 #Region  Public Subroutines
 
-' Connect to GPS service.
-Public Sub Connect
-	FLP.Connect()
-End Sub
-
-' Is device connected Query.
-Public Sub IsConnected As Boolean
-	Return FLP.IsConnected
-End Sub
-
 ' Gets the Last known location.
-Public Sub GetLastLocation As Location
-	Return FLP.GetLastKnownLocation	
+Public Sub GetLocation As Location
+#if B4A
+	Return flp.GetLastKnownLocation	
+#else ' B4i
+	Return mCurrentLocation
+#End If
 End Sub
 
-' Restart Location
-' interval - time interval in mSecs, displacement is smallest displacement in meters.
-Public Sub RestartFLP(interval As Int, displacement As Int) As ResumableSub
-	StopFLP
-	wait for (StartFLP(interval, displacement)) complete (success As Boolean)
-	Return success
+' Is location device authorized?
+public Sub IsLocationAuthorized() As Boolean
+#if B4A
+	Return flp.IsConnected ' HACK - not sure this is the best thing to do!
+#else ' B4i
+	Return locManager.IsAuthorized 
+#End If
+End Sub
+
+' Is Location available
+Public Sub IsLocationAvailable() As Boolean
+	Dim locationAvailable As Boolean = False
+	If IsLocationAuthorized = True Then
+		If mCurrentLocation.IsInitialized = True Then
+			If mCurrentLocation.Latitude <> 0 And mCurrentLocation.Longitude <> 0 Then
+				locationAvailable = True
+			End If
+		End If
+	End If
+	Return locationAvailable
 End Sub
 
 ' Start Location
-' interval - time interval in mSecs, displacement is smallest displacement in meters.
-Public Sub StartFLP(interval As Int, displacement As Int) As ResumableSub
-	Do While IsConnected = False
-		Sleep(1000)
-	Loop
-
-	If flpStarted = False Then
-		RequestLocationUpdates(interval, displacement)
-		flpStarted = True
-	End If
-	Dim success As Boolean = True
-	Return success
+public Sub Start
+	LocationDeviceStart
+	tmrLocationReadyTimeout.Enabled = True
 End Sub
 
 ' Stop Location
-Public Sub StopFLP
-	If flpStarted Then
-		RemoveLocationUpdates
-		flpStarted = False
-	End If
+Public Sub Stop
+	tmrLocationReadyTimeout.Enabled = False	
+	LocationDeviceOFF
 End Sub
 
 
@@ -127,7 +187,23 @@ End Sub
 
 #Region  Local Subroutines
 ' Sets up the location request.
-Private Sub CreateLocationRequest(interval As Int, displacement As Int) As LocationRequest
+' Switch off location device.
+private Sub LocationDeviceOFF
+#if B4A
+'	If flp.IsInitialized Then ' bit of protect - disconnect has thrown exception
+'		flp.Disconnect
+'	End If
+	If flpStarted Then
+		flp.RemoveLocationUpdates
+		flpStarted = False
+	End If
+#Else	
+	locManager.Stop ' looks like check is not required for iOS.
+#End If
+End Sub
+
+#if B4A
+Private Sub CreateLocationRequest(interval As Int, displacement As Int) As LocationRequest	
 	Dim lr As LocationRequest
 	lr.Initialize
 	lr.SetInterval(interval)
@@ -139,12 +215,36 @@ End Sub
 
 ' Remove location updates.
 Private Sub RemoveLocationUpdates
-	FLP.RemoveLocationUpdates
+	flp.RemoveLocationUpdates
 End Sub
 
 ' Request location updates
 ' interval - time interval in mSecs, displacement is smallest displacement in meters.
 Private Sub RequestLocationUpdates(interval As Int, displacement As Int)
-	FLP.RequestLocationUpdates(CreateLocationRequest(interval, displacement))
+	flp.RequestLocationUpdates(CreateLocationRequest(interval, displacement))
 End Sub
+#End If
+
+' Start the locations updates
+Private Sub LocationDeviceStart
+#if B4A
+'	flp.Connect ' This will then be handled in either mLocator_ConnectionSuccess() or mLocator_ConnectionFailed()
+	Do While flp.IsConnected = False
+		Sleep(1000)
+	Loop
+	If flpStarted = False Then
+		flp.RequestLocationUpdates(CreateLocationRequest(10000, 1))
+		flpStarted = True
+	End If
+#else ' B4i
+	'if the user allowed us to use the location service or if we never asked the user before then we call LocationManager.Start.
+'	If locManager.IsAuthorized Or locManager.AuthorizationStatus = locManager.AUTHORIZATION_NOT_DETERMINED Then
+		locManager.Start(0)
+'   End if
+#End If
+End Sub
+
+
+
+
 #End Region  Local Subroutines

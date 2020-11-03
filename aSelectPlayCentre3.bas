@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: aSelectPlayCentre3
-	' Release...: 2
-	' Date......: 15/10/20
+	' Release...: 3
+	' Date......: 02/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -25,6 +25,12 @@ Version=10
 	' Overview..: Support to indicate page is visible. 
 	' Amendee...: D Morris
 	' Details...: Added: IsVisible().
+	'				
+	' Date......: 02/11/20
+	' Release...: 3
+	' Overview..: Improved display centre list operation.
+	' Amendee...: D Morris
+	' Details...: Mod: Activity_Resume().
 	'				
 	' Date......: 
 	' Release...: 
@@ -79,9 +85,13 @@ End Sub
 
 Sub Activity_Resume
 	Log("StartPlayCentre - Activity_Resume run!")
-'	hc.SelectCentre
+' Insert for old system	
 	Wait for (CheckPermission) complete(result As Boolean)
-	hc.SelectCentre(result)
+'	hc.SelectCentre(result)
+
+' Insert for new system
+	hc.StartLocationUpdates
+
 End Sub
 
 Sub Activity_Pause (UserClosed As Boolean)
@@ -158,6 +168,9 @@ Private Sub CheckPermission As ResumableSub
 		"This information is used within the App to find local centres or to check you are in the centre." & CRLF & _
 		"It is not disclosed to any third parties!" & CRLF & CRLF & _
 		"THE APP CANNOT RUN WITHOUT YOU ALLOWING LOCATION"
+		
+		' To programmatically display settings form see https://www.b4x.com/android/forum/threads/settings-screen-actions-using-intent.19339/		
+		
 		xui.MsgboxAsync( msg, "Location permission")
 		wait for MsgBox_result(resultPermission As Int)
 	End If

@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="181"
-	android:versionName="1.0.0.181"
+	android:versionCode="182"
+	android:versionName="1.0.0.182"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="29"/>
@@ -157,6 +157,13 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
+			android:name=".aselectplaycentre3"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
 			android:name=".about"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
@@ -186,13 +193,6 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".aselectitem"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".aselectplaycentre3"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>

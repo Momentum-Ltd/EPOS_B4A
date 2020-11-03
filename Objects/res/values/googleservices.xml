@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="firebase_database_url" translatable="false">https://superorder-9ab63.firebaseio.com</string>
+  <string name="gcm_defaultSenderId" translatable="false">1003870344311</string>
+  <string name="google_storage_bucket" translatable="false">superorder-9ab63.appspot.com</string>
+  <string name="project_id" translatable="false">superorder-9ab63</string>
+  <string name="google_app_id" translatable="false">1:1003870344311:android:e5bab76805106195</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyB1UBDK8leQkzt7KYIseTOJg1iOAZSf4vs</string>
+  <string name="google_api_key" translatable="false">AIzaSyB1UBDK8leQkzt7KYIseTOJg1iOAZSf4vs</string>
+  <string name="default_web_client_id" translatable="false">1003870344311-or7jkd2oplmpvn4f67mcb7pcsjiogjdv.apps.googleusercontent.com</string>
+</resources>

@@ -100,7 +100,7 @@ Sub Class_Globals
 	
 	' Constants
 	Private const DFT_MIN_DISPLAY_TIME As Int = 5000 	' Minimum time the Sign is displayed for (in msecs).
-	Private const DFT_ONLINE_TIMEOUT As Int	= 10000		' Timeout on check for server on-line (and internet) - in msecs.
+	Private const DFT_ONLINE_TIMEOUT As Int	= 20000		' Timeout on check for server on-line (and internet) - in msecs.
 	
 	' Timers
 	Private tmrMinimumDisplayPeriod As Timer			' Controls the minimum time this activity is displayed.
