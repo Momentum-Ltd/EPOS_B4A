@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: aPlaceOrder
-	' Release...: 8
-	' Date......: 31/05/20
+	' Release...: 9
+	' Date......: 04/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -63,6 +63,12 @@ Version=9.5
 	' Overview..: Bugfix: #0421 - Placing new orders when previous orders cancelled.
 	' Amendee...: D Morris
 	' Details...:  Remove: Public QueryPayment() not used
+	'
+	' Date......: 04/11/20
+	' Release...: 9
+	' Overview..: Changes to support new version of hPlaceOrder class.
+	' Amendee...: D Morris.
+	' Details...:  Mod: pHandleOrderResponse().
 	'
 	' Date......: 
 	' Release...: 
@@ -146,7 +152,7 @@ End Sub
 
 ' Handles the response from the Server to the Order message.
 Public Sub pHandleOrderResponse(orderResponseStr As String)
-	hc.pHandleOrderResponse(orderResponseStr)
+	hc.HandleOrderResponse(orderResponseStr)
 End Sub
 '
 '' Query Payment options and makes payment if required.

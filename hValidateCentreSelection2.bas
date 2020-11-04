@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 5
-	' Date......: 02/10/20
+	' Release...: 6
+	' Date......: 04/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -44,6 +44,16 @@ Version=10
 	' Overview..: Mod: Support for Centre Web site with full URL.
 	' Amendee...: D Morris
 	' Details...: Mod: lblMore_Click() - database supplies full URL.
+	'		
+	' Date......: 04/11/20
+	' Release...: 6
+	' Overview..: Issue: #0415 Clear table number when new Centre is selected.
+	' Amendee...: D Morris.
+	' Details...: Mod:  lExitToSyncData() rename to ExitToSyncData().
+	'					ExitToSyncData() clears the table number.
+	'					IExitBackToSelectCentre() renamed to ExitBackToSelectCentre().
+	'				    IStartSignOnToCentre() renamed to StartSignOnToCentre().
+	'					lWebSignedOntoCentre() renamed to WebSignedOntoCentre().
 	' 
 	' Date......: 
 	' Release...: 
@@ -108,7 +118,7 @@ End Sub
 ' Customer rejects the Centre selected.
 Sub btnCancel_Click()
 	If enableViews = True Then
-		lExitBackToSelectCentre		
+		ExitBackToSelectCentre		
 	End If
 End Sub
 
@@ -119,7 +129,7 @@ Sub btnSelect_Click()
 		Starter.myData.centre.postCode = selectCentreDetails.postCode
 		Starter.myData.centre.picture = selectCentreDetails.picture
 		ProgressShow("Connecting to centre, please wait...")
-		lStartSignOnToCentre		
+		StartSignOnToCentre		
 	End If
 End Sub
 
@@ -129,20 +139,13 @@ Sub ConnnectToCentreTimeout_tick
 	tmrConnectToCentreTimout.Enabled = False
 	xui.MsgboxAsync("Unable to communicate with the selected centre - please retry or select another centre.", "Timeout Error")
 	wait for Msgbox_Result(result As Int)
-	lExitBackToSelectCentre
+	ExitBackToSelectCentre
 End Sub
-
-'' Customer presses Home icon
-'Private Sub imgHome_Click
-'	If enableViews  = True Then
-'		lExitBackToSelectCentre		
-'	End If
-'End Sub
 
 ' Handle back button
 private Sub lblBackButton_Click
 	If enableViews = True Then
-		lExitBackToSelectCentre		
+		ExitBackToSelectCentre		
 	End If
 End Sub
 
@@ -177,25 +180,25 @@ End Sub
 '  Invoked when starter receives the response.
 public Sub HandleConnectToServerResponse(centreSignonOk As Boolean)
 	If centreSignonOk Then
-		wait for (lWebSignedOntoCentre) complete (signonOk As Boolean)
+		wait for (WebSignedOntoCentre) complete (signonOk As Boolean)
 		If signonOk Then
-			lExitToSyncData
+			ExitToSyncData
 		Else
-			lExitBackToSelectCentre
+			ExitBackToSelectCentre
 		End If
 	Else
-		lExitBackToSelectCentre
+		ExitBackToSelectCentre
 	End If
 End Sub
 
 ' Handle response to Open Tab confirm message
 Public Sub HandleOpenTabConfirmResponse
 	tmrConnectToCentreTimout.Enabled = False ' Stop the timeout timer
-	wait for (lWebSignedOntoCentre) complete (signonOk As Boolean)
+	wait for (WebSignedOntoCentre) complete (signonOk As Boolean)
 	If signonOk Then
-		lExitToSyncData
+		ExitToSyncData
 	Else
-		lExitBackToSelectCentre
+		ExitBackToSelectCentre
 	End If
 End Sub
 
@@ -236,7 +239,7 @@ End Sub
 #Region  Local Subroutines
 
 ' Exits back to Select Centre - usually called when an error has occurred.
-private Sub lExitBackToSelectCentre
+private Sub ExitBackToSelectCentre
 	ProgressHide
 	tmrConnectToCentreTimout.Enabled = False
 #if B4A
@@ -247,8 +250,9 @@ private Sub lExitBackToSelectCentre
 End Sub
 
 ' Exits to Sync Data 
-private Sub lExitToSyncData
+private Sub ExitToSyncData
 	ProgressHide
+	Starter.customerOrderInfo.tableNumber = 0
 	tmrConnectToCentreTimout.Enabled = False
 #if B4A
 	CallSubDelayed(aSyncDatabase, "pSyncDataBase")
@@ -279,7 +283,7 @@ End Sub
 
 ' Invokes signon to centre operation - this sub invokes a series
 '  of operations to connect the Phone to a Centre Server via the Web
-Private Sub lStartSignOnToCentre
+Private Sub StartSignOnToCentre
 	tmrConnectToCentreTimout.Enabled = False ' restart timeout.
 	tmrConnectToCentreTimout.Enabled = True
 #if B4A
@@ -295,7 +299,7 @@ Private Sub ViewControl( pEnableViews As Boolean)
 End Sub
 
 ' Informs the Web Server that this device has signed onto a centre.
-Private Sub lWebSignedOntoCentre As ResumableSub
+Private Sub WebSignedOntoCentre As ResumableSub
 	Dim signonSuccessful As Boolean = False
 	
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)

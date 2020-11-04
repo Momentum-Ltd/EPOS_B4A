@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 6
-	' Date......: 02/11/20
+	' Release...: 6-
+	' Date......: 03/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -56,6 +56,12 @@ Version=10
 	'			  Mod: SelectCentre() "wait for" inserted (to help with mixed up Centre images).
 	'             Removed: lblMore_Click().
 	'			  Mod: LocationDeviceOFF() is now private.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..:
+	' Amendee...: 
+	' Details...: 
 	'
 	' Date......: 
 	' Release...: 

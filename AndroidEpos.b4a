@@ -65,6 +65,7 @@ Library20=stdactionbar
 Library21=xml2map
 Library22=xui views
 Library23=xui
+Library24=ime
 Library3=randomaccessfile
 Library4=xmlbuilder
 Library5=network
@@ -170,7 +171,7 @@ Module94=TestStartAt
 Module95=ValidateCentreSelection2
 Module96=ValidateDevice
 NumberOfFiles=24
-NumberOfLibraries=23
+NumberOfLibraries=24
 NumberOfModules=96
 Version=10.2
 @EndOfDesignText@
@@ -181,8 +182,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 182                                                                                                                                                                          
-	' Date......: 03/11/20
+	' Release...: 183                                                                                                                                                                         
+	' Date......: 04/11/20
 	'
 	' History
 	'
@@ -266,6 +267,14 @@ Version=10.2
 	' Amendee...: D Morris.
 	' Details...: mod: hHome_v6, modEposWeb_v12, aSelectPlayCentre3_v3, hSelectPlayCentre3_v6, clsLocation_v3.
 	'		
+	' Date......: 04/11/20
+	' Release...: 183
+	' Overview..: Issue: #0415 Clear table number when new Centre is selected.
+	'             Issue: #0456 Ensure table number entered before order can be placed. 
+	'			  Bugfix: SuperOrder icon losted now re-inserted.
+	' Amendee...: D Morris.
+	' Details...: Mod: hValidateCentreSelection2_v6, hPlaceOrder_v20, aPlaceOrder_v9.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -279,8 +288,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 182
-	#VersionName: 1.0.0.182
+	#VersionCode: 183
+	#VersionName: 1.0.0.183
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

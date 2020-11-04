@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 19
-	' Date......: 08/08/20
+	' Release...: 20
+	' Date......: 04/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -40,6 +40,15 @@ Version=9.5
 	' Overview..: Support for new UI. 
 	' Amendee...: D Morris
 	' Details...: Mod: Changes to now exit to Centre Home page.
+	'		
+	' Date......: 04/11/20
+	' Release...: 20
+	' Overview..: Issue: #0456 Ensure table number entered before order can be placed. 
+	' Amendee...: D Morris.
+	' Details...: Mod: ResumeOp() modified.
+	'				 : HandleMessageButton() and HandleOrderButton() disable if invalid table.
+	'			     : ClearOrder() code added to handle order button.
+	'				 : Removed the p and l from start of names.
 	'
 	' Date......: 
 	' Release...: 
@@ -63,8 +72,6 @@ Sub Class_Globals
 	Private const TABLE_NUMBER_MAX_LEN As Int = 3 ' The table number text field's contents can be up to this maximum length.
 
 	' Activity view declarations
-'	Private btnMessage As B4XView ' The button which allows the user to add/edit the order message.
-'	Private btnOrder As B4XView ' The button which submits the order to the Server.
 	Private btnMessage As SwiftButton	 	' The button which allows the user to add/edit the order message.
 	Private btnOrder As SwiftButton		 	' The button which submits the order to the Server.
 	Private lblOrderTotal As B4XView 		' The label which displays the total price of the order.
@@ -92,7 +99,11 @@ Sub Class_Globals
 	
 	' Misc objects
 	Private progressbox As clsProgressDialog	' Progress box
-	
+
+#if B4A
+	Dim kk As IME	
+#End If
+
 	' Local variables
 	Private mLocalOrderTotal As Float ' The total price of the order.
 #if B4I
@@ -116,7 +127,8 @@ End Sub
 ' Added to support done button on numerical keyboard.
 '  see https://www.b4x.com/android/forum/threads/input-accessory-views.51000/#content
 Sub btnHideKeyboard_Click
-	xPlaceOrder.HideKeyboard
+'	xPlaceOrder.HideKeyboard
+	ProcessTableNumer(txtTableNumber.Text.Trim)
 End Sub
 #end if
 
@@ -149,7 +161,7 @@ Private Sub btnMessage_Click
 		Starter.CustomerOrderInfo.orderMessage = modEposWeb.FilterStringInput(txtMessage.Text.Trim)
 	End If
 #End If
-	lHandleMessageButton
+	HandleMessageButton
 End Sub
 
 ' Handles the Click event of the Submit Order button.
@@ -221,24 +233,26 @@ End Sub
 
 ' Handles the ItemClick event of the Order Items listview.
 Private Sub lvwOrderItems_ItemClick(Value As Object, position As Int)
-	Dim itemSelect As Int = position
+	If Starter.CustomerOrderInfo.tableNumber <> 0 Then ' Check if table number is OK!
+		Dim itemSelect As Int = position
 #if B4A
-	If itemSelect < lvwOrderItems.Size Then	' Edit Items?
-	'	CallSubDelayed2(aSelectItem, "pEditItem", position) ' Edit item in order table
-		CallSubDelayed2(aSelectItem, "pEditItem", itemSelect - 1) ' Edit item in order table
-	Else ' Add new item
-		CallSubDelayed(aSelectItem, "pStartSelectItem")
-	End If
+		If itemSelect < lvwOrderItems.Size Then	' Edit Items?
+		'	CallSubDelayed2(aSelectItem, "pEditItem", position) ' Edit item in order table
+			CallSubDelayed2(aSelectItem, "pEditItem", itemSelect - 1) ' Edit item in order table
+		Else ' Add new item
+			CallSubDelayed(aSelectItem, "pStartSelectItem")
+		End If
 #else ' B4I
-	xPlaceOrder.HideKeyboard
-	xPlaceOrder.ClrPageTitle()	' fixes page title operation.
-	xSelectItem.Show
-	If itemSelect < lvwOrderItems.Size Then
-		xSelectItem.EditItem(itemSelect - 1) ' Edit item in order table
-	Else ' Selected item is the last in the list - the 'add an item' placeholder
-		xSelectItem.StartSelectItem ' Select a new item
+		xPlaceOrder.HideKeyboard
+		xPlaceOrder.ClrPageTitle()	' fixes page title operation.
+		xSelectItem.Show
+		If itemSelect < lvwOrderItems.Size Then
+			xSelectItem.EditItem(itemSelect - 1) ' Edit item in order table
+		Else ' Selected item is the last in the list - the 'add an item' placeholder
+			xSelectItem.StartSelectItem ' Select a new item
+		End If	
+#End If		
 	End If
-#End If
 End Sub
 
 #if B4A
@@ -273,13 +287,7 @@ End Sub
 
 ' Handles the EnterPressed event of the Table Number edittext view.
 Private Sub txtTableNumber_EnterPressed
-	Dim enteredTableNo As String = txtTableNumber.Text.Trim
-	If enteredTableNo <> "" And enteredTableNo <> 0 Then
-		Starter.customerOrderInfo.tableNumber = enteredTableNo
-	Else
-		xui.MsgboxAsync("You must enter a table number.", "Table Number Required")
-		txtTableNumber.RequestFocus ' Re-select the textbox
-	End If
+	ProcessTableNumer(txtTableNumber.Text.Trim) 
 End Sub
 
 ' Handles the TextChanged event of the Table Number edittext view.
@@ -306,7 +314,7 @@ End Sub
 
 ' Handles the Cancel Order operation (i.e. back button).
 Public Sub CancelOrder
-	lClearOrder ' Clear the database's order information
+	ClearOrder ' Clear the database's order information
 	ExitToCentreHomePage
 End Sub
 
@@ -352,7 +360,7 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 End Sub
 
 ' Handles the response from the Server to the Order message.
-Public Sub pHandleOrderResponse(orderResponseStr As String)
+Public Sub HandleOrderResponse(orderResponseStr As String)
 	ProgressHide ' Always hide the progress dialog at this point
 #if B4A
 	Dim xmlStr As String = orderResponseStr.SubString(modEposApp.EPOS_ORDER_SEND.Length)
@@ -392,7 +400,7 @@ Public Sub pHandleOrderResponse(orderResponseStr As String)
 				' DM 27/5/18 & 19/09/18 - This is not ideal as the order may not be accepted by the server - need to investigate.
 				svcPhoneTotal.AdjustPhoneTotal(Main.LatestOrderTotal)
 #End If
-				lClearOrder ' Important to do this as it updates the Starter service's database
+				ClearOrder ' Important to do this as it updates the Starter service's database
 #if B4A
 	'			StartActivity(aTaskSelect)
 #else 'B4i
@@ -479,10 +487,26 @@ End Sub
 
 ' Performs the resume operation.
 public Sub ResumeOp
-	lSetupViews
-	lShowOrderList
-	lHandleMessageButton
+	SetupViews
+	HandleMessageButton
+	HandleOrderButton	
+	ShowOrderList	
+	If Starter.customerOrderInfo.tableNumber = 0 Then	' Table number has NOT been entered?
+#if B4A
+'		txtTableNumber.RequestFocus		
+		CallSubDelayed(Me, "ShowKeyboard")
+#else 'B4i
+		txtTableNumber.RequestFocus		
+#End If
+	End If
 End Sub
+
+#if B4A
+' Show keyboard
+Sub ShowKeyboard
+	kk.ShowKeyboard(txtTableNumber)
+End Sub
+#End If
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
@@ -533,18 +557,24 @@ End Sub
 #End If
 
 ' Clears all items and data from the current order (including in the database).
-Private Sub lClearOrder
+Private Sub ClearOrder
 	Starter.customerOrderInfo.orderList.Clear
 	Starter.customerOrderInfo.orderMessage = ""
-	lShowOrderList
-	lHandleMessageButton
+	ShowOrderList
+	HandleMessageButton
+	HandleOrderButton
 End Sub
 
 ' Initialize the locals etc.
 private Sub InitializeLocals
+#if B4A
+	kk.Initialize("")	
+#End If
+
+	
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 #if B4A
-	lSetupViews
+	SetupViews
 #else ' B4I
 	Dim greyColour As Int = Colors.RGB(169, 169, 169)
 	btnHideKeyboard.Initialize("btnHideKeyboard", btnHideKeyboard.STYLE_SYSTEM)
@@ -560,13 +590,26 @@ private Sub InitializeLocals
 	
 End Sub
 
-' Displays the relevant text on the Message button.
-Private Sub lHandleMessageButton
+' Displays the relevant text on the Message button and enables/disables the button accordingly.
+Private Sub HandleMessageButton
 	If Starter.customerOrderInfo.orderMessage <> "" Then
-	'TODO Problem with swiftbutton.
 		btnMessage.xLBL.text = "Edit your message"
 	Else ' No message currently saved
 		btnMessage.xLBL.text = "Add a message" & CRLF & "to your order"
+	End If
+	If Starter.customerOrderInfo.tableNumber <> 0 Then
+		btnMessage.Enabled = True
+	Else
+		btnMessage.Enabled = False
+	End If
+End Sub
+
+' Enable/disable Order button accordingly.
+Private Sub HandleOrderButton
+	If Starter.customerOrderInfo.tableNumber <> 0 Then
+		btnOrder.Enabled = True
+	Else
+		btnOrder.Enabled = False
 	End If
 End Sub
 
@@ -580,8 +623,27 @@ Private Sub ProgressShow(message As String)
 	progressbox.Show(message)
 End Sub
 
+' Process the Table number enter and check if valid.
+Private Sub ProcessTableNumer(enteredTableNo As String) 
+	If enteredTableNo <> "" And enteredTableNo <> 0 Then
+		Starter.customerOrderInfo.tableNumber = enteredTableNo
+#if B4i
+		xPlaceOrder.HideKeyboard
+#End If
+		ResumeOp
+	Else
+		xui.MsgboxAsync("You must enter a table number.", "Table Number Required")
+#if B4A
+		'txtTableNumber.RequestFocus ' Re-select the textbox
+		CallSubDelayed(Me, "ShowKeyboard")
+#else 'B4i
+		txtTableNumber.RequestFocus ' Re-select the textbox
+#End If
+	End If
+End Sub
+
 ' Updates the radiobuttons and table number textbox based on the Starter service's table number database value.
-Private Sub lSetupViews
+Private Sub SetupViews
 	' Set the table number as necessary
 	Dim tableNumber As String = Starter.customerOrderInfo.tableNumber
 	If tableNumber = "0" Then 
@@ -609,7 +671,7 @@ Private Sub lSetupViews
 End Sub
 
 ' Shows the current list of order items in the Order Items listview.
-Private Sub lShowOrderList
+Private Sub ShowOrderList
 	Dim i As Int = 1
 	Dim topLine As String
 	Dim bottomLine As String
@@ -630,15 +692,19 @@ Private Sub lShowOrderList
 		orderTotal = orderTotal + lineTotal
 		i = i + 1
 	Next
-	lvwOrderItems.AddTextItem("+ Press here to add an item", i)
+	If Starter.CustomerOrderInfo.tableNumber <> 0 Then
+		lvwOrderItems.AddTextItem("+ Press here to add an item", i)	
+	Else
+		lvwOrderItems.AddTextItem("+ Enter table number", i)	
+	End If
 #if B4A
 	' https://www.b4x.com/android/forum/threads/customlistview-scrolltoitem-problem.90996/
 	Sleep(0)	' Suggested by Erel.
 	lvwOrderItems.ScrollToItem(i - 1)
 #else
-	Sleep(0)	' (for iOS this fixs the problme of vanishing "+ Press here to add an item" when anchors used.
+	Sleep(0)	' (for iOS this fixes the problem of vanishing "+ Press here to add an item" when anchors used.
 	If i > 1 Then ' Don't work like B4A it does help to improve (need to ask the Community). 
-		lvwOrderItems.ScrollToItem(i - 1)	' TODO B4I promblems don't work like the B4A version.
+		lvwOrderItems.ScrollToItem(i - 1)	' TODO B4I problems don't work like the B4A version.
 	End If
 #end if
 
