@@ -11,8 +11,8 @@ Version=7.3
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 86
-	' Date......: 09/10/20
+	' Release...: 86-
+	' Date......: 06/11/20
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -76,6 +76,13 @@ Version=7.3
 	' Overview..: Bugfix: #0514 - Not displaying text part of messages.
 	' Amendee...: D Morris
 	' Details...: Mod: lNotifyMessage() code fixed.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: #0530 (revisited) Mixed up centre images.
+	'			  Issue #0512 Change the blue hyberlink text to white. 
+	' Amendee...: D Morris
+	' Details...: Mod: DownloadImage() fixed as video on resummable subs. 
 	' 			  			    
 	' Date......: 
 	' Release...: 
@@ -302,7 +309,7 @@ Public Sub DownloadImage(imageName As String, iv As ImageView) As ResumableSub
 	job.Initialize("", Me) 'note that the name parameter is no longer needed.
 	Dim fullPath As String = server.serverUrlPath & modEposWeb.WEB_DIR_IMG & "/" & imageName
 	job.Download(fullPath)
-	Wait For JobDone(job As HttpJob)
+	Wait For (job) JobDone(job As HttpJob) ' (job) is important - See https://www.b4x.com/etp.html?vimeography_gallery=1&vimeography_video=255570732
 	If job.Success Then
 		iv.Bitmap = job.GetBitmap
 		downloadOk = True

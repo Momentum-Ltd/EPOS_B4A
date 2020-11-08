@@ -91,7 +91,6 @@ Sub Activity_Resume
 
 ' Insert for new system
 	hc.StartLocationUpdates
-
 End Sub
 
 Sub Activity_Pause (UserClosed As Boolean)

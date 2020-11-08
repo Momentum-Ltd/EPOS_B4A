@@ -11,14 +11,21 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: clsProgress
-	' Release...: 1
-	' Date......: 06/08/20
+	' Release...: 1-
+	' Date......: 07/11/20
 	'
 	' History
 	' Date......: 06/08/20
 	' Release...: 1
 	' Created by: D Morris 
 	' Details...: Based on clsProgressDialog_v4 and clsProgressIndicator_v1.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Documentation changes.
+	' Amendee...: D Morris
+	' Details...: Mod: Documentation on about message improved.
+	'			  Added: IsShown.
 	'
 	' Date......: 
 	' Release...: 
@@ -43,7 +50,7 @@ Sub Class_Globals
 	Private mCallback As Object
 	Private mEvent As String
 
-	Private mMessage As String					' Storage for dialog message.	
+	Private mDialogMessage As String			' Storage for the message shown when the progree dialog is displayed.	
 	Private mShowDialog As Boolean				' When set indicates dialog is shown.
 End Sub
 
@@ -83,17 +90,21 @@ public Sub Hide
 	mShowDialog = False	
 End Sub
 
+' Is the Progress circles been shown
+Public Sub IsShown As Boolean
+	Return mIndicator.mBase.Visible	
+End Sub
+
 ' Shows the process dialog
-' Message is message shown in dialog if shown.
-public Sub Show(message As String)
+' The dialogMessage is the message shown in progress dialog is invoked.
+public Sub Show(dialogMessage As String)
 	' Just in case the timer is already running - needs to be stopped the restarted.
 	' See https://www.b4x.com/android/forum/threads/call-timer_tick-and-reset-timer.30105/
 	tmrProgressTimeout.Enabled = False ' This is necessary, see above.
 	tmrProgressTimeout.Enabled = True
 	mIndicator.Show
-	mMessage = message
+	mDialogMessage = dialogMessage
 	mShowDialog = False
-'	ShowDialog
 End Sub
 
 ' Show the dialog box
@@ -101,9 +112,9 @@ Public Sub ShowDialog
 	If tmrProgressTimeout.Enabled = True And mShowDialog = False Then
 		mShowDialog = True
 #if B4A
-		ProgressDialogShow2(mMessage, False)
+		ProgressDialogShow2(mDialogMessage, False)
 #else
-		mHudObj.ProgressDialogShow(mMessage)
+		mHudObj.ProgressDialogShow(mDialogMessage)
 #End If		
 	End If
 End Sub

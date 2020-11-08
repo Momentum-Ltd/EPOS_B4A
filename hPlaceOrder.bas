@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 20
-	' Date......: 04/11/20
+	' Release...: 20-
+	' Date......: 05/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -52,6 +52,17 @@ Version=9.5
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..:   Issue: #0541 Screen flashing when keyboard shown. 
+	'				Issue: #0547 Sticky table number.
+	' Amendee...: D Morris
+	' Details...: Mod: OnClose() - Issue #0547 fixes sticky table number
+	'			  Mod: ResumeOp() - Issue #0541 Screen flash when keyboard displayed.
+	'			  Mod: ProcessTableNumer() now handles table number collect selected. 
+	'			  Mod: HandleMessageButton() and HandleOrderButton() now check for order collection.
+	'			  Mod: txtTableNumber_TextChanged() handles collection option.
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..:
 	' Amendee...: 
 	' Details...: 
@@ -69,43 +80,43 @@ Sub Class_Globals
 	Private notification As clsNotifications	' Handles notifications
 		
 	' Local constants
-	Private const TABLE_NUMBER_MAX_LEN As Int = 3 ' The table number text field's contents can be up to this maximum length.
+	Private const TABLE_NUMBER_MAX_LEN As Int = 3 	' The table number text field's contents can be up to this maximum length.
+	Private const TABLE_NUMBER_MAX As Int = 999		' The table number maximum value.
 
 	' Activity view declarations
-	Private btnMessage As SwiftButton	 	' The button which allows the user to add/edit the order message.
-	Private btnOrder As SwiftButton		 	' The button which submits the order to the Server.
-	Private lblOrderTotal As B4XView 		' The label which displays the total price of the order.
+	Private btnMessage As SwiftButton	 		' The button which allows the user to add/edit the order message.
+	Private btnOrder As SwiftButton		 		' The button which submits the order to the Server.
+	Private lblOrderTotal As B4XView 			' The label which displays the total price of the order.
 	
 #if B4A
-	Private lvwOrderItems As CustomListView' The listview which contains all the items current on the order.
+	Private lvwOrderItems As CustomListView		' The listview which contains all the items current on the order.
 #else ' B4I
-	Private btnHideKeyboard As Button	' Button to used to Submit the table number.
-	Private lvwOrderItems As CustomListView ' The listview which contains all the items current on the order.
-	Private swcCollectDeliver As Switch ' The swtich used to control whether the order will be collected or delivered.
-	Private lblCollectCaption As Label ' The label used as a caption for the 'Collect from counter' delivery option.
-	Private lblDeliverCaption As Label ' The label used as a caption for the 'Deliver to table' delivery option.
-	Private lblTableNumberCaption As Label ' label used as a caption for table number entry.
+	Private btnHideKeyboard As Button			' Button to used to Submit the table number.
+	Private lvwOrderItems As CustomListView 	' The listview which contains all the items current on the order.
+	Private swcCollectDeliver As Switch 		' The swtich used to control whether the order will be collected or delivered.
+	Private lblCollectCaption As Label 			' The label used as a caption for the 'Collect from counter' delivery option.
+	Private lblDeliverCaption As Label 			' The label used as a caption for the 'Deliver to table' delivery option.
+	Private lblTableNumberCaption As Label 		' label used as a caption for table number entry.
 #End If
 #if B4A
-	Private optCollect As B4XView ' The radiobutton which signifies the order should be collected by the customer when ready.
-	Private optTable As B4XView ' The radiobutton which signifies the order will be delivered to the customer's table when ready.
+	Private optCollect As B4XView 				' The radiobutton which signifies the order should be collected by the customer when ready.
+	Private optTable As B4XView 				' The radiobutton which signifies the order will be delivered to the customer's table when ready.
 #end if
 
-	Private pnlHideOrder As B4XView	' Panel to hide order details.
-	Private txtTableNumber As B4XView ' The text field used to enter the customer's table number.
+	Private pnlHideOrder As B4XView				' Panel to hide order details.
+	Private txtTableNumber As B4XView 			' The text field used to enter the customer's table number.
 #if B4I
-	Private txtMessage As TextView ' The multiline text view displayed on the text input dialog, used for the orderr message.
+	Private txtMessage As TextView 				' The multiline text view displayed on the text input dialog, used for the order message.
 #End If
 	
 	' Misc objects
 	Private progressbox As clsProgressDialog	' Progress box
-
 #if B4A
-	Dim kk As IME	
+	Private kk As IME							' Used for showing the keybaord.
 #End If
 
 	' Local variables
-	Private mLocalOrderTotal As Float ' The total price of the order.
+	Private mLocalOrderTotal As Float 			' The total price of the order.
 #if B4I
 	Private mConfirmationObject As clsEposCustomerOrderResponse ' Object which stores the Server's response to the Send Order command.
 #end if
@@ -134,6 +145,7 @@ End Sub
 
 ' Handles the Click event of the Order Message button.
 Private Sub btnMessage_Click
+	'TODO There is a X-Platform version of this see https://www.b4x.com/android/forum/threads/b4x-xui-views-cross-platform-views-and-dialogs.100836/#content
 #if B4A
 	Dim textInputDialog As InputDialog
 	textInputDialog.Input = Starter.customerOrderInfo.orderMessage
@@ -167,21 +179,20 @@ End Sub
 ' Handles the Click event of the Submit Order button.
 Private Sub btnOrder_Click
 	' Check if the entered order details are OK
+	Starter.customerOrderInfo.tableNumber = modEposApp.Val( txtTableNumber.Text.Trim) 
 	Dim errorMsg As String = ""
 	If Starter.customerorderInfo.orderList.Size < 1 Then
 		errorMsg = errorMsg & "there are no items in your order"
 	End If
-	If txtTableNumber.Text.Trim = "" Then
+	If Starter.CustomerOrderInfo.deliverToTable And Starter.CustomerOrderInfo.tableNumber = 0 Then
 		If errorMsg <> "" Then 
 			errorMsg = errorMsg & " and "
 		End If
 		errorMsg = errorMsg & "no table number has been entered"
 	End If
-	
 	' Send the order command, or display error message, as appropriate
 	If errorMsg = "" Then ' Order details are OK, no errors detected
 		Starter.customerOrderInfo.customerNumber = Starter.myData.customer.customerId
-		Starter.customerOrderInfo.tableNumber = txtTableNumber.Text.Trim ' Belt-and-braces
 		Starter.customerOrderInfo.centreId = Starter.myData.centre.centreId
 		Dim xmlOrder As String = Starter.customerOrderInfo.XmlSerialize
 #if B4A
@@ -211,29 +222,34 @@ End Sub
 
 #if B4I
 ' Clicks on screen off keyboard so hide the keyboard.
-Sub lblCollectCaption_Click
-	xPlaceOrder.HideKeyboard
+Private Sub lblCollectCaption_Click
+	QueryDisplayKeyboard
 End Sub
 
-'' Clicks on screen off keyboard so hide the keyboard.
-'Sub lblCollectOnly_Click
-'	xPlaceOrder.HideKeyboard
-'End Sub
+' Clicks on screen off keyboard so hide the keyboard.
+Private Sub lblCollectOnly_Click
+	QueryDisplayKeyboard
+End Sub
 
 ' Clicks on screen off keyboard so hide the keyboard.
-Sub lblDeliverCaption_Click
-	xPlaceOrder.HideKeyboard
+private Sub lblDeliverCaption_Click
+	QueryDisplayKeyboard
+End Sub
+
+' Clicks on screen off keyboard so hide the keyboard.
+private Sub lblOrderTotal_Click
+	QueryDisplayKeyboard
 End Sub
 
 ' Clicks on screen off keyboard so hide the keyboard.
 Private Sub lblTableNumberCaption_Click
-	xPlaceOrder.HideKeyboard
+	QueryDisplayKeyboard
 End Sub
 #End If
 
 ' Handles the ItemClick event of the Order Items listview.
 Private Sub lvwOrderItems_ItemClick(Value As Object, position As Int)
-	If Starter.CustomerOrderInfo.tableNumber <> 0 Then ' Check if table number is OK!
+	If Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then ' Check if table number is OK!
 		Dim itemSelect As Int = position
 #if B4A
 		If itemSelect < lvwOrderItems.Size Then	' Edit Items?
@@ -243,7 +259,7 @@ Private Sub lvwOrderItems_ItemClick(Value As Object, position As Int)
 			CallSubDelayed(aSelectItem, "pStartSelectItem")
 		End If
 #else ' B4I
-		xPlaceOrder.HideKeyboard
+'		xPlaceOrder.HideKeyboard
 		xPlaceOrder.ClrPageTitle()	' fixes page title operation.
 		xSelectItem.Show
 		If itemSelect < lvwOrderItems.Size Then
@@ -260,12 +276,22 @@ End Sub
 ' NOTE: This event appears not to trigger when the radiobutton is unchecked?
 Private Sub optCollect_CheckedChange(Checked As Boolean)
 	Starter.customerOrderInfo.deliverToTable = False
+	QueryDisplayKeyboard
 End Sub
 #else ' B4I
 ' Handles the ValueChanged event of the Collect or Deliver switch.
-Private Sub swcCollectDeliver_ValueChanged(Value As Boolean)
-	xPlaceOrder.HideKeyboard
-	Starter.CustomerOrderInfo.deliverToTable = Value
+Private Sub swcCollectDeliver_ValueChanged(deliver As Boolean)
+'	xPlaceOrder.HideKeyboard
+	Starter.CustomerOrderInfo.deliverToTable = deliver
+	QueryDisplayKeyboard
+'	If deliver And txtTableNumber.Text.Trim = "" Then
+'		ShowKeyboard
+'	Else
+'		xPlaceOrder.HideKeyboard
+'	End If
+	HandleMessageButton
+	HandleOrderButton	
+	ShowOrderList	' This ensure correct text is shown at end of list.
 End Sub
 #End If
 
@@ -274,6 +300,7 @@ End Sub
 ' NOTE: This event appears not to trigger when the radiobutton is unchecked?
 Private Sub optTable_CheckedChange(Checked As Boolean)
 	Starter.customerOrderInfo.deliverToTable = True
+	QueryDisplayKeyboard
 End Sub
 #End If
 
@@ -293,19 +320,21 @@ End Sub
 ' Handles the TextChanged event of the Table Number edittext view.
 ' Uses https://www.b4x.com/android/forum/threads/edittext-max-characters-limit.23409/ to limit the length of input
 Private Sub txtTableNumber_TextChanged(strOld As String, strNew As String)
-	If strNew.Length > TABLE_NUMBER_MAX_LEN Then
-		txtTableNumber.Text = strNew.substring2(0, (TABLE_NUMBER_MAX_LEN ) ) ' This code don't work correctly 
-		' looks like some problem with buffering - Community suggests using
-	Else If IsNumber(strNew) And strNew <> "" And strNew <> "0" Then
-#if B4I
-		btnHideKeyboard.text = "Submit"
-#end if		
-		Starter.customerOrderInfo.tableNumber = strNew
-	Else
-#if B4I
-		btnHideKeyboard.text =  "Enter table number"
-#end if
+	Dim tableNumber As Int = modEposApp.Val(strNew)
+	If strNew.Length > TABLE_NUMBER_MAX_LEN Or tableNumber > TABLE_NUMBER_MAX  Then
+		tableNumber = TABLE_NUMBER_MAX
 	End If
+	Starter.CustomerOrderInfo.tableNumber = tableNumber	
+	If strNew <> strOld Then
+		If tableNumber <> 0 Then
+			txtTableNumber.Text = tableNumber				
+		Else
+			txtTableNumber.Text = "" ' Table = 0 displayed as blank.
+		End If	
+	End If
+#if B4i
+	HandleKeyboardDoneButton(tableNumber)
+#End If
 End Sub
 
 #End Region  Event Handlers
@@ -433,6 +462,7 @@ End Sub
 
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
+	Starter.CustomerOrderInfo.tableNumber = modEposApp.Val( txtTableNumber.Text.trim) ' Ensures last entered table number is stored.
 	If progressbox.IsInitialized = True Then	' Ensures the progress timer is stopped.
 		progressbox.Hide
 	End If
@@ -491,22 +521,16 @@ public Sub ResumeOp
 	HandleMessageButton
 	HandleOrderButton	
 	ShowOrderList	
-	If Starter.customerOrderInfo.tableNumber = 0 Then	' Table number has NOT been entered?
-#if B4A
-'		txtTableNumber.RequestFocus		
-		CallSubDelayed(Me, "ShowKeyboard")
-#else 'B4i
-		txtTableNumber.RequestFocus		
+	If Starter.customerOrderInfo.tableNumber = 0 And Starter.CustomerOrderInfo.deliverToTable Then	' Table number required?
+#if B4i
+		Sleep(500)	' This helps the flashing problem - see Issue #0541
 #End If
-	End If
-End Sub
+		ShowKeyboard
+	Else
+		HideKeyboard
+	End If	
 
-#if B4A
-' Show keyboard
-Sub ShowKeyboard
-	kk.ShowKeyboard(txtTableNumber)
 End Sub
-#End If
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
@@ -553,7 +577,6 @@ Private Sub AddDoneButtonToKeyboard(attachedTextBox As TextView)
 	Dim textboxNativeObj As NativeObject = attachedTextBox
 	textboxNativeObj.SetField("inputAccessoryView", pnlButton)
 End Sub
-
 #End If
 
 ' Clears all items and data from the current order (including in the database).
@@ -565,13 +588,58 @@ Private Sub ClearOrder
 	HandleOrderButton
 End Sub
 
+#if B4i
+' Handle keyboard done button text.
+Private Sub HandleKeyboardDoneButton(tableNumberVal As Int)
+	If tableNumberVal > 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+#if B4I
+		btnHideKeyboard.text = "Submit"
+#end if		
+	Else
+#if B4I
+		btnHideKeyboard.text =  "Enter table number"
+#end if
+	End If
+End Sub
+#End If
+
+' Displays the relevant text on the Message button and enables/disables the button accordingly.
+Private Sub HandleMessageButton
+	If Starter.customerOrderInfo.orderMessage <> "" Then
+		btnMessage.xLBL.text = "Edit your message"
+	Else ' No message currently saved
+		btnMessage.xLBL.text = "Add a message" & CRLF & "to your order"
+	End If
+	If Starter.customerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+		btnMessage.Enabled = True
+	Else
+		btnMessage.Enabled = False
+	End If
+End Sub
+
+' Enable/disable Order button accordingly.
+Private Sub HandleOrderButton
+	If Starter.customerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+		btnOrder.Enabled = True
+	Else
+		btnOrder.Enabled = False
+	End If
+End Sub
+
+' Hide the keyboard
+Private Sub HideKeyboard
+#if B4A
+	kk.HideKeyboard
+#else ' B4i
+	xPlaceOrder.HideKeyboard
+#End If
+End Sub
+
 ' Initialize the locals etc.
 private Sub InitializeLocals
 #if B4A
 	kk.Initialize("")	
 #End If
-
-	
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 #if B4A
 	SetupViews
@@ -587,30 +655,6 @@ private Sub InitializeLocals
 	AddViewToKeyboard(txtTableNumber, btnHideKeyboard)
 #End If
 	notification.Initialize
-	
-End Sub
-
-' Displays the relevant text on the Message button and enables/disables the button accordingly.
-Private Sub HandleMessageButton
-	If Starter.customerOrderInfo.orderMessage <> "" Then
-		btnMessage.xLBL.text = "Edit your message"
-	Else ' No message currently saved
-		btnMessage.xLBL.text = "Add a message" & CRLF & "to your order"
-	End If
-	If Starter.customerOrderInfo.tableNumber <> 0 Then
-		btnMessage.Enabled = True
-	Else
-		btnMessage.Enabled = False
-	End If
-End Sub
-
-' Enable/disable Order button accordingly.
-Private Sub HandleOrderButton
-	If Starter.customerOrderInfo.tableNumber <> 0 Then
-		btnOrder.Enabled = True
-	Else
-		btnOrder.Enabled = False
-	End If
 End Sub
 
 ' Show the process box
@@ -623,22 +667,26 @@ Private Sub ProgressShow(message As String)
 	progressbox.Show(message)
 End Sub
 
-' Process the Table number enter and check if valid.
+' Process the Table number enter and check if valid t - then take appropriate action.
 Private Sub ProcessTableNumer(enteredTableNo As String) 
-	If enteredTableNo <> "" And enteredTableNo <> 0 Then
-		Starter.customerOrderInfo.tableNumber = enteredTableNo
-#if B4i
-		xPlaceOrder.HideKeyboard
-#End If
+	If (enteredTableNo <> "" And enteredTableNo <> 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+		Starter.customerOrderInfo.tableNumber = modEposApp.Val(enteredTableNo)
+'#if B4i
+'		xPlaceOrder.HideKeyboard
+'#End If
 		ResumeOp
 	Else
 		xui.MsgboxAsync("You must enter a table number.", "Table Number Required")
-#if B4A
-		'txtTableNumber.RequestFocus ' Re-select the textbox
-		CallSubDelayed(Me, "ShowKeyboard")
-#else 'B4i
-		txtTableNumber.RequestFocus ' Re-select the textbox
-#End If
+		ShowKeyboard
+	End If
+End Sub
+
+' Query displaying of keyboard.
+Private Sub QueryDisplayKeyboard
+	If Starter.customerOrderInfo.tableNumber = 0 And Starter.CustomerOrderInfo.deliverToTable Then	' Table number required?
+		ShowKeyboard
+	Else
+		HideKeyboard
 	End If
 End Sub
 
@@ -670,6 +718,24 @@ Private Sub SetupViews
 	btnMessage.mBase.Visible = Not(Starter.myData.centre.disableCustomMessage)
 End Sub
 
+' Show the keyboard
+Private Sub ShowKeyboard
+#if B4A
+	txtTableNumber.RequestFocus ' Re-select the textbox
+	CallSubDelayed(Me, "ShowKeyboard_B4A")	' Must be called this way for the keyboard to appear.
+#else 'B4i
+	HandleKeyboardDoneButton(modEposApp.Val(txtTableNumber.Text.Trim))
+	txtTableNumber.RequestFocus ' Re-select the textbox
+#End If
+End Sub
+
+#if B4A
+' B4A Show keyboard be a set for the keyboard to appear.- 
+Private Sub ShowKeyboard_B4A
+	kk.ShowKeyboard(txtTableNumber)
+End Sub
+#End If
+
 ' Shows the current list of order items in the Order Items listview.
 Private Sub ShowOrderList
 	Dim i As Int = 1
@@ -692,7 +758,7 @@ Private Sub ShowOrderList
 		orderTotal = orderTotal + lineTotal
 		i = i + 1
 	Next
-	If Starter.CustomerOrderInfo.tableNumber <> 0 Then
+	If Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 		lvwOrderItems.AddTextItem("+ Press here to add an item", i)	
 	Else
 		lvwOrderItems.AddTextItem("+ Enter table number", i)	
@@ -714,3 +780,4 @@ Private Sub ShowOrderList
 End Sub
 
 #End Region  Local Subroutines
+

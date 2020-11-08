@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 6
-	' Date......: 02/11/20
+	' Release...: 6-
+	' Date......: 06/11/20
 	'
 	' History
 	' Date......: 08/08/20
@@ -53,6 +53,15 @@ Version=10
 	' Overview..: Bugfix: (iOS) #0534 Order status list missing updates.
 	' Amendee...: D Morris.
 	' Details...: Mod: (for iOS) - timer to update the order status list periodically.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..:  Issue #0499 Fix progress circles truncation. 
+	'				Issue: #0544 Slow screen rebuild after refresh.
+	' Amendee...: D Morris
+	' Details...: Mod: 	pSendRequestForOrderStatusList() - Clear list command removed.
+	'			  Issue #0521 Refresh icon touch area increased.
+	'             Mod: pnlShowDialog rename to pnlLoadingTouch.
 	'			
 	' Date......: 
 	' Release...: 
@@ -92,7 +101,7 @@ Sub Class_Globals
 #else ' B4I
 	Private lvwOrderSummary As usrListView 
 #End If
-	Private pnlShowDialog As Panel						' Clickable show dialog hotspot.
+	Private pnlLoadingTouch As B4XView					' Clickable show loading circle display progress dialog.
 	
 	' Misc objects
 	Private notification As clsNotifications			' Handles notifications	
@@ -100,6 +109,7 @@ Sub Class_Globals
 #if B4I
 	Private tmrUpdateOrderStatus As Timer				' Timer to handle updating the order status.
 #End If
+	Private pnlRefreshTouch As B4XView
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -151,17 +161,24 @@ Private Sub btnPlaceOrder_Click
 	End If
 End Sub
 
-' Handles refresh display button.
-Private Sub imgRefresh_Click
-	If enableViews = True Then
-		pSendRequestForOrderStatusList		
-	End If
+'' Handles refresh display button.
+'Private Sub imgRefresh_Click
+'	If enableViews = True Then
+'		pSendRequestForOrderStatusList		
+'	End If
+'End Sub
+
+' Click on progress circles to show the dialog progress box.
+' This is always enabled.
+Private Sub pnlLoadingTouch_Click
+	progressbox.ShowDialog
 End Sub
 
-' Click on SuperOrder Icon to show the dialog progress box.
-' This is always enabled.
-Private Sub pnlShowDialog_Click
-	progressbox.ShowDialog
+' Touch area for the refesh operation
+Sub pnlRefreshTouch_Click
+	If enableViews = True Then
+		pSendRequestForOrderStatusList
+	End If
 End Sub
 
 ' Handles Show more order information i.e. clicking on an order summary list.
@@ -397,7 +414,7 @@ End Sub
 
 ' Sends to the Server the message which requests the customer's order status list.
 public Sub pSendRequestForOrderStatusList
-	lvwOrderSummary.Clear ' Clear down previous displayed information.
+	' lvwOrderSummary.Clear ' Clear down previous displayed information.
 	ProgressShow("Getting your order status, please wait...")
 	Dim msg As String = modEposApp.EPOS_ORDERSTATUSLIST & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
 #if B4A
@@ -426,7 +443,7 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 		displayUpdateInProgress = True
 		' Assemble a list containing all of the items' info, and detect if the whole list needs to be refreshed
 #if B4A
-	For itemIndex = 0 To (lvwOrderSummary.Size - 1)
+		For itemIndex = 0 To (lvwOrderSummary.Size - 1)
 #else ' B4I
 		For itemIndex = 0 To (lvwOrderSummary.Count - 1)
 #End If
@@ -457,7 +474,7 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 		Else ' No orders left in order list
 			Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
 			invalidItem.status = modConvert.statusUnknown
-			#if B4A
+#if B4A
 			lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
 #else ' B4I
 			lvwOrderSummary.AddItem("No active orders found", "", invalidItem)

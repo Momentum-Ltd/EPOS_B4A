@@ -77,102 +77,103 @@ ManifestCode='This code will be applied to the manifest file during compilation.
 Module1=About
 Module10=CheckAccountStatus
 Module11=clsCentreInfo
-Module12=clsConfigSettings
-Module13=clsConnect
-Module14=clsCustomerBill
-Module15=clsCustomerInfo
-Module16=clsCustomerOrderItemRec
-Module17=clsDataBaseTables
-Module18=clsDescriptionTableRec
-Module19=clsDeviceInfo
+Module12=clsCentreInfoAndImgRec
+Module13=clsConfigSettings
+Module14=clsConnect
+Module15=clsCustomerBill
+Module16=clsCustomerInfo
+Module17=clsCustomerOrderItemRec
+Module18=clsDataBaseTables
+Module19=clsDescriptionTableRec
 Module2=aCardEntry
-Module20=clsEposApiHelper
-Module21=clsEposBalanceCheckRec
-Module22=clsEposCustomerBillByItem
-Module23=clsEposCustomerDetails
-Module24=clsEposCustomerInfo
-Module25=clsEposCustomerOrder
-Module26=clsEposCustomerOrderResponse
-Module27=clsEposCustomerPayment
-Module28=clsEposLocationRec
-Module29=clsEposMessageRec
+Module20=clsDeviceInfo
+Module21=clsEposApiHelper
+Module22=clsEposBalanceCheckRec
+Module23=clsEposCustomerBillByItem
+Module24=clsEposCustomerDetails
+Module25=clsEposCustomerInfo
+Module26=clsEposCustomerOrder
+Module27=clsEposCustomerOrderResponse
+Module28=clsEposCustomerPayment
+Module29=clsEposLocationRec
 Module3=aHome
-Module30=clsEposOrderInfo
-Module31=clsEposOrderStatus
-Module32=clsEposOrderStatusList
-Module33=clsEposWebCentreLocationRec
-Module34=clsEposWebCommsMessageRec
-Module35=clsEposWebCustomerRec
-Module36=clsEposWebLocationCoordinates
-Module37=clsGoodsTableRec
-Module38=clsGroupCategoryTableRec
-Module39=clsLocation
+Module30=clsEposMessageRec
+Module31=clsEposOrderInfo
+Module32=clsEposOrderStatus
+Module33=clsEposOrderStatusList
+Module34=clsEposWebCentreLocationRec
+Module35=clsEposWebCommsMessageRec
+Module36=clsEposWebCustomerRec
+Module37=clsEposWebLocationCoordinates
+Module38=clsGoodsTableRec
+Module39=clsGroupCategoryTableRec
 Module4=aPlaceOrder
-Module40=clsMainCategoryTableRec
-Module41=clsMyData
-Module42=clsNotifications
-Module43=clsOrderPaymentRec
-Module44=clsOrderStartResponse
-Module45=clsOrderStatusRec
-Module46=clsOrderSummary
-Module47=clsOrderSummaryRec
-Module48=clsOrderTableRec
-Module49=clsPreparationTableRec
+Module40=clsLocation
+Module41=clsMainCategoryTableRec
+Module42=clsMyData
+Module43=clsNotifications
+Module44=clsOrderPaymentRec
+Module45=clsOrderStartResponse
+Module46=clsOrderStatusRec
+Module47=clsOrderSummary
+Module48=clsOrderSummaryRec
+Module49=clsOrderTableRec
 Module5=aSelectItem
-Module50=clsProgress
-Module51=clsProgressDialog
-Module52=clsProgressIndicator
-Module53=clsReportErrors
-Module54=clsServer
-Module55=clsSizeOptionTableRec
-Module56=clsSizePriceTableRec
-Module57=clsStripe
-Module58=clsStripeCardRec
-Module59=clsStripeTokenRec
+Module50=clsPreparationTableRec
+Module51=clsProgress
+Module52=clsProgressDialog
+Module53=clsProgressIndicator
+Module54=clsReportErrors
+Module55=clsServer
+Module56=clsSizeOptionTableRec
+Module57=clsSizePriceTableRec
+Module58=clsStripe
+Module59=clsStripeCardRec
 Module6=aSelectPlayCentre3
-Module60=clsSubCategoryTableRec
-Module61=ConnectionHelper
-Module62=CreateAccount
-Module63=FirebaseMessaging
-Module64=hAbout
-Module65=hCardEntry
-Module66=hChangeAccountInfo
-Module67=hChangeSettings2
-Module68=hCheckAccountStatus
-Module69=hCreateAccount
+Module60=clsStripeTokenRec
+Module61=clsSubCategoryTableRec
+Module62=ConnectionHelper
+Module63=CreateAccount
+Module64=FirebaseMessaging
+Module65=hAbout
+Module66=hCardEntry
+Module67=hChangeAccountInfo
+Module68=hChangeSettings2
+Module69=hCheckAccountStatus
 Module7=aSyncDatabase
-Module70=hHome
-Module71=hPlaceOrder
-Module72=hQueryNewInstall
-Module73=hSelectItem
-Module74=hSelectPlayCentre3
-Module75=hSelectPlayCentre3_OLD
-Module76=hSyncDatabase
-Module77=hValidateCentreSelection2
-Module78=hValidateDevice
-Module79=modConvert
+Module70=hCreateAccount
+Module71=hHome
+Module72=hPlaceOrder
+Module73=hQueryNewInstall
+Module74=hSelectItem
+Module75=hSelectPlayCentre3
+Module76=hSelectPlayCentre3_OLD
+Module77=hSyncDatabase
+Module78=hValidateCentreSelection2
+Module79=hValidateDevice
 Module8=ChangeAccountInfo
-Module80=modEposApp
-Module81=modEposWeb
-Module82=NB6
-Module83=QueryNewInstall
-Module84=srvNotification
-Module85=srvPhoneTotal
-Module86=Starter
-Module87=svcTestSequence
-Module88=TemplateActivity
-Module89=TemplateClass
+Module80=modConvert
+Module81=modEposApp
+Module82=modEposWeb
+Module83=NB6
+Module84=QueryNewInstall
+Module85=srvNotification
+Module86=srvPhoneTotal
+Module87=Starter
+Module88=svcTestSequence
+Module89=TemplateActivity
 Module9=ChangeSettings
-Module90=TemplateCode
-Module91=TemplateService
-Module92=TemplateXactivity
-Module93=TemplateXhelper
-Module94=TestStartAt
-Module95=ValidateCentreSelection2
-Module96=ValidateDevice
+Module90=TemplateClass
+Module91=TemplateCode
+Module92=TemplateService
+Module93=TemplateXactivity
+Module94=TemplateXhelper
+Module95=TestStartAt
+Module96=ValidateCentreSelection2
+Module97=ValidateDevice
 NumberOfFiles=24
 NumberOfLibraries=24
-NumberOfModules=96
+NumberOfModules=97
 Version=10.2
 @EndOfDesignText@
 
@@ -182,8 +183,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 183                                                                                                                                                                         
-	' Date......: 04/11/20
+	' Release...: 183-                                                                                                                                                                         
+	' Date......: 06/11/20
 	'
 	' History
 	'
@@ -274,6 +275,22 @@ Version=10.2
 	'			  Bugfix: SuperOrder icon losted now re-inserted.
 	' Amendee...: D Morris.
 	' Details...: Mod: hValidateCentreSelection2_v6, hPlaceOrder_v20, aPlaceOrder_v9.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: #0512 Change the blue hyberlink text to white.
+	'			  Issue: #0517 Centre validation now only shows first line of address. 
+	'		      Issue: #0541 Screen flashing when keyboard shown.
+	'			  Issue: 00542 Table number handling provided.
+	'		      Issue: #0544 Slow screen rebuild after refresh.
+	'			  Issue: #0530 (revisited) Mixed up centre images.
+	'			  Bugfix: #0547 Sticky table number.
+	' Amendee...: D Morris
+	' Details...:   New: clsCentreInfoAndImgRec_v1.
+	'				Mod: Starter_v87,  hPlaceOrder_v21, ModEposApp_v27, clsEposCustomerOrder_v12, hHome_v7, hSelectPlayCentre3_v7,
+	'			    Mod: hValidateCentreSelection2_v7, clsProgress_v2.
+	'             forms: frmValidateCentreSelection3_v4, frmAbout_v2, frmASelectPlayCentre3_v3, frmChangeAccountInfo_v4, frmHome_v3,
+	'						frmValidateDevice_v6.
 	'		
 	' Date......: 
 	' Release...: 
@@ -289,7 +306,7 @@ Version=10.2
 
 	#ApplicationLabel: SuperOrder
 	#VersionCode: 183
-	#VersionName: 1.0.0.183
+	#VersionName: 1.0.0.183-
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

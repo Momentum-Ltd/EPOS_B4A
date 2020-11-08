@@ -11,8 +11,8 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: clsEposCustomerOrder
-    ' Release...: 11
-    ' Date......: 01/12/19
+    ' Release...: 11-
+    ' Date......: 05/11/20
     '
     ' History
 	' Date......: 23/12/17
@@ -36,6 +36,12 @@ Version=7.3
     ' Details...: Added: centreId.
 	'				Mod: XmlSerialize() supports centreId.
 	'			    Mod: old definitions allowDeliverToTable and disableCustomerMessage removed.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: 00542 Table number handling provided.
+	' Amendee...: D Morris
+	' Details...: Mod: Initialize() deliver to table now is the default.
 	'
 	' Date......: 
     ' Release...: 
@@ -89,6 +95,7 @@ End Sub
 
 ' Initializes the object.
 Public Sub Initialize
+	deliverToTable = True
 	orderList.Initialize
 End Sub
 

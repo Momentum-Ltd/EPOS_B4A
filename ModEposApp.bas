@@ -11,8 +11,8 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: ModEposApp
-	' Release...: 26
-	' Date......: 02/08/20
+	' Release...: 26-
+	' Date......: 08/11/20
 	'
 	' History
 	' Date......: 23/12/16
@@ -48,6 +48,12 @@ Version=7.3
 	' Overview..: Constants for distance.
 	' Amendee...: D Morris.
 	' Details...: Added: CENTRE_DISTANCE_UNKNOWN, CENTRE_DISTANCE_NA.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Support number string to int conversion.
+	' Amendee...: D Morris.
+	' Details...: Added: Val(), GetFirstLine().
 	'
 	' Date......: 
 	' Release...: 
@@ -204,7 +210,6 @@ Public Sub DisplayPrivacyNotice
 #else ' B4I
 	Main.App.OpenUrl(modEposWeb.URL_PRIVACY_POLICY)
 #End If
-
 End Sub
 
 ' Returns a currency value (with 2 decimal digits).
@@ -217,6 +222,19 @@ Public Sub FormatSelectedCentre() As String
 	Return Starter.myData.centre.name 
 End Sub
 
+' Returns the first line of a multiline string.
+Public Sub GetFirstLine(fullString As String) As String
+	Dim idx As Int = fullString.IndexOf(Chr(13))
+	Dim processedString As String 
+	
+	If idx > 0 Then ' CR Found?
+		processedString = fullString.SubString2(0, idx - 1)
+	Else
+		processedString = fullString	' No CR return whole string. 	
+	End If
+	Return processedString
+End Sub
+
 #if B4A
 ' Intialize the std action bar (Android only)
 Public Sub InitializeStdActionBar(stdBarObj As StdActionBar, stdBarName As String)
@@ -226,6 +244,16 @@ Public Sub InitializeStdActionBar(stdBarObj As StdActionBar, stdBarName As Strin
 	stdBarObj.ShowUpIndicator = True
 End Sub
 #end if
+
+' Converts a number string to an integer (similar to Vbasic Val() function).
+'  Returns 0 if number string = ""
+Public Sub Val(numberString As String) As Int
+	Dim number As Int = 0
+	If numberString <> "" And numberString <> Null Then
+		number = numberString
+	End If
+	Return number
+End Sub
 
 #End Region  Public Subroutines
 

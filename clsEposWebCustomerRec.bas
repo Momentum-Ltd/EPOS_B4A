@@ -5,8 +5,7 @@ Type=Class
 Version=9.01
 @EndOfDesignText@
 '
-' This class is used to store the customer info and transmit it to the Web API.
-' Its contents are copied directly from the CustomerDetailsTest project (class of the same name).
+' This class is used to store the customer info and image information.
 '
 
 #Region  Documentation

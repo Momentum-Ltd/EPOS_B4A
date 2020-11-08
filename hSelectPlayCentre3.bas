@@ -11,7 +11,7 @@ Version=10
 	'
 	' Name......: hSelectPlayCentre3
 	' Release...: 6-
-	' Date......: 03/11/20
+	' Date......: 06/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -59,9 +59,11 @@ Version=10
 	'
 	' Date......: 
 	' Release...: 
-	' Overview..:
-	' Amendee...: 
-	' Details...: 
+	' Overview..: Issue: #0544 Slow screen rebuild after refresh.
+	' Amendee...: D Morris
+	' Details...: Mod: DisplayOnListview() code changed to split processing and rendering code.
+	'			  Mod: SelectCentre() - now controls the progress indicator.
+	'			  Mod: Progress indicator removed from DisplayNearbyCentres() and DisplayNearbyCentres()
 	'
 	' Date......: 
 	' Release...: 
@@ -91,21 +93,22 @@ Sub Class_Globals
 
 	' misc objects
 	Private locationDevice As clsLocation	
-	Private progressbox As clsProgressIndicator	' Progress box
+	Private progressbox As clsProgress				' Progress box
 	Private tmrDelayNewLocation As Timer			' Timer to limit how quickly the new location is used to search for centres.	
-
 	
 	' View declarations
 	Private clvCentres As CustomListView		' Custom listview used to show the list of centres available as options.
 	
 	Private imgAccount As B4XView 				' Account info button 
 	Private imgLogo As B4XView					' Centre logo	
-	Private imgRefresh As B4XView				' Refresh displayed centre list button.
+	Private imgRefresh As B4XView				' Refresh displayed centre list button (See pnlRefreshTouch).
 	Private indLoading As B4XLoadingIndicator	' In progress indicator
 
 	Private lblStatus As B4XView				' Centre status (open, closed etc)
 	Private lblName As B4XView					' Centre name
 	Private lblDistance As B4XView				' Distance
+	Private pnlLoadingTouch As B4XView			' Clickable loading circles to show progress dialog.
+	Private pnlRefreshTouch As B4XView			' Clickable refresh show progress dialog.
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -122,11 +125,6 @@ End Sub
 
 #Region  Event Handlers
 
-' Handles refresh display button.
-Private Sub imgRefresh_Click
-	RefreshCentreList
-End Sub
-
 ' Handles the ItemClick event of the Centres listview.
 Private Sub clvCentres_ItemClick (Position As Int, Value As Object)
 	Dim centreDetails As clsEposWebCentreLocationRec = Value
@@ -141,13 +139,18 @@ Private Sub clvCentres_ItemClick (Position As Int, Value As Object)
 End Sub
 
 ' Display accounts options
-PRivate Sub imgAccount_Click
+Private Sub imgAccount_Click
 #if B4A
 	CallSubDelayed(aSelectPlayCentre3, "ShowMenu")
 #else
 	frmXSelectPlayCentre3.ShowActionMenu
 #End If
 End Sub
+
+'' Handles refresh display button.
+'Private Sub imgRefresh_Click
+'	RefreshCentreList
+'End Sub
 
 ' Location ready (or timeout)
 '  thisLocation() = 0,0 timoutoccurred. 
@@ -159,8 +162,21 @@ private Sub locationDevice_LocationReady(location1 As Location)
 	End If
 End Sub
 
-' Progress dialog has timed out
-Sub progressbox_Timeout()
+' Click on progress circles to show progress dialog box
+Sub pnlLoadingTouch_Click
+	progressbox.ShowDialog
+End Sub
+
+' Refresh list (touch area).
+Private Sub pnlRefreshTouch_Click
+	If displayUpdateInProgress And Not(progressbox.IsShown) Then ' Code to clear a sticky displayUpdateInProgress flag.
+		displayUpdateInProgress = False 
+	End If
+	RefreshCentreList
+End Sub
+
+' Progress dialog has timed out.
+Private Sub progressbox_Timeout()
 	Log("hSelectPlayCentre - Progress dialog tripped!")
 End Sub
 
@@ -212,12 +228,13 @@ End Sub
 public Sub OnClose
 	tmrDelayNewLocation.Enabled = False
 	If progressbox.IsInitialized = True Then
-		ProgressHide		' Just in-case.
+		progressbox.Hide		' Just in-case.
 	End If
 	If locationDevice.IsInitialized Then
 		locationDevice.Stop		
 	End If
-	displayUpdateInProgress = False
+' removed this line because it caused problem with displaying centre list.
+'	displayUpdateInProgress = False ' TODO to try to do this another way. There is a temporary fix in pnlRefreshTouch_Click().
 End Sub
 
 ' Refrest the list of centres.
@@ -229,6 +246,7 @@ End Sub
 Public Sub SelectCentre(permissionResult As Boolean)
 	If Not(displayUpdateInProgress) Then ' OK to update display?
 		displayUpdateInProgress = True
+		progressbox.Show("Finding centres close to you, please wait...")
 #if B4A
 		If locationDevice.IsLocationAvailable Then
 			' DisplayNearbyCentres(currentLocation)
@@ -254,12 +272,12 @@ Public Sub SelectCentre(permissionResult As Boolean)
 			'DisplayAllCentres
 			Wait For (DisplayAllCentres) complete(rxMsg As String)
 		End If
-	
 #End If ' End B4i	
 		If rxMsg <> Null Then
-			DisplayOnListview(rxMsg)
+			wait for (DisplayOnListview(rxMsg)) complete(ok As Boolean)
 		End If
 		RestartDisplayNewLocationTimer 	' Do this after the information is display (to avoid calling before previous task is complete)
+		progressbox.Hide
 		displayUpdateInProgress = False ' Release the display for update.
 	End If
 End Sub
@@ -331,35 +349,66 @@ Private Sub DisplayOnListview(inputJson As String) As ResumableSub
 	jp.Initialize(inputJson)
 	Dim centreList As List = jp.NextArray
 	' Loop to convert each centre details object to a clsEposWebCentreLocationRec and add it to the listview
-	clvCentres.Clear	' clear previously displayed information.
+'	clvCentres.Clear	' clear previously displayed information.
+'	For Each centreDetailsMap As Map In centreList
+'		Dim centre As clsEposWebCentreLocationRec
+'		centre.address = centreDetailsMap.Get("address")
+'		centre.centreName = centreDetailsMap.Get("centreName")
+'		centre.centreopen = centreDetailsMap.Get("centreOpen")
+'		centre.description = centreDetailsMap.Get("description")
+'		centre.distance = centreDetailsMap.GetDefault("distance", modEposApp.CENTRE_DISTANCE_UNKNOWN)
+'		centre.id = centreDetailsMap.Get("id")
+'		centre.lanIpAddress = centreDetailsMap.Get("lanIpAddress")
+'		centre.picture = centreDetailsMap.Get("picture")
+'		centre.postCode = centreDetailsMap.Get("postCode")
+'		centre.thumbnail = centreDetailsMap.Get("thumbnail")
+'		centre.webSite = centreDetailsMap.Get("website")
+'		Dim img  As ImageView
+'		img.Initialize("test")
+'		Wait For (Starter.DownloadImage(centre.picture, img)) complete(downloadOk As Boolean)
+'		If downloadOk = True Then
+'			clvCentres.Add(CreateItem(clvCentres.AsView.Width, centre, img), centre)
+'		Else
+'			displayListOk = False
+'		End If
+'	Next
+
+	' First stage write centre info to memory
+	Dim centreInfoList As List : centreInfoList.Initialize
 	For Each centreDetailsMap As Map In centreList
-		Dim centre As clsEposWebCentreLocationRec
-		centre.address = centreDetailsMap.Get("address")
-		centre.centreName = centreDetailsMap.Get("centreName")
-		centre.centreopen = centreDetailsMap.Get("centreOpen")
-		centre.description = centreDetailsMap.Get("description")
-		centre.distance = centreDetailsMap.GetDefault("distance", modEposApp.CENTRE_DISTANCE_UNKNOWN)
-		centre.id = centreDetailsMap.Get("id")
-		centre.lanIpAddress = centreDetailsMap.Get("lanIpAddress")
-		centre.picture = centreDetailsMap.Get("picture")
-		centre.postCode = centreDetailsMap.Get("postCode")
-		centre.thumbnail = centreDetailsMap.Get("thumbnail")
-		centre.webSite = centreDetailsMap.Get("website")
+		Dim centreInfo As clsCentreInfoAndImgRec : centreInfo.Initialize
+		centreInfo.centre.address = centreDetailsMap.Get("address")
+		centreInfo.centre.centreName = centreDetailsMap.Get("centreName")
+		centreInfo.centre.centreopen = centreDetailsMap.Get("centreOpen")
+		centreInfo.centre.description = centreDetailsMap.Get("description")
+		centreInfo.centre.distance = centreDetailsMap.GetDefault("distance", modEposApp.CENTRE_DISTANCE_UNKNOWN)
+		centreInfo.centre.id = centreDetailsMap.Get("id")
+		centreInfo.centre.lanIpAddress = centreDetailsMap.Get("lanIpAddress")
+		centreInfo.centre.picture = centreDetailsMap.Get("picture")
+		centreInfo.centre.postCode = centreDetailsMap.Get("postCode")
+		centreInfo.centre.thumbnail = centreDetailsMap.Get("thumbnail")
+		centreInfo.centre.webSite = centreDetailsMap.Get("website")
 		Dim img  As ImageView
 		img.Initialize("test")
-		'TODO Need check if something wrong with the download?
-		' Wait For (Starter.DownloadImage(centre.thumbnail, img)) complete(a As Boolean)
-		Wait For (Starter.DownloadImage(centre.picture, img)) complete(downloadOk As Boolean)
-		If downloadOk = True Then
-			clvCentres.Add(CreateItem(clvCentres.AsView.Width, centre, img), centre)
-		Else
-			displayListOk = False
-		End If
+		Wait For (Starter.DownloadImage( centreInfo.centre.picture, img)) complete(downloadOk As Boolean)
+'		If downloadOk = True Then
+			centreInfo.imgPanel = CreateItem(clvCentres.AsView.Width, centreInfo.centre, img)
+			centreInfoList.Add(centreInfo)
+'		End If	
+	Next
+	' Second stage displays the information
+	clvCentres.Clear	' clear previously displayed information.
+	' Hide the customerListView to stop it jumping when refreshed.
+'	clvCentres.AsView.Visible = False ' See https://www.b4x.com/android/forum/threads/moving-or-hiding-a-customlistview.36861/
+	For Each centreInfoRec As clsCentreInfoAndImgRec In centreInfoList
+		clvCentres.Add(centreInfoRec.imgPanel, centreInfoRec.centre)
+		' Sleep(100) ' This appears to cause problems if switching quick between list centres and centre confirmation pages. 		
 	Next
 	clvCentres.DefaultTextColor = Colors.White
 	Dim noMoreCentres As clsEposWebCentreLocationRec
 	noMoreCentres.id = 0 	' Indicates no more centres.
 	clvCentres.AddTextItem(CRLF & "No more centres nearby", noMoreCentres)
+'	clvCentres.AsView.Visible = True
 	Return displayListOk
 End Sub
 
@@ -368,16 +417,15 @@ End Sub
 '   returns rxMsg if download ok else null if error.
 Private Sub DisplayAllCentres() As ResumableSub
 	Dim rxMsg As String = Null	
-	ProgressShow("Getting a list of all centres, please wait...")
+'	ProgressShow("Getting a list of all centres, please wait...")
 	Log("Request the Web API to give list of all centres...")
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
 	Dim urlStr As String = 	Starter.server.URL_CENTRE_API & _
 	"?" & modEposWeb.API_LATITUDE & "=" & modEposWeb.API_GET_ALL & _
-									"&" & modEposWeb.API_LONGITUDE & "=" & modEposWeb.API_GET_ALL
-						
+									"&" & modEposWeb.API_LONGITUDE & "=" & modEposWeb.API_GET_ALL					
 	job.Download(urlStr)
 	Wait For (job) JobDone(job As HttpJob)
-	ProgressHide
+'	ProgressHide
 	If job.Success And job.Response.StatusCode = 200 Then
 		' 		Dim rxMsg As String = job.GetString
 		rxMsg = job.GetString
@@ -403,7 +451,7 @@ End Sub
 '  returns rxMsg if download ok else null if error.
 Private Sub DisplayNearbyCentres(pCurrentLocation As Location) As ResumableSub
 	Dim rxMsg As String = Null
-	ProgressShow("Finding centres close to you, please wait...")
+'	ProgressShow("Finding centres close to you, please wait...")
 	Log("Sending the coordinates to the Web API...")
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
 	Dim urlStr As String = Starter.server.URL_CENTRE_API & _
@@ -416,7 +464,7 @@ Private Sub DisplayNearbyCentres(pCurrentLocation As Location) As ResumableSub
 	End If
 	job.Download(urlStr)
 	Wait For (job) JobDone(job As HttpJob)
-	ProgressHide
+'	ProgressHide
 	If job.Success And job.Response.StatusCode = 200 Then
 		' Dim rxMsg As String = job.GetString
 		rxMsg = job.GetString
@@ -442,10 +490,13 @@ End Sub
 
 ' Initialize the locals etc.
 private Sub InitializeLocals
+	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
+	progressbox.Show("Getting your location.")
 	tmrDelayNewLocation.Initialize("tmrDelayNewLocation", DFT_DELAYNEWLOCATION)
+'	tmrLockDisplayUpdTimeout.Initialize("tmrLockDisplayUpdTimeout", DFT_LOCKDISPLAYUPD_TIMEOUT)
 	displayUpdateInProgress = False
 	locationDevice.Initialize(Me, "locationDevice")
-	progressbox.Initialize(Me, "progressbox",modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
+'	progressbox.Initialize(Me, "progressbox",modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 End Sub
 
 ' Is this form shown
@@ -457,15 +508,15 @@ private Sub IsVisible As Boolean
 #End If
 End Sub
 
-' Show the process box
-Private Sub ProgressHide
-	progressbox.Hide
-End Sub
+'' Show the process box
+'Private Sub ProgressHide
+'	progressbox.Hide
+'End Sub
 
-' Hide The process box.
-Private Sub ProgressShow(message As String)
-	progressbox.Show
-End Sub
+'' Hide The process box.
+'Private Sub ProgressShow(message As String)
+'	progressbox.Show(message)
+'End Sub
 
 ' Restart Display new location timer
 private Sub RestartDisplayNewLocationTimer
@@ -522,4 +573,5 @@ Private Sub ShowValidateCentreSelectionPage(centreDetails As clsEposWebCentreLoc
 End Sub
 
 #End Region  Local Subroutines
+
 

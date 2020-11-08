@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 6
-	' Date......: 04/11/20
+	' Release...: 6-
+	' Date......: 06/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -57,6 +57,15 @@ Version=10
 	' 
 	' Date......: 
 	' Release...: 
+	' Overview..: Issue: Confirm centre displays old image before it is overwritten.
+	'			  Added: Support for hot spot on progress circles.
+	' Amendee...: D Morris
+	' Details...: Mod: OnClose() clears out the old image.
+	'			  Issue #0521 Refresh icon touch area increased.
+	'             Added: Support for touch on progress circles.
+	' 
+	' Date......: 
+	' Release...: 
 	' Overview..: 
 	' Amendee...: 
 	' Details...: 
@@ -92,14 +101,16 @@ Sub Class_Globals
 	Private lblCentreNAme As Label								' Name of the Centre
 	Private lblClosed As Label									' Closed label
 	Private lblDescription As Label								' Description of Centre
-	Private lblInstructions As B4XView							'ignore Instructions about accepting the centre selection
-	Private lblSelectedCentreDetails As B4XView					'ignore Selected centre details
+	Private lblInstructions As B4XView							' ignore Instructions about accepting the centre selection
+	Private lblSelectedCentreDetails As B4XView					' ignore Selected centre details
+	Private pnlLoadingTouch As B4XView							' Clickable loading circles to show progress dialog.
 	
 	' misc objects
-	Private progressbox As clsProgressIndicator					' Progress box
+	Private progressbox As clsProgress							' Progress box
 	Private tmrConnectToCentreTimout As Timer					' Connect to centre timeout
 	Private selectCentreDetails As clsEposWebCentreLocationRec	' Storage for selected centre.
 		
+
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -172,6 +183,11 @@ private Sub lblMore_Click
 #End If
 End Sub
 
+' Click on the loading circle to show progress dialog.
+Sub pnlLoadingTouch_Click
+	progressbox.ShowDialog	
+End Sub
+
 #End Region  Event Handlers
 
 #Region  Public Subroutines
@@ -209,7 +225,7 @@ Public Sub MainValidateCentreSelection(centreDetails As clsEposWebCentreLocation
 	selectCentreDetails = centreDetails	' update local copy of Centre information
 	tmrConnectToCentreTimout.Enabled = False	' ensure timeout timer is stopped.
 '	lblSelectedCentreDetails.Text = "You have selected Centre:" & CRLF & selectCentreDetails.centreName & CRLF & "Postcode:" &selectCentreDetails.postCode
-	lblAddress.text = selectCentreDetails.postCode & ":" & selectCentreDetails.address 
+	lblAddress.text = selectCentreDetails.postCode & ": " & modEposApp.GetFirstLine(selectCentreDetails.address) 
 	lblCentreNAme.Text = selectCentreDetails.centreName
 	lblDescription.Text = selectCentreDetails.description
 	Dim img  As ImageView
@@ -218,6 +234,7 @@ Public Sub MainValidateCentreSelection(centreDetails As clsEposWebCentreLocation
 	Dim bt As Bitmap = img.Bitmap
 	Starter.myData.centre.pictureBitMap = bt
 	imgCentrePicture.SetBitmap(bt.Resize(imgCentrePicture.Width, imgCentrePicture.Height, True))
+	imgCentrePicture.Visible = True
 	If selectCentreDetails.centreOpen Then
 		btnSelect.mBase.Visible = True
 		lblClosed.Visible = False
@@ -229,9 +246,8 @@ End Sub
 
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
-	If progressbox.IsInitialized = True Then
-		ProgressHide		' Just in-case.
-	End If
+	imgCentrePicture.Visible = False	' Clear out old image for next time.
+	ProgressHide		' Just in-case.
 End Sub
 
 #End Region  Public Subroutines
@@ -272,13 +288,15 @@ End Sub
 ' Hide the process box
 Private Sub ProgressHide
 	ViewControl(True)
-	progressbox.Hide
+	If progressbox.IsInitialized Then
+		progressbox.Hide	
+	End If
 End Sub
 
 ' Show the process box.
 Private Sub ProgressShow(message As String)
 	ViewControl(False)
-	progressbox.Show
+	progressbox.Show(message)
 End Sub
 
 ' Invokes signon to centre operation - this sub invokes a series
