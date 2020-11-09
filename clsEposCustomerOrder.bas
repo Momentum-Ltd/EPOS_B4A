@@ -11,8 +11,8 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: clsEposCustomerOrder
-    ' Release...: 11-
-    ' Date......: 05/11/20
+    ' Release...: 12
+    ' Date......: 08/11/20
     '
     ' History
 	' Date......: 23/12/17
@@ -37,8 +37,8 @@ Version=7.3
 	'				Mod: XmlSerialize() supports centreId.
 	'			    Mod: old definitions allowDeliverToTable and disableCustomerMessage removed.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 12
 	' Overview..: Issue: 00542 Table number handling provided.
 	' Amendee...: D Morris
 	' Details...: Mod: Initialize() deliver to table now is the default.

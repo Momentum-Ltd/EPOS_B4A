@@ -10,7 +10,7 @@ Version=9.8
 #Region  Documentation
 	'
 	' Name......: clsServer
-	' Release...: 1-
+	' Release...: 2
 	' Date......: 27/06/20
 	'
 	' History

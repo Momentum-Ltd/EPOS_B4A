@@ -11,8 +11,8 @@ Version=7.3
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 86-
-	' Date......: 06/11/20
+	' Release...: 87
+	' Date......: 08/11/20
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -77,8 +77,8 @@ Version=7.3
 	' Amendee...: D Morris
 	' Details...: Mod: lNotifyMessage() code fixed.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 87
 	' Overview..: Issue: #0530 (revisited) Mixed up centre images.
 	'			  Issue #0512 Change the blue hyberlink text to white. 
 	' Amendee...: D Morris

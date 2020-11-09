@@ -11,7 +11,7 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: ModEposApp
-	' Release...: 26-
+	' Release...: 27
 	' Date......: 08/11/20
 	'
 	' History
@@ -49,8 +49,8 @@ Version=7.3
 	' Amendee...: D Morris.
 	' Details...: Added: CENTRE_DISTANCE_UNKNOWN, CENTRE_DISTANCE_NA.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 27
 	' Overview..: Support number string to int conversion.
 	' Amendee...: D Morris.
 	' Details...: Added: Val(), GetFirstLine().

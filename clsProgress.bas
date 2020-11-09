@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: clsProgress
-	' Release...: 1-
-	' Date......: 07/11/20
+	' Release...: 2
+	' Date......: 08/11/20
 	'
 	' History
 	' Date......: 06/08/20
@@ -20,8 +20,8 @@ Version=10
 	' Created by: D Morris 
 	' Details...: Based on clsProgressDialog_v4 and clsProgressIndicator_v1.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 2
 	' Overview..: Documentation changes.
 	' Amendee...: D Morris
 	' Details...: Mod: Documentation on about message improved.

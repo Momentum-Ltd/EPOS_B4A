@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 6-
-	' Date......: 06/11/20
+	' Release...: 7
+	' Date......: 08/11/20
 	'
 	' History
 	' Date......: 08/08/20
@@ -54,8 +54,8 @@ Version=10
 	' Amendee...: D Morris.
 	' Details...: Mod: (for iOS) - timer to update the order status list periodically.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 7
 	' Overview..:  Issue #0499 Fix progress circles truncation. 
 	'				Issue: #0544 Slow screen rebuild after refresh.
 	' Amendee...: D Morris

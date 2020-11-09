@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 20-
-	' Date......: 05/11/20
+	' Release...: 21
+	' Date......: 08/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -50,8 +50,8 @@ Version=9.5
 	'			     : ClearOrder() code added to handle order button.
 	'				 : Removed the p and l from start of names.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 21
 	' Overview..:   Issue: #0541 Screen flashing when keyboard shown. 
 	'				Issue: #0547 Sticky table number.
 	' Amendee...: D Morris

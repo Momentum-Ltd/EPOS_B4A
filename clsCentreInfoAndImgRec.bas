@@ -11,12 +11,12 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: clsCentreInfoAndImgRec
-	' Release...: -
-	' Date......: 06/11/20
+	' Release...: 1
+	' Date......: 08/11/20
 	'
 	' History
-	' Date......: 06/11/20
-	' Release...: -
+	' Date......: 08/11/20
+	' Release...: 1
 	' Created by: D Morris
 	' Details...: First release to support version tracking
 	'

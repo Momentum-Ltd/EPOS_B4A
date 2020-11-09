@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 6-
-	' Date......: 06/11/20
+	' Release...: 7
+	' Date......: 08/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -57,8 +57,8 @@ Version=10
 	'             Removed: lblMore_Click().
 	'			  Mod: LocationDeviceOFF() is now private.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 7
 	' Overview..: Issue: #0544 Slow screen rebuild after refresh.
 	' Amendee...: D Morris
 	' Details...: Mod: DisplayOnListview() code changed to split processing and rendering code.

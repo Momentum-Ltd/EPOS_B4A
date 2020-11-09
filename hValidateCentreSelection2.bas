@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 6-
-	' Date......: 06/11/20
+	' Release...: 7
+	' Date......: 08/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -55,8 +55,8 @@ Version=10
 	'				    IStartSignOnToCentre() renamed to StartSignOnToCentre().
 	'					lWebSignedOntoCentre() renamed to WebSignedOntoCentre().
 	' 
-	' Date......: 
-	' Release...: 
+	' Date......: 08/11/20
+	' Release...: 7
 	' Overview..: Issue: Confirm centre displays old image before it is overwritten.
 	'			  Added: Support for hot spot on progress circles.
 	' Amendee...: D Morris

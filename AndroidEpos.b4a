@@ -147,33 +147,32 @@ Module72=hPlaceOrder
 Module73=hQueryNewInstall
 Module74=hSelectItem
 Module75=hSelectPlayCentre3
-Module76=hSelectPlayCentre3_OLD
-Module77=hSyncDatabase
-Module78=hValidateCentreSelection2
-Module79=hValidateDevice
+Module76=hSyncDatabase
+Module77=hValidateCentreSelection2
+Module78=hValidateDevice
+Module79=modConvert
 Module8=ChangeAccountInfo
-Module80=modConvert
-Module81=modEposApp
-Module82=modEposWeb
-Module83=NB6
-Module84=QueryNewInstall
-Module85=srvNotification
-Module86=srvPhoneTotal
-Module87=Starter
-Module88=svcTestSequence
-Module89=TemplateActivity
+Module80=modEposApp
+Module81=modEposWeb
+Module82=NB6
+Module83=QueryNewInstall
+Module84=srvNotification
+Module85=srvPhoneTotal
+Module86=Starter
+Module87=svcTestSequence
+Module88=TemplateActivity
+Module89=TemplateClass
 Module9=ChangeSettings
-Module90=TemplateClass
-Module91=TemplateCode
-Module92=TemplateService
-Module93=TemplateXactivity
-Module94=TemplateXhelper
-Module95=TestStartAt
-Module96=ValidateCentreSelection2
-Module97=ValidateDevice
+Module90=TemplateCode
+Module91=TemplateService
+Module92=TemplateXactivity
+Module93=TemplateXhelper
+Module94=TestStartAt
+Module95=ValidateCentreSelection2
+Module96=ValidateDevice
 NumberOfFiles=24
 NumberOfLibraries=24
-NumberOfModules=97
+NumberOfModules=96
 Version=10.2
 @EndOfDesignText@
 
@@ -183,8 +182,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 183-                                                                                                                                                                         
-	' Date......: 06/11/20
+	' Release...: 184                                                                                                                                                                         
+	' Date......: 09/11/20
 	'
 	' History
 	'
@@ -276,8 +275,8 @@ Version=10.2
 	' Amendee...: D Morris.
 	' Details...: Mod: hValidateCentreSelection2_v6, hPlaceOrder_v20, aPlaceOrder_v9.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 09/11/20
+	' Release...: 184
 	' Overview..: Issue: #0512 Change the blue hyberlink text to white.
 	'			  Issue: #0517 Centre validation now only shows first line of address. 
 	'		      Issue: #0541 Screen flashing when keyboard shown.
@@ -287,7 +286,7 @@ Version=10.2
 	'			  Bugfix: #0547 Sticky table number.
 	' Amendee...: D Morris
 	' Details...:   New: clsCentreInfoAndImgRec_v1.
-	'				Mod: Starter_v87,  hPlaceOrder_v21, ModEposApp_v27, clsEposCustomerOrder_v12, hHome_v7, hSelectPlayCentre3_v7,
+	'				Mod: Starter_v87,  hPlaceOrder_v21, modEposApp_v27, clsEposCustomerOrder_v12, hHome_v7, hSelectPlayCentre3_v7,
 	'			    Mod: hValidateCentreSelection2_v7, clsProgress_v2.
 	'             forms: frmValidateCentreSelection3_v4, frmAbout_v2, frmASelectPlayCentre3_v3, frmChangeAccountInfo_v4, frmHome_v3,
 	'						frmValidateDevice_v6.
@@ -305,8 +304,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 183
-	#VersionName: 1.0.0.183-
+	#VersionCode: 184
+	#VersionName: 1.0.0.184
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
