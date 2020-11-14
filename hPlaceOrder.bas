@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 21
-	' Date......: 08/11/20
+	' Release...: 22
+	' Date......: 14/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -60,6 +60,13 @@ Version=9.5
 	'			  Mod: ProcessTableNumer() now handles table number collect selected. 
 	'			  Mod: HandleMessageButton() and HandleOrderButton() now check for order collection.
 	'			  Mod: txtTableNumber_TextChanged() handles collection option.
+	'
+	' Date......: 14/11/20
+	' Release...: 22
+	' Overview..: Bugfix: Screen flashing.
+	' Amendee...: D Morris
+	' Details...: Mod: HandleOrderResponse()
+	' 			  Mod: HandleOrderAcknResponse() Description changed.
 	'
 	' Date......: 
 	' Release...: 
@@ -357,7 +364,7 @@ Private Sub ExitToCentreHomePage()
 #End If	
 End Sub
 
-' Handles the Order Acknowledgement response from the Server by displaying a messagebox with relevant text.
+' Handles the Order Acknowledgement response from the Server and takes appropriate action.
 Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 	ProgressHide ' Always hide the progress dialog
 #if B4A
@@ -410,9 +417,11 @@ Public Sub HandleOrderResponse(orderResponseStr As String)
 			Dim msg As String = "Your order with" & CRLF & _
 								"Centre:" & Starter.myData.centre.name & CRLF & _
 								"Has been successfully verified." & CRLF & _
-								 "Please press 'Proceed' to confirm your order."		
+								 "Please press 'Proceed' to confirm your order."	
+								 	
 			xui.Msgbox2Async(msg, "Order Verified", "Proceed", "Cancel", "", Null)
 			Wait For MsgBox_Result(Result As Int)
+
 			If Result = xui.DialogResponse_Positive Then
 				ProgressShow("Processing your selection...")
 				Dim localOrderObj As clsOrderTableRec : localOrderObj.Initialize
@@ -769,9 +778,9 @@ Private Sub ShowOrderList
 	lvwOrderItems.ScrollToItem(i - 1)
 #else
 	Sleep(0)	' (for iOS this fixes the problem of vanishing "+ Press here to add an item" when anchors used.
-	If i > 1 Then ' Don't work like B4A it does help to improve (need to ask the Community). 
-		lvwOrderItems.ScrollToItem(i - 1)	' TODO B4I problems don't work like the B4A version.
-	End If
+'	If i > 1 Then ' Don't work like B4A it does help to improve (need to ask the Community). 
+'		lvwOrderItems.ScrollToItem(i - 1)	' TODO B4I problems don't work like the B4A version.
+'	End If
 #end if
 
 '#End If

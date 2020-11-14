@@ -141,6 +141,7 @@ Public Sub Load As Boolean
 		loadOk = SaveDefault
 	End If
 '	Log("IMPORTANT - A fixed is required here!")
+'	pictureBitMap = xui.LoadBitmap(File.DirAssets, "ImageNotAvailableSmall.png") ' Removed crashes iOS device!
 	pictureBitMap = LoadBitmap(File.DirAssets, "ImageNotAvailableSmall.png")
 	Return loadOk
 End Sub

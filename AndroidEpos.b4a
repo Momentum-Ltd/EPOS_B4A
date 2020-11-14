@@ -73,7 +73,7 @@ Library6=phone
 Library7=javaobject
 Library8=contentresolver
 Library9=mlwifi
-ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
 Module1=About
 Module10=CheckAccountStatus
 Module11=clsCentreInfo
@@ -182,8 +182,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 184                                                                                                                                                                         
-	' Date......: 09/11/20
+	' Release...: 185                                                                                                                                                                        
+	' Date......: 14/11/20
 	'
 	' History
 	'
@@ -201,71 +201,7 @@ Version=10.2
 	' For releases v145 - 151 see release v153
 	' for releases v152 - 162 see release v163
 	' for releases v163 - 173 see release v177.
-	'
-	' Date......: 16/09/20
-	' Release...: 174
-	' Overview..: Bugfix: 0497 (Android)  - Problem with centre's web url. 
-	' Amendee...: D Morris
-	' Details...: Mod: hValidateCentreSelection2_v4, Starter_v83.
-	'					NOTE: This version will not run in debug - See https://www.b4x.com/android/forum/threads/debug-problem-java-lang-runtimeexception-unable-to-create-service.122368/#post-764749
-	'
-	' Date......: 16/09/20
-	' Release...: 175 
-	' Overview..: Investigation in unable to run in debug (see release 1.0.0.174).
-	'			  Bugfix: #0498 - Not displaying correct centre after switching (not fixed see below).
-	' Amendee...: D Morris
-	' Details...:  Support for INCLUDE_SOCKET_CODE - see Starter.
-	'					Mod: Starter.v84 
-	'			   Bugfix: #0498 - has been compiled with B4A V10.2.
-	'			   Note: Worked with locally loaded code but would not work when code installed from Google Play Store. 
-	'		
-	' Date......: 28/09/20
-	' Release...: 176
-	' Overview..: Bugfix: #0498 - Not displaying correct centre after switching (Second attempt to fix).
-	' Amendee...: D Morris
-	' Details...: Mod: aHome_v2. hHome_v3.
-	'		
-	' Date......: 02/10/20
-	' Release...: 177
-	' Overview..: Bugfix: #0500 - Validate Centre screen not showing picture after communication timeout.
-	'			     Mod: Support for Centre Web site with full URL.
-	' Amendee...: D Morris
-	' Details...: Mod: hValidateCentreSelection2_v5, Starter_v85, hHome_v3, hSelectPlayCentre3_v4, ValidateCentreSelection2_v3.
-	'		
-	' Date......: 05/10/20
-	' Release...: 178
-	' Overview..: Add: #0349 - Support for test centres.
-	' Amendee...: D Morris.
-	' Details...: New: frmChangeSettings2_v1, hChangeSettings2_v1.
-	'			  Mod: clsConfigSettings_v18, ChangeSettings_v15, modEposWeb_v11, clsEposWebCentreLocationRec_v4, ModConvert_v14.
-	'             Mod: Manifest updated to support non-https communications (don't appear to work).
-	'		
-	' Date......: 09/10/20
-	' Release...: 179
-	' Overview..: Bugfix: #0514 - Not displaying text part of messages.
-	'			  Bugfix: #0515 - Exception thrown if invalid card information entered.
-	' Amendee...: D Morris
-	' Details...:  Mod: Starter_v86, hCardEntry_v16.
-	'		
-	' Date......: 09/10/20
-	' Release...: 180
-	' Overview..: As version 179 with SDK v29.
-	' Amendee...: D Morris
-	' Details...: Mod: Manifest - targetSdkVersion="29".
-	'		
-	' Date......: 15/10/20
-	' Release...: 181
-	' Overview..: Bugfix: #0519 - Now periodically updates the Centre list.
-	'			  Bugfix: #0523 - Showing "Order #0" on manually entered orders.
-	' Amendee...: D Morris
-	' Details...: Mod:aSelectPlayCentre3_v2.
-	'		
-	' Date......: 03/11/20
-	' Release...: 182
-	' Overview..: Bugfix: Server #2 unable to communication.
-	'			     Mod: Now uses new clsLocation to handle location.
-	' Amendee...: D Morris.
-	' Details...: mod: hHome_v6, modEposWeb_v12, aSelectPlayCentre3_v3, hSelectPlayCentre3_v6, clsLocation_v3.
+	' for releases v174 - 182 see release v183.
 	'		
 	' Date......: 04/11/20
 	' Release...: 183
@@ -291,6 +227,20 @@ Version=10.2
 	'             forms: frmValidateCentreSelection3_v4, frmAbout_v2, frmASelectPlayCentre3_v3, frmChangeAccountInfo_v4, frmHome_v3,
 	'						frmValidateDevice_v6.
 	'		
+	' Date......: 14/11/20
+	' Release...: 185
+	' Overview..: Bugfix #0551 (Android tablets) Select centre screen unable to select the menu option.
+	'			  Bugfix #0552 (Android – tablets) Select centre screen – Distance not in correct position.
+	'			  Issue #0554 (Android – tablets) Select centre screen – panel height is small.
+	'			  Issue #0555 (Android – tablets) Home screen progress circles overflow.
+	'             Bugfix: (Andriod - tablets) Create new account button off screen.
+	' 			  Mods: Progress circles moved to top of Create Account and Validate Device pages.
+	'             Bugfix: Flashing between Home and Place orders screen. 
+	' Amendee...: D Morris
+	' Details...: Mod: aSelectPlayCentre3_V4, hSelectPlayCentre3_v8.
+	'			  Forms: frmHome_v4, frmQueryNewInstall_v6, frmCheckAccountStatus_v6, frmCreateAccount_v6, frmValidateDevice_v7.
+	'			  Mod: aPlaceOrder_v10, hPlaceOrder_v22, Starter_v88
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -304,8 +254,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 184
-	#VersionName: 1.0.0.184
+	#VersionCode: 185
+	#VersionName: 1.0.0.185
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
