@@ -182,8 +182,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 185                                                                                                                                                                        
-	' Date......: 14/11/20
+	' Release...: 186                                                                                                                                                                       
+	' Date......: 16/11/20
 	'
 	' History
 	'
@@ -230,16 +230,25 @@ Version=10.2
 	' Date......: 14/11/20
 	' Release...: 185
 	' Overview..: Bugfix #0551 (Android tablets) Select centre screen unable to select the menu option.
-	'			  Bugfix #0552 (Android – tablets) Select centre screen – Distance not in correct position.
-	'			  Issue #0554 (Android – tablets) Select centre screen – panel height is small.
-	'			  Issue #0555 (Android – tablets) Home screen progress circles overflow.
+	'			  Bugfix #0552 (Android tablets) Select centre screen – Distance not in correct position.
+	'			  Issue #0554 (Android tablets) Select centre screen – panel height is small.
+	'			  Issue #0555 (Android tablets) Home screen progress circles overflow.
 	'             Bugfix: (Andriod - tablets) Create new account button off screen.
 	' 			  Mods: Progress circles moved to top of Create Account and Validate Device pages.
-	'             Bugfix: Flashing between Home and Place orders screen. 
+	'             Bugfix: #0556 Flashing between Home and Place orders screen. 
 	' Amendee...: D Morris
 	' Details...: Mod: aSelectPlayCentre3_V4, hSelectPlayCentre3_v8.
 	'			  Forms: frmHome_v4, frmQueryNewInstall_v6, frmCheckAccountStatus_v6, frmCreateAccount_v6, frmValidateDevice_v7.
 	'			  Mod: aPlaceOrder_v10, hPlaceOrder_v22, Starter_v88
+	'		
+	' Date......: 16/11/20
+	' Release...: 186
+	' Overview..: Bugfix: #0535 Display order information - status and position incorrect.
+	'			   Issue: #0557 iOS Place Order item list fills from bottom.
+	'              Issue: #0553 Android Tablet Home screen order list too small.
+	'			  Bugfix: #0535 Order information (Status and queue position incorrect). 
+	' Amendee...: D Morris
+	' Details...: Mod: hPlaceOrder_v23, hHome_v8, frmHome_v5.
 	'		
 	' Date......: 
 	' Release...: 
@@ -254,8 +263,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 185
-	#VersionName: 1.0.0.185
+	#VersionCode: 186
+	#VersionName: 1.0.0.186
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

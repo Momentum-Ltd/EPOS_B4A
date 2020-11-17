@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 22
-	' Date......: 14/11/20
+	' Release...: 23
+	' Date......: 16/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -68,6 +68,12 @@ Version=9.5
 	' Details...: Mod: HandleOrderResponse()
 	' 			  Mod: HandleOrderAcknResponse() Description changed.
 	'
+	' Date......: 16/11/20
+	' Release...: 23
+	' Overview..: Issue: #0557 iOS Place Order item list fills from bottom.
+	' Amendee...: D Morris.
+	' Details...: Mod: ShowOrderList() modified.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -94,28 +100,21 @@ Sub Class_Globals
 	Private btnMessage As SwiftButton	 		' The button which allows the user to add/edit the order message.
 	Private btnOrder As SwiftButton		 		' The button which submits the order to the Server.
 	Private lblOrderTotal As B4XView 			' The label which displays the total price of the order.
-	
+	Private lvwOrderItems As CustomListView		' The listview which contains all the items current on the order.	
+	Private pnlHideOrder As B4XView				' Panel to hide order details.
+	Private txtTableNumber As B4XView 			' The text field used to enter the customer's table number.	
 #if B4A
-	Private lvwOrderItems As CustomListView		' The listview which contains all the items current on the order.
+	Private optCollect As B4XView 				' The radiobutton which signifies the order should be collected by the customer when ready.
+	Private optTable As B4XView 				' The radiobutton which signifies the order will be delivered to the customer's table when ready.	
 #else ' B4I
 	Private btnHideKeyboard As Button			' Button to used to Submit the table number.
-	Private lvwOrderItems As CustomListView 	' The listview which contains all the items current on the order.
 	Private swcCollectDeliver As Switch 		' The swtich used to control whether the order will be collected or delivered.
 	Private lblCollectCaption As Label 			' The label used as a caption for the 'Collect from counter' delivery option.
 	Private lblDeliverCaption As Label 			' The label used as a caption for the 'Deliver to table' delivery option.
 	Private lblTableNumberCaption As Label 		' label used as a caption for table number entry.
+	Private txtMessage As TextView 				' The multiline text view displayed on the text input dialog, used for the order message.	
 #End If
-#if B4A
-	Private optCollect As B4XView 				' The radiobutton which signifies the order should be collected by the customer when ready.
-	Private optTable As B4XView 				' The radiobutton which signifies the order will be delivered to the customer's table when ready.
-#end if
 
-	Private pnlHideOrder As B4XView				' Panel to hide order details.
-	Private txtTableNumber As B4XView 			' The text field used to enter the customer's table number.
-#if B4I
-	Private txtMessage As TextView 				' The multiline text view displayed on the text input dialog, used for the order message.
-#End If
-	
 	' Misc objects
 	Private progressbox As clsProgressDialog	' Progress box
 #if B4A
@@ -139,7 +138,6 @@ End Sub
 #End Region  Mandatory Subroutines & Data
 
 #Region  Event Handlers
-
 
 #if B4I
 ' Added to support done button on numerical keyboard.
@@ -768,9 +766,9 @@ Private Sub ShowOrderList
 		i = i + 1
 	Next
 	If Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
-		lvwOrderItems.AddTextItem("+ Press here to add an item", i)	
+		lvwOrderItems.AddTextItem("+ Press here to add an item" & CRLF , i) ' Note: The CRLF is necessary for list to scroll when required. 	
 	Else
-		lvwOrderItems.AddTextItem("+ Enter table number", i)	
+		lvwOrderItems.AddTextItem("+ Enter table number" & CRLF, i)	
 	End If
 #if B4A
 	' https://www.b4x.com/android/forum/threads/customlistview-scrolltoitem-problem.90996/
@@ -778,12 +776,11 @@ Private Sub ShowOrderList
 	lvwOrderItems.ScrollToItem(i - 1)
 #else
 	Sleep(0)	' (for iOS this fixes the problem of vanishing "+ Press here to add an item" when anchors used.
-'	If i > 1 Then ' Don't work like B4A it does help to improve (need to ask the Community). 
-'		lvwOrderItems.ScrollToItem(i - 1)	' TODO B4I problems don't work like the B4A version.
-'	End If
+	Dim bottomItem As Int = lvwOrderItems.LastVisibleIndex
+	If bottomItem < (i - 1) Then ' Make iOS list view operate as Android (See not about CRLF above) 
+		lvwOrderItems.ScrollToItem(i - 1)
+	End If
 #end if
-
-'#End If
 	lblOrderTotal.Text = "Order Total: £" & modEposApp.FormatCurrency(orderTotal)
 	mLocalOrderTotal = orderTotal
 End Sub

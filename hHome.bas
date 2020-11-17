@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 7
-	' Date......: 08/11/20
+	' Release...: 8
+	' Date......: 16/11/20
 	'
 	' History
 	' Date......: 08/08/20
@@ -63,6 +63,18 @@ Version=10
 	'			  Issue #0521 Refresh icon touch area increased.
 	'             Mod: pnlShowDialog rename to pnlLoadingTouch.
 	'			
+	' Date......: 16/11/20
+	' Release...: 8
+	' Overview..: ListViews changed to CustomListViews.
+	'             Bugfix: #0535 Display order information - status and position incorrect.
+	'			   Issue: #0553 Android Tablet Home screen order list too small.
+	'			  Bugfix: #0535 Order information (Status and queue position incorrect). 
+	' Overview..: ListViews changed to CustomListViews.
+	' Amendee...: D Morris
+	' Details...:  Mode: B4A ListView changed to CustomListView (and associated code).
+	'				Mod: B4A Order list backgroud change to grey (as the iOS).
+	'             Bugfix: (#0535) - pHandleOrderInfo() status and position removed. And report reworded.
+	'			
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -96,11 +108,12 @@ Sub Class_Globals
 	Private lblBackButton As B4XView					' Back button
 	Private lblCentreName As B4XView					' Centre name	
 	Private lblShowOrder As Label						' Instruction to show order information.
-#if B4A
-	Private lvwOrderSummary As ListView 				' The listview which displays all the customer's orders.
-#else ' B4I
-	Private lvwOrderSummary As usrListView 
-#End If
+	Private pnlHeader As B4XView	
+'#if B4A
+	Private lvwOrderSummary As CustomListView			' The listview which displays all the customer's orders.
+'#else ' B4I
+'	Private lvwOrderSummary As usrListView 
+'#End If
 	Private pnlLoadingTouch As B4XView					' Clickable show loading circle display progress dialog.
 	
 	' Misc objects
@@ -182,11 +195,11 @@ Sub pnlRefreshTouch_Click
 End Sub
 
 ' Handles Show more order information i.e. clicking on an order summary list.
-#if B4A
+'#if B4A
 Private Sub lvwOrderSummary_ItemClick(Position As Int, Value As Object)
-#else ' B4I
-Private Sub lvwOrderSummary_ItemClick(Value As Object, Index As Int)
-#End If
+'#else ' B4I
+'Private Sub lvwOrderSummary_ItemClick(Value As Object, Index As Int)
+'#End If
 	If enableViews = True Then
 		Dim statusObj As clsEposOrderStatus = Value
 		If statusObj.status <> modConvert.statusUnknown And statusObj.orderId <> 0 Then			
@@ -244,22 +257,22 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 	If orderInfoObj.orderId = mPressedOrderStatus.orderId Then ' Only proceed if the recieved info is for the correct order
 		If orderInfoObj.itemList.Size <> 0 Then ' XML string was deserialised OK
 			title = "Order " & orderInfoObj.orderId & " Details"
-			Dim timestampStr As String = "Order started at " & orderInfoObj.orderStarted
+			Dim timestampStr As String = "Order placed at " & orderInfoObj.orderStarted
 			If orderInfoObj.orderStarted = "00:00:00" Then
-				timestampStr = "Not started (payment required)"
+				timestampStr = "Payment required!"
 			End If
-			Dim queueStr As String = " (" & modConvert.ConvertNumberToOrdinalString(mPressedOrderStatus.queuePosition) & ")"
-			If mPressedOrderStatus.queuePosition < 1 Then
-				queueStr = ""
-			End If
+'			Dim queueStr As String = " (" & modConvert.ConvertNumberToOrdinalString(mPressedOrderStatus.queuePosition) & ")"
+'			If mPressedOrderStatus.queuePosition < 1 Then
+'				queueStr = ""
+'			End If
 			Dim deliveryTypeStr As String = "Will be delivered to table " & orderInfoObj.tableNumber & "."
 			If orderInfoObj.deliverToTable = False Then 
 				deliveryTypeStr = "To be collected when ready."
 			End If
-			msg = timestampStr & "." & CRLF & "Status: " & _
-					modConvert.ConvertStatusToUserString(mPressedOrderStatus.status, mPressedOrderStatus.deliverToTable) & _
-					queueStr & "." & CRLF & deliveryTypeStr & CRLF & CRLF & "Items in this order:"
-			
+'			msg = timestampStr & "." & CRLF & "Status: " & _
+'					modConvert.ConvertStatusToUserString(mPressedOrderStatus.status, mPressedOrderStatus.deliverToTable) & _
+'					queueStr & "." & CRLF & deliveryTypeStr & CRLF & CRLF & "Items in this order:"
+			msg = timestampStr & CRLF & deliveryTypeStr & CRLF & CRLF & "Items in this order:"
 			For Each item As clsCustomerOrderItemRec In orderInfoObj.itemList
 				Dim sizePriceObj As clsSizePriceTableRec = Starter.DataBase.GetSizePriceRec(item.priceId)
 				Dim itemName As String = Starter.DataBase.GetGroupAndDescriptionName(sizePriceObj.goodsId)
@@ -273,9 +286,9 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 			If orderInfoObj.paid Then
 				orderPaidStr = "This order has been paid for."
 			End If
-			Dim orderMessage As String = CRLF & CRLF & "Your order message: " & orderInfoObj.orderMessage
-			If orderInfoObj.orderMessage.Trim = "" Then
-				orderMessage = ""
+			Dim orderMessage As String = ""
+			If orderInfoObj.orderMessage.Trim <> "" Then
+				orderMessage =  CRLF & CRLF & "Your order message: " & orderInfoObj.orderMessage
 			End If
 			msg = msg & CRLF & CRLF & "Order total: £" & modEposApp.FormatCurrency(totalCost) & _ 
 							CRLF & orderPaidStr & orderMessage
@@ -344,25 +357,28 @@ Public Sub pHandleOrderStatusList(orderStatusStr As String)
 					lAddOrderEntryToListview(order)
 				Next
 				If orderListObj.overflowFlag Then ' Order list overflowed?
-#if B4A
-					lvwOrderSummary.AddSingleLine2("More orders....", invalidItem)
-#else ' B4I
-					lvwOrderSummary.AddItem("More orders....", "", invalidItem)
-#End If
+'#if B4A
+''					lvwOrderSummary.AddSingleLine2("More orders....", invalidItem)
+					lvwOrderSummary.AddTextItem("More orders....", invalidItem)
+'#else ' B4I
+'					lvwOrderSummary.AddItem("More orders....", "", invalidItem)
+'#End If
 				End If
 			Else ' No orders found in order list
-#if B4A
-				lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
-#else ' B4I
-				lvwOrderSummary.AddItem("No active orders found", "", invalidItem)
-#End If
+'#if B4A
+'			'	lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
+				lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
+'#else ' B4I
+'				lvwOrderSummary.AddItem("No active orders found", "", invalidItem)
+'#End If
 			End If
 		Else ' XML failed to deserialise properly
-#if B4A
-			lvwOrderSummary.AddTwoLines2("Error reading order list", "Please retry", invalidItem)
-#else ' B4I
-			lvwOrderSummary.AddItem("Error reading order list", "Please retry", invalidItem)
-#End If
+'#if B4A
+'			' lvwOrderSummary.AddTwoLines2("Error reading order list", "Please retry", invalidItem)
+			lvwOrderSummary.AddTextItem("Error reading order list" & CRLF & "Please retry", invalidItem)
+'#else ' B4I
+'			lvwOrderSummary.AddItem("Error reading order list", "Please retry", invalidItem)
+'#End If
 		End If		
 		displayUpdateInProgress = False
 	End If
@@ -442,17 +458,18 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 	If Not(displayUpdateInProgress) Then
 		displayUpdateInProgress = True
 		' Assemble a list containing all of the items' info, and detect if the whole list needs to be refreshed
-#if B4A
+'#if B4A
 		For itemIndex = 0 To (lvwOrderSummary.Size - 1)
-#else ' B4I
-		For itemIndex = 0 To (lvwOrderSummary.Count - 1)
-#End If
+'#else ' B4I
+'		For itemIndex = 0 To (lvwOrderSummary.Count - 1)
+'#End If
 			' Detect multiple orders in the list which have the 'waiting' status.
-#if B4A
-			Dim listviewStatus As  clsEposOrderStatus = lvwOrderSummary.GetItem(itemIndex)
-#else ' B4I
-			Dim listviewStatus As clsEposOrderStatus = lvwOrderSummary.GetItemAtIndex(itemIndex)
-#End If	
+'#if B4A
+'			' Dim listviewStatus As  clsEposOrderStatus = lvwOrderSummary.GetItem(itemIndex)
+			Dim listviewStatus As  clsEposOrderStatus = lvwOrderSummary.GetValue(itemIndex)
+'#else ' B4I
+'			Dim listviewStatus As clsEposOrderStatus = lvwOrderSummary.GetItemAtIndex(itemIndex)
+'#End If	
 			' Update and add the item to the list as necessary
 			If listviewStatus.orderId = statusObj.orderId Then
 				listviewStatus = statusObj
@@ -474,11 +491,12 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 		Else ' No orders left in order list
 			Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
 			invalidItem.status = modConvert.statusUnknown
-#if B4A
-			lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
-#else ' B4I
-			lvwOrderSummary.AddItem("No active orders found", "", invalidItem)
-#End If
+'#if B4A
+'			'lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
+			lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
+'#else ' B4I
+'			lvwOrderSummary.AddItem("No active orders found", "", invalidItem)
+'#End If
 		End If
 		displayUpdateInProgress = False
 	End If
@@ -506,11 +524,12 @@ Private Sub lAddOrderEntryToListview(statusObj As clsEposOrderStatus)
 		queueStr = ""
 	End If
 	Dim bottomStr As String = "Status: " & statusStr & queueStr
-#if B4A
-	lvwOrderSummary.AddTwoLines2(topStr, bottomStr, statusObj)
-#else ' B4I
-	lvwOrderSummary.AddItem(topStr, bottomStr, statusObj)
-#End If
+'#if B4A
+''	lvwOrderSummary.AddTwoLines2(topStr, bottomStr, statusObj)
+	lvwOrderSummary.AddTextItem(topStr & CRLF & bottomStr, statusObj)
+'#else ' B4I
+'	lvwOrderSummary.AddItem(topStr, bottomStr, statusObj)
+'#End If
 End Sub
 
 ' Checks if connected to centre.
@@ -555,12 +574,12 @@ private Sub InitializeLocals
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 #if B4A
 	' DH: The HACK below ensures the listview always displays black text
-	lvwOrderSummary.SingleLineLayout.Label.TextColor = Colors.Black
-	lvwOrderSummary.SingleLineLayout.Label.TextSize = 16
-	lvwOrderSummary.TwoLinesLayout.Label.TextColor = Colors.Black
-	lvwOrderSummary.TwoLinesLayout.Label.TextSize = 14
-	lvwOrderSummary.TwoLinesLayout.SecondLabel.TextColor = Colors.Black
-	lvwOrderSummary.TwoLinesLayout.SecondLabel.TextSize = 14
+'	lvwOrderSummary.SingleLineLayout.Label.TextColor = Colors.Black
+'	lvwOrderSummary.SingleLineLayout.Label.TextSize = 16
+'	lvwOrderSummary.TwoLinesLayout.Label.TextColor = Colors.Black
+'	lvwOrderSummary.TwoLinesLayout.Label.TextSize = 14
+'	lvwOrderSummary.TwoLinesLayout.SecondLabel.TextColor = Colors.Black
+'	lvwOrderSummary.TwoLinesLayout.SecondLabel.TextSize = 14
 	' End HACK
 #End If
 	notification.Initialize
@@ -568,6 +587,9 @@ private Sub InitializeLocals
 	tmrUpdateOrderStatus.Initialize("tmrUpdateOrderStatus", DFT_UPDATE_ORDERSTATUS)
 	tmrUpdateOrderStatus.Enabled = True
 #End If
+	Dim bt As Bitmap = imgSuperorder.GetBitmap
+	imgSuperorder.SetBitmap(bt.Resize(imgSuperorder.Width, imgSuperorder.Height, True))
+	imgSuperorder.Top = (pnlHeader.Height - imgSuperorder.Height) / 2   ' Centre SuperOrder vertically.
 End Sub
 
 ' Checks if a centre is open
