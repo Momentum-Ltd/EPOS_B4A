@@ -84,95 +84,96 @@ Module15=clsCustomerBill
 Module16=clsCustomerInfo
 Module17=clsCustomerOrderItemRec
 Module18=clsDataBaseTables
-Module19=clsDescriptionTableRec
+Module19=clsDatehandler
 Module2=aCardEntry
-Module20=clsDeviceInfo
-Module21=clsEposApiHelper
-Module22=clsEposBalanceCheckRec
-Module23=clsEposCustomerBillByItem
-Module24=clsEposCustomerDetails
-Module25=clsEposCustomerInfo
-Module26=clsEposCustomerOrder
-Module27=clsEposCustomerOrderResponse
-Module28=clsEposCustomerPayment
-Module29=clsEposLocationRec
+Module20=clsDescriptionTableRec
+Module21=clsDeviceInfo
+Module22=clsEposApiHelper
+Module23=clsEposBalanceCheckRec
+Module24=clsEposCustomerBillByItem
+Module25=clsEposCustomerDetails
+Module26=clsEposCustomerInfo
+Module27=clsEposCustomerOrder
+Module28=clsEposCustomerOrderResponse
+Module29=clsEposCustomerPayment
 Module3=aHome
-Module30=clsEposMessageRec
-Module31=clsEposOrderInfo
-Module32=clsEposOrderStatus
-Module33=clsEposOrderStatusList
-Module34=clsEposWebCentreLocationRec
-Module35=clsEposWebCommsMessageRec
-Module36=clsEposWebCustomerRec
-Module37=clsEposWebLocationCoordinates
-Module38=clsGoodsTableRec
-Module39=clsGroupCategoryTableRec
+Module30=clsEposLocationRec
+Module31=clsEposMessageRec
+Module32=clsEposOrderInfo
+Module33=clsEposOrderStatus
+Module34=clsEposOrderStatusList
+Module35=clsEposWebCentreLocationRec
+Module36=clsEposWebCommsMessageRec
+Module37=clsEposWebCustomerRec
+Module38=clsEposWebLocationCoordinates
+Module39=clsGoodsTableRec
 Module4=aPlaceOrder
-Module40=clsLocation
-Module41=clsMainCategoryTableRec
-Module42=clsMyData
-Module43=clsNotifications
-Module44=clsOrderPaymentRec
-Module45=clsOrderStartResponse
-Module46=clsOrderStatusRec
-Module47=clsOrderSummary
-Module48=clsOrderSummaryRec
-Module49=clsOrderTableRec
+Module40=clsGroupCategoryTableRec
+Module41=clsLocation
+Module42=clsMainCategoryTableRec
+Module43=clsMyData
+Module44=clsNotifications
+Module45=clsOrderPaymentRec
+Module46=clsOrderStartResponse
+Module47=clsOrderStatusRec
+Module48=clsOrderSummary
+Module49=clsOrderSummaryRec
 Module5=aSelectItem
-Module50=clsPreparationTableRec
-Module51=clsProgress
-Module52=clsProgressDialog
-Module53=clsProgressIndicator
-Module54=clsReportErrors
-Module55=clsServer
-Module56=clsSizeOptionTableRec
-Module57=clsSizePriceTableRec
-Module58=clsStripe
-Module59=clsStripeCardRec
+Module50=clsOrderTableRec
+Module51=clsPreparationTableRec
+Module52=clsProgress
+Module53=clsProgressDialog
+Module54=clsProgressIndicator
+Module55=clsReportErrors
+Module56=clsServer
+Module57=clsSizeOptionTableRec
+Module58=clsSizePriceTableRec
+Module59=clsStripe
 Module6=aSelectPlayCentre3
-Module60=clsStripeTokenRec
-Module61=clsSubCategoryTableRec
-Module62=ConnectionHelper
-Module63=CreateAccount
-Module64=FirebaseMessaging
-Module65=hAbout
-Module66=hCardEntry
-Module67=hChangeAccountInfo
-Module68=hChangeSettings2
-Module69=hCheckAccountStatus
+Module60=clsStripeCardRec
+Module61=clsStripeTokenRec
+Module62=clsSubCategoryTableRec
+Module63=ConnectionHelper
+Module64=CreateAccount
+Module65=FirebaseMessaging
+Module66=hAbout
+Module67=hCardEntry
+Module68=hChangeAccountInfo
+Module69=hChangeSettings2
 Module7=aSyncDatabase
-Module70=hCreateAccount
-Module71=hHome
-Module72=hPlaceOrder
-Module73=hQueryNewInstall
-Module74=hSelectItem
-Module75=hSelectPlayCentre3
-Module76=hSyncDatabase
-Module77=hValidateCentreSelection2
-Module78=hValidateDevice
-Module79=modConvert
+Module70=hCheckAccountStatus
+Module71=hCreateAccount
+Module72=hHome
+Module73=hPlaceOrder
+Module74=hQueryNewInstall
+Module75=hSelectItem
+Module76=hSelectPlayCentre3
+Module77=hSyncDatabase
+Module78=hValidateCentreSelection2
+Module79=hValidateDevice
 Module8=ChangeAccountInfo
-Module80=modEposApp
-Module81=modEposWeb
-Module82=NB6
-Module83=QueryNewInstall
-Module84=srvNotification
-Module85=srvPhoneTotal
-Module86=Starter
-Module87=svcTestSequence
-Module88=TemplateActivity
-Module89=TemplateClass
+Module80=modConvert
+Module81=modEposApp
+Module82=modEposWeb
+Module83=NB6
+Module84=QueryNewInstall
+Module85=srvNotification
+Module86=srvPhoneTotal
+Module87=Starter
+Module88=svcTestSequence
+Module89=TemplateActivity
 Module9=ChangeSettings
-Module90=TemplateCode
-Module91=TemplateService
-Module92=TemplateXactivity
-Module93=TemplateXhelper
-Module94=TestStartAt
-Module95=ValidateCentreSelection2
-Module96=ValidateDevice
+Module90=TemplateClass
+Module91=TemplateCode
+Module92=TemplateService
+Module93=TemplateXactivity
+Module94=TemplateXhelper
+Module95=TestStartAt
+Module96=ValidateCentreSelection2
+Module97=ValidateDevice
 NumberOfFiles=24
 NumberOfLibraries=24
-NumberOfModules=96
+NumberOfModules=97
 Version=10.2
 @EndOfDesignText@
 
@@ -182,18 +183,18 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 186                                                                                                                                                                       
-	' Date......: 16/11/20
+	' Release...: 187                                                                                                                                                                      
+	' Date......: 22/11/20
 	'
 	' History
 	'
-	' For releases v1-24, see release v28.
-	' For releases v25-45, see release v48.
-	' For releases v46-62, see release v67. 
-	' For releases v63-77, see release v77.
-	' For releases v78-87, see release v87.
-	' For releases v88-97  see release v97.
-	' For releases v98-109 see release v110
+	' For releases v1 - 24, see release v28.
+	' For releases v25 - 45, see release v48.
+	' For releases v46 - 62, see release v67. 
+	' For releases v63 - 77, see release v77.
+	' For releases v78 - 87, see release v87.
+	' For releases v88 - 97  see release v97.
+	' For releases v98 - 109 see release v110
 	' For releases v110 - 120 see release v122.
 	' For releases v121 - 129 see release v130
 	' For releases v130 - 138 see release v139.
@@ -243,12 +244,25 @@ Version=10.2
 	'		
 	' Date......: 16/11/20
 	' Release...: 186
-	' Overview..: Bugfix: #0535 Display order information - status and position incorrect.
-	'			   Issue: #0557 iOS Place Order item list fills from bottom.
-	'              Issue: #0553 Android Tablet Home screen order list too small.
+	' Overview..: Issue: #0557 iOS Place Order item list fills from bottom.
+	'             Issue: #0553 Android Tablet Home screen order list too small.
 	'			  Bugfix: #0535 Order information (Status and queue position incorrect). 
 	' Amendee...: D Morris
 	' Details...: Mod: hPlaceOrder_v23, hHome_v8, frmHome_v5.
+	'		
+	' Date......: 22/11/20
+	' Release...: 187
+	' Overview..: Issue: #0437 Enter card details difficult.
+	'             Issue: #0451 Replace "Default Card" with "Saved Card".
+	'             Issue: #0453 Expiry date format.
+	' 			  Issue: #0455 Place Order - show delivery option if allowed. 
+	'		      Issue: #0559 Improve "Account not activated" report.
+	'	          Added: Support for clsDataHandler class.
+	' Amendee...: D Morris
+	' Details...: Added: clsDateHandler_v1.
+	'				Mod: hCardEntry_v17,  hPlaceOrder_v24, hHome_v9, hCheckAccountStatus_v19.
+	'             Forms: frmCardEntry_v8, frmPlaceOrder_v4.
+	'			    Mod: hPlaceOrder_v25.
 	'		
 	' Date......: 
 	' Release...: 
@@ -263,8 +277,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 186
-	#VersionName: 1.0.0.186
+	#VersionCode: 187
+	#VersionName: 1.0.0.187
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 23
-	' Date......: 16/11/20
+	' Release...: 25
+	' Date......: 22/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -73,6 +73,23 @@ Version=9.5
 	' Overview..: Issue: #0557 iOS Place Order item list fills from bottom.
 	' Amendee...: D Morris.
 	' Details...: Mod: ShowOrderList() modified.
+	'		
+	' Date......: 20/11/20
+	' Release...: 24
+	' Overview..: Issue: #0451 Replace "Default Card" with "Saved Card".
+	'			  Issue: #0455 Place Order - delivery/collection operation changed. 
+	' Amendee...: D Morris
+	' Details...: Mod: QueryPayment() shown text fixed.
+	'		      Mod: Code changed to support B4Xswitch.
+	'			  Mod: SetupViews() renamed to SetupCollectDeliverViews().
+	'			  Mod: txtTableNumber changed to B4XFloatTextField (the add done button code is removed).
+	'
+	' Date......: 22/11/20
+	' Release...: 25
+	' Overview..: Bugfix - problem with Centres not allowing delivery.
+	' Amendee...: D Morris
+	' Details...: Mod: btnOrder_Click() extra code to handle ensure flag is set correctly.
+	'					QueryPayment() "Save" changed to "Saved".
 	'
 	' Date......: 
 	' Release...: 
@@ -88,37 +105,34 @@ Version=9.5
 
 Sub Class_Globals
 	' X-platform related.
-	Private xui As XUI			'ignore
-		
-	Private notification As clsNotifications	' Handles notifications
-		
+	Private xui As XUI							'ignore
+				
 	' Local constants
 	Private const TABLE_NUMBER_MAX_LEN As Int = 3 	' The table number text field's contents can be up to this maximum length.
 	Private const TABLE_NUMBER_MAX As Int = 999		' The table number maximum value.
 
 	' Activity view declarations
-	Private btnMessage As SwiftButton	 		' The button which allows the user to add/edit the order message.
-	Private btnOrder As SwiftButton		 		' The button which submits the order to the Server.
-	Private lblOrderTotal As B4XView 			' The label which displays the total price of the order.
-	Private lvwOrderItems As CustomListView		' The listview which contains all the items current on the order.	
+	Private btnMessage As SwiftButton	 		' Button which allows the user to add/edit the order message.
+	Private btnOrder As SwiftButton		 		' Button which submits the order to the Server.
+	Private lblOrderTotal As B4XView 			' Label which displays the total price of the order.
+	Private lvwOrderItems As CustomListView		' listview which contains all the items current on the order.	
 	Private pnlHideOrder As B4XView				' Panel to hide order details.
-	Private txtTableNumber As B4XView 			' The text field used to enter the customer's table number.	
+	Private lblCollectionOnly As B4XView		' Label indicating Centre only allows collection.
+	Private swcCollectDeliver As B4XSwitch 		' Swtich used to control whether the order will be collected or delivered.
+	Private lblCollectCaption As B4XView		' Label used as a caption for the 'Collect from counter' delivery option.
+	Private lblDeliverCaption As B4XView		' Label used as a caption for the 'Deliver to table' delivery option.
+	Private txtTableNumber As B4XFloatTextField ' Text field used to enter the customer's table number.
 #if B4A
-	Private optCollect As B4XView 				' The radiobutton which signifies the order should be collected by the customer when ready.
-	Private optTable As B4XView 				' The radiobutton which signifies the order will be delivered to the customer's table when ready.	
+	Private pnlTableNumber As B4XView			' White back panel for txtTableNumber 
 #else ' B4I
-	Private btnHideKeyboard As Button			' Button to used to Submit the table number.
-	Private swcCollectDeliver As Switch 		' The swtich used to control whether the order will be collected or delivered.
-	Private lblCollectCaption As Label 			' The label used as a caption for the 'Collect from counter' delivery option.
-	Private lblDeliverCaption As Label 			' The label used as a caption for the 'Deliver to table' delivery option.
-	Private lblTableNumberCaption As Label 		' label used as a caption for table number entry.
 	Private txtMessage As TextView 				' The multiline text view displayed on the text input dialog, used for the order message.	
 #End If
 
 	' Misc objects
+	Private notification As clsNotifications	' Handles notifications	
 	Private progressbox As clsProgressDialog	' Progress box
 #if B4A
-	Private kk As IME							' Used for showing the keybaord.
+	Private kk As IME							' Used for showing/hiding the keybaord.
 #End If
 
 	' Local variables
@@ -139,15 +153,6 @@ End Sub
 
 #Region  Event Handlers
 
-#if B4I
-' Added to support done button on numerical keyboard.
-'  see https://www.b4x.com/android/forum/threads/input-accessory-views.51000/#content
-Sub btnHideKeyboard_Click
-'	xPlaceOrder.HideKeyboard
-	ProcessTableNumer(txtTableNumber.Text.Trim)
-End Sub
-#end if
-
 ' Handles the Click event of the Order Message button.
 Private Sub btnMessage_Click
 	'TODO There is a X-Platform version of this see https://www.b4x.com/android/forum/threads/b4x-xui-views-cross-platform-views-and-dialogs.100836/#content
@@ -167,7 +172,9 @@ Private Sub btnMessage_Click
 	txtMessage.Text = Starter.CustomerOrderInfo.orderMessage
 	txtMessage.SetBorder(1, Colors.Black, 3)
 	txtMessage.KeyboardAppearance = txtMessage.APPEARANCE_DARK
+
 	AddDoneButtonToKeyboard(txtMessage)
+
 	dialogPanel.AddView(txtMessage, 0, 0, dialogPanel.Width, dialogPanel.Height)
 	Dim dialog As CustomLayoutDialog
 	dialog.Initialize(dialogPanel)
@@ -183,17 +190,20 @@ End Sub
 
 ' Handles the Click event of the Submit Order button.
 Private Sub btnOrder_Click
-	' Check if the entered order details are OK
 	Starter.customerOrderInfo.tableNumber = modEposApp.Val( txtTableNumber.Text.Trim) 
 	Dim errorMsg As String = ""
 	If Starter.customerorderInfo.orderList.Size < 1 Then
 		errorMsg = errorMsg & "there are no items in your order"
 	End If
-	If Starter.CustomerOrderInfo.deliverToTable And Starter.CustomerOrderInfo.tableNumber = 0 Then
-		If errorMsg <> "" Then 
-			errorMsg = errorMsg & " and "
+	If Starter.myData.centre.allowDeliverToTable Then ' Centre allows delivery?
+		If Starter.CustomerOrderInfo.deliverToTable And Starter.CustomerOrderInfo.tableNumber = 0 Then ' Table number ok
+			If errorMsg <> "" Then 
+				errorMsg = errorMsg & " and "
+			End If
+			errorMsg = errorMsg & "no table number has been entered"
 		End If
-		errorMsg = errorMsg & "no table number has been entered"
+	Else ' Centre not allowing delivery
+		Starter.customerOrderInfo.deliverToTable = False	' Ensure delivery is OFF.
 	End If
 	' Send the order command, or display error message, as appropriate
 	If errorMsg = "" Then ' Order details are OK, no errors detected
@@ -219,52 +229,49 @@ Private Sub btnOrder_Click
 End Sub
 
 #if B4I
-' Handles the Click event of the dynamically-created Done keyboard accessory button.
+' Handles done button (used for submitting customer messages).
 Private Sub btnTextboxDone_Click
 	txtMessage.ResignFocus ' Hide the keyboard
 End Sub
 #End If
 
-#if B4I
-' Clicks on screen off keyboard so hide the keyboard.
+' Handles click off txtTableNumber view to hide the keyboard.
 Private Sub lblCollectCaption_Click
 	QueryDisplayKeyboard
 End Sub
 
-' Clicks on screen off keyboard so hide the keyboard.
+' Handles click off txtTableNumber view to hide the keyboard.
 Private Sub lblCollectOnly_Click
 	QueryDisplayKeyboard
 End Sub
 
-' Clicks on screen off keyboard so hide the keyboard.
+' Handles click off txtTableNumber view to hide the keyboard.
 private Sub lblDeliverCaption_Click
 	QueryDisplayKeyboard
 End Sub
 
-' Clicks on screen off keyboard so hide the keyboard.
+' Handles click off txtTableNumber view to hide the keyboard.
 private Sub lblOrderTotal_Click
 	QueryDisplayKeyboard
 End Sub
 
-' Clicks on screen off keyboard so hide the keyboard.
-Private Sub lblTableNumberCaption_Click
+' Handles click off txtTableNumber view to hide the keyboard.
+Private Sub lblCollectionOnly_Click
 	QueryDisplayKeyboard
 End Sub
-#End If
 
 ' Handles the ItemClick event of the Order Items listview.
 Private Sub lvwOrderItems_ItemClick(Value As Object, position As Int)
-	If Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then ' Check if table number is OK!
+	If Not(Starter.myData.centre.allowDeliverToTable) Or _
+		 Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then ' Check if table number is OK!
 		Dim itemSelect As Int = position
 #if B4A
 		If itemSelect < lvwOrderItems.Size Then	' Edit Items?
-		'	CallSubDelayed2(aSelectItem, "pEditItem", position) ' Edit item in order table
 			CallSubDelayed2(aSelectItem, "pEditItem", itemSelect - 1) ' Edit item in order table
 		Else ' Add new item
 			CallSubDelayed(aSelectItem, "pStartSelectItem")
 		End If
 #else ' B4I
-'		xPlaceOrder.HideKeyboard
 		xPlaceOrder.ClrPageTitle()	' fixes page title operation.
 		xSelectItem.Show
 		If itemSelect < lvwOrderItems.Size Then
@@ -273,41 +280,29 @@ Private Sub lvwOrderItems_ItemClick(Value As Object, position As Int)
 			xSelectItem.StartSelectItem ' Select a new item
 		End If	
 #End If		
+	Else 
+		xui.MsgboxAsync("You must enter a table number.", "Table Number Required")
 	End If
 End Sub
 
-#if B4A
-' Handles the CheckedChanged event of the Table radiobutton.
-' NOTE: This event appears not to trigger when the radiobutton is unchecked?
-Private Sub optCollect_CheckedChange(Checked As Boolean)
-	Starter.customerOrderInfo.deliverToTable = False
-	QueryDisplayKeyboard
-End Sub
-#else ' B4I
-' Handles the ValueChanged event of the Collect or Deliver switch.
+' Handle Collect/Deliver switch.
 Private Sub swcCollectDeliver_ValueChanged(deliver As Boolean)
-'	xPlaceOrder.HideKeyboard
 	Starter.CustomerOrderInfo.deliverToTable = deliver
 	QueryDisplayKeyboard
-'	If deliver And txtTableNumber.Text.Trim = "" Then
-'		ShowKeyboard
-'	Else
-'		xPlaceOrder.HideKeyboard
-'	End If
+	SetupCollectDeliverViews
 	HandleMessageButton
 	HandleOrderButton	
 	ShowOrderList	' This ensure correct text is shown at end of list.
 End Sub
-#End If
 
-#if B4A
-' Handles the CheckedChanged event of the Table radiobutton.
-' NOTE: This event appears not to trigger when the radiobutton is unchecked?
-Private Sub optTable_CheckedChange(Checked As Boolean)
-	Starter.customerOrderInfo.deliverToTable = True
-	QueryDisplayKeyboard
-End Sub
-#End If
+'#if B4A
+'' Handles the CheckedChanged event of the Table radiobutton.
+'' NOTE: This event appears not to trigger when the radiobutton is unchecked?
+'Private Sub optTable_CheckedChange(Checked As Boolean)
+'	Starter.customerOrderInfo.deliverToTable = True
+'	QueryDisplayKeyboard
+'End Sub
+'#End If
 
 ' Progress dialog has timed out
 Private Sub progressbox_Timeout
@@ -337,9 +332,6 @@ Private Sub txtTableNumber_TextChanged(strOld As String, strNew As String)
 			txtTableNumber.Text = "" ' Table = 0 displayed as blank.
 		End If	
 	End If
-#if B4i
-	HandleKeyboardDoneButton(tableNumber)
-#End If
 End Sub
 
 #End Region  Event Handlers
@@ -389,7 +381,6 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 '	StartActivity(aTaskSelect)	'WARNING Causes problems with paying for an order.
 #else 'B4i
 	xPlaceOrder.ClrPageTitle()	' fixes page title operation.
-'	xTaskSelect.Show
 #End If
 End Sub
 
@@ -440,9 +431,7 @@ Public Sub HandleOrderResponse(orderResponseStr As String)
 #if B4A
 	'			StartActivity(aTaskSelect)
 #else 'B4i
-		'		ProgressShow("Submitting your order...") ' Ok code - may still be necessary for slow connections.
 				xPlaceOrder.ClrPageTitle()	' fixes page title operation.
-	'			xTaskSelect.Show
 #End If
 			End If
 		Else ' Order was not accepted
@@ -484,9 +473,9 @@ Public Sub QueryPayment(amount As Float)As ResumableSub
 	Dim exitToTaskSelect As Boolean = False 'HACK to deal with problem with blank form.
 		If Starter.myData.centre.acceptCards Then ' Cards accepted
 	#if B4A
-		xui.Msgbox2Async(msg, "Payment Options", "Default" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
+		xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
 	#else ' B4i - don't support CRLF in button text.
-		xui.Msgbox2Async(msg, "Payment Options", "Default Card", "Cash", "Another Card", Null)
+		xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
 	#end if
 		Wait For MsgBox_Result(Result As Int)
 		If Result = xui.DialogResponse_Positive Then ' Default Card?
@@ -524,19 +513,12 @@ End Sub
 
 ' Performs the resume operation.
 public Sub ResumeOp
-	SetupViews
+	' SetupCollectDeliverViews
 	HandleMessageButton
 	HandleOrderButton	
 	ShowOrderList	
-	If Starter.customerOrderInfo.tableNumber = 0 And Starter.CustomerOrderInfo.deliverToTable Then	' Table number required?
-#if B4i
-		Sleep(500)	' This helps the flashing problem - see Issue #0541
-#End If
-		ShowKeyboard
-	Else
-		HideKeyboard
-	End If	
-
+	SetupCollectDeliverViews
+	QueryDisplayKeyboard
 End Sub
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
@@ -552,14 +534,13 @@ End Sub
 #End Region  Public Subroutines
 
 #Region  Local Subroutines
-
 #If B4I
-' Add to support a done button on numerical keyboard.
-' see https://www.b4x.com/android/forum/threads/input-accessory-views.51000/#content
-Sub AddViewToKeyboard(TextField1 As TextField, View1 As View)
-	Dim no As NativeObject = TextField1
-	no.SetField("inputAccessoryView", View1)
-End Sub
+'' Add to support a done button on numerical keyboard.
+'' see https://www.b4x.com/android/forum/threads/input-accessory-views.51000/#content
+'Sub AddViewToKeyboard(TextField1 As TextField, View1 As View)
+'	Dim no As NativeObject = TextField1
+'	no.SetField("inputAccessoryView", View1)
+'End Sub
 
 ' Sets up a small 'Done' buttons to appear above the keyboard shown when the specified textbox is entered.
 Private Sub AddDoneButtonToKeyboard(attachedTextBox As TextView)
@@ -585,7 +566,6 @@ Private Sub AddDoneButtonToKeyboard(attachedTextBox As TextView)
 	textboxNativeObj.SetField("inputAccessoryView", pnlButton)
 End Sub
 #End If
-
 ' Clears all items and data from the current order (including in the database).
 Private Sub ClearOrder
 	Starter.customerOrderInfo.orderList.Clear
@@ -595,21 +575,6 @@ Private Sub ClearOrder
 	HandleOrderButton
 End Sub
 
-#if B4i
-' Handle keyboard done button text.
-Private Sub HandleKeyboardDoneButton(tableNumberVal As Int)
-	If tableNumberVal > 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
-#if B4I
-		btnHideKeyboard.text = "Submit"
-#end if		
-	Else
-#if B4I
-		btnHideKeyboard.text =  "Enter table number"
-#end if
-	End If
-End Sub
-#End If
-
 ' Displays the relevant text on the Message button and enables/disables the button accordingly.
 Private Sub HandleMessageButton
 	If Starter.customerOrderInfo.orderMessage <> "" Then
@@ -617,7 +582,7 @@ Private Sub HandleMessageButton
 	Else ' No message currently saved
 		btnMessage.xLBL.text = "Add a message" & CRLF & "to your order"
 	End If
-	If Starter.customerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+	If Not(Starter.myData.centre.allowDeliverToTable) Or Starter.customerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 		btnMessage.Enabled = True
 	Else
 		btnMessage.Enabled = False
@@ -626,7 +591,7 @@ End Sub
 
 ' Enable/disable Order button accordingly.
 Private Sub HandleOrderButton
-	If Starter.customerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+	If Not(Starter.myData.centre.allowDeliverToTable) Or Starter.customerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 		btnOrder.Enabled = True
 	Else
 		btnOrder.Enabled = False
@@ -649,17 +614,17 @@ private Sub InitializeLocals
 #End If
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 #if B4A
-	SetupViews
+'	SetupViews
 #else ' B4I
-	Dim greyColour As Int = Colors.RGB(169, 169, 169)
-	btnHideKeyboard.Initialize("btnHideKeyboard", btnHideKeyboard.STYLE_SYSTEM)
-	btnHideKeyboard.CustomLabel.Font = Font.CreateNew(25)
-	btnHideKeyboard.Text = "Enter table number"
-	btnHideKeyboard.Width = 100
-	btnHideKeyboard.Height = 50
-	btnHideKeyboard.Color = greyColour
-	btnHideKeyboard.SetBorder(1, Colors.Black, 3)
-	AddViewToKeyboard(txtTableNumber, btnHideKeyboard)
+'	Dim greyColour As Int = Colors.RGB(169, 169, 169)
+'	btnHideKeyboard.Initialize("btnHideKeyboard", btnHideKeyboard.STYLE_SYSTEM)
+'	btnHideKeyboard.CustomLabel.Font = Font.CreateNew(25)
+'	btnHideKeyboard.Text = "Enter table number"
+'	btnHideKeyboard.Width = 100
+'	btnHideKeyboard.Height = 50
+'	btnHideKeyboard.Color = greyColour
+'	btnHideKeyboard.SetBorder(1, Colors.Black, 3)
+'	AddViewToKeyboard(txtTableNumber, btnHideKeyboard)
 #End If
 	notification.Initialize
 End Sub
@@ -678,9 +643,6 @@ End Sub
 Private Sub ProcessTableNumer(enteredTableNo As String) 
 	If (enteredTableNo <> "" And enteredTableNo <> 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 		Starter.customerOrderInfo.tableNumber = modEposApp.Val(enteredTableNo)
-'#if B4i
-'		xPlaceOrder.HideKeyboard
-'#End If
 		ResumeOp
 	Else
 		xui.MsgboxAsync("You must enter a table number.", "Table Number Required")
@@ -690,56 +652,84 @@ End Sub
 
 ' Query displaying of keyboard.
 Private Sub QueryDisplayKeyboard
-	If Starter.customerOrderInfo.tableNumber = 0 And Starter.CustomerOrderInfo.deliverToTable Then	' Table number required?
+	If Starter.myData.centre.allowDeliverToTable And _ 
+		Starter.customerOrderInfo.tableNumber = 0 And _
+		 Starter.CustomerOrderInfo.deliverToTable Then	' Table number required?
+#if B4I
+		Sleep(1000)	' Gives nice keyboard operation (would be to be quicker).
+#End If
 		ShowKeyboard
 	Else
 		HideKeyboard
 	End If
 End Sub
 
-' Updates the radiobuttons and table number textbox based on the Starter service's table number database value.
-Private Sub SetupViews
-	' Set the table number as necessary
-	Dim tableNumber As String = Starter.customerOrderInfo.tableNumber
-	If tableNumber = "0" Then 
-		tableNumber = ""
-	End If
-	txtTableNumber.Text = tableNumber
-	' Display the collect/deliver radiobuttons (or the collection-only caption), and set them as necessary
-	Dim allowDeliver As Boolean = Starter.myData.centre.allowDeliverToTable	
-#if B4A
-	optTable.Enabled = allowDeliver
-	If Starter.customerOrderInfo.deliverToTable Then ' Get the previous selection
-		optTable.Checked = True
-	Else
-		optCollect.Checked = True
-	End If
-#else ' B4I
-	swcCollectDeliver.Visible = allowDeliver
-	swcCollectDeliver.Value = False
+' Updates views for Collect/Deliver operation.
+Private Sub SetupCollectDeliverViews
+	Dim allowDeliver As Boolean = Starter.myData.centre.allowDeliverToTable		
 	If allowDeliver Then
+		lblCollectionOnly.Visible = False	
+		lblCollectCaption.Visible = True	' Display the delivery options.
+		swcCollectDeliver.mBase.Visible = True
+		lblDeliverCaption.Visible = True
+		' Set the table number as necessary
+		Dim tableNumber As String = Starter.customerOrderInfo.tableNumber
+		If tableNumber = "0" Then 
+			tableNumber = ""
+		End If
+		txtTableNumber.Text = tableNumber
+		' Display the collect/deliver radiobuttons (or the collection-only caption), and set them as necessary
+		swcCollectDeliver.mBase.Visible = allowDeliver
 		swcCollectDeliver.Value = Starter.CustomerOrderInfo.deliverToTable
-	End If
+		If swcCollectDeliver.Value = True Then ' Deliver?
+			txtTableNumber.mBase.Visible = True
+#if B4A
+			pnlTableNumber.Visible = True
 #End If
-	' Display the custom message button as necessary
+			lblCollectCaption.TextColor = Colors.LightGray
+			lblCollectCaption.Font = xui.CreateDefaultFont(lblCollectCaption.Font.Size)
+			lblDeliverCaption.Text = "Deliver to"
+			lblDeliverCaption.TextColor = Colors.White
+			lblDeliverCaption.Font = xui.CreateDefaultBoldFont(lblDeliverCaption.Font.Size)
+		Else ' Collect
+			txtTableNumber.mBase.Visible = False
+#if B4A
+			pnlTableNumber.Visible = False
+#End If
+			lblCollectCaption.TextColor = Colors.White
+			lblCollectCaption.Font = xui.CreateDefaultBoldFont(lblCollectCaption.Font.Size)
+			lblDeliverCaption.Text = "Deliver"
+			lblDeliverCaption.TextColor = Colors.LightGray
+			lblDeliverCaption.Font = xui.CreateDefaultFont(lblDeliverCaption.Font.Size)
+		End If
+	Else ' Display Collection only message.
+		lblCollectionOnly.Visible = True 
+		lblCollectCaption.Visible = False	' Display the delivery options.
+		swcCollectDeliver.mBase.Visible = False
+		lblDeliverCaption.Visible = False
+		txtTableNumber.mBase.Visible = False
+#if B4A
+		pnlTableNumber.Visible = False
+#End If
+	End If
+
+	' Update the message button as necessary
 	btnMessage.mBase.Visible = Not(Starter.myData.centre.disableCustomMessage)
 End Sub
 
 ' Show the keyboard
 Private Sub ShowKeyboard
-#if B4A
-	txtTableNumber.RequestFocus ' Re-select the textbox
-	CallSubDelayed(Me, "ShowKeyboard_B4A")	' Must be called this way for the keyboard to appear.
-#else 'B4i
-	HandleKeyboardDoneButton(modEposApp.Val(txtTableNumber.Text.Trim))
-	txtTableNumber.RequestFocus ' Re-select the textbox
+#if B4A 
+	Sleep(0) ' Necessary for the B4A otherwise the keyboard don't appear automatically!
 #End If
+	txtTableNumber.RequestFocusAndShowKeyboard
+	txtTableNumber.mBase.RequestFocus ' Necessary for the B4A otherwise the keyboard don't appear automatically!
 End Sub
 
 #if B4A
 ' B4A Show keyboard be a set for the keyboard to appear.- 
 Private Sub ShowKeyboard_B4A
-	kk.ShowKeyboard(txtTableNumber)
+'	kk.ShowKeyboard(txtTableNumber)
 End Sub
 #End If
 
@@ -765,7 +755,7 @@ Private Sub ShowOrderList
 		orderTotal = orderTotal + lineTotal
 		i = i + 1
 	Next
-	If Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+	If Not(Starter.myData.centre.allowDeliverToTable) Or Starter.CustomerOrderInfo.tableNumber <> 0 Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 		lvwOrderItems.AddTextItem("+ Press here to add an item" & CRLF , i) ' Note: The CRLF is necessary for list to scroll when required. 	
 	Else
 		lvwOrderItems.AddTextItem("+ Enter table number" & CRLF, i)	

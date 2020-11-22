@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 16
-	' Date......: 09/10/20
+	' Release...: 17
+	' Date......: 20/11/20
 	'
 	' History
 	' Date......: 13/10/19
@@ -33,6 +33,15 @@ Version=9.5
 	' Overview..: Bugfix: #0515 - Exception thrown if invalid card information entered.
 	' Amendee...: D Morris.
 	' Details...: Mod: SubmitCard() code fixed.
+	'		
+	' Date......: 20/11/20
+	' Release...: 17
+	' Overview..: Issue: #0437 Enter card details difficult. 
+	'			  Issue: #0453 Expiry date format.
+	' Amendee...: D Morris
+	' Details...: Mod: SetupTabOrder() now will just show a accept button and not tab to next field.
+	'			  Added: (for Android) clicking on background hides keyboard. 
+	'			  Mod: uses clsMMYYhandler to process date string.
 	'
 	' Date......: 
 	' Release...: 
@@ -49,9 +58,12 @@ Sub Class_Globals
 	Private xui As XUI							'ignore (to remove warning).
 	
 	' Misc objects
+	Private processedDate As clsDatehandler		' Handles processing date.
 	Private progressbox As clsProgressDialog	' Progress box.
 	Private cardInfo As clsStripeTokenRec		' Strip relating objects.
-
+#if B4A
+	Private kk As IME							' Used for hidding the keybaord.
+#End If
 	' View declarations
 	' Card Entry Panel
 	Private btnSubmit As SwiftButton			' Submit card details button.
@@ -73,6 +85,7 @@ Sub Class_Globals
 	Private total As Float 						' Amount to charge (if register card and take payment at the same time).
 	Private mOrderId As Int						' The order to pay (if n.a. then = 0)
 
+
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -93,6 +106,15 @@ End Sub
 ' Load test data.
 Private Sub btnTestData_Click
 	LoadTestData
+End Sub
+
+' Hide keyboard (click outside the text fields).
+Private Sub pnlCardEntry_Click
+#if b4A
+	kk.HideKeyboard
+#Else
+	xCardEntry.HideKeyboard
+#End If
 End Sub
 
 ' Progress dialog has timed out
@@ -132,14 +154,14 @@ Private Sub txtCardNumber_TextChanged (old As String, new As String)
 '	Dim eos As Int = (new.Length + 1)
 	If old.Length > new.Length Then
 		If new.Length = 4 Or new.Length = 9 Or new.Length = 14 Then ' backspace over space?
-			Dim x As String = FormatCardNumber(new)			
+			Dim x As String = FormatCardNumber(new)
 			x = x.SubString2(0, new.Length - 1)
 			If x <> new Then
-				txtCardNumber.Text = x		
+				txtCardNumber.Text = x
 				If x.Length > 0 Then
 					et.SetSelection(x.Length, 0)
-				End If							
-			End If	
+				End If
+			End If
 		End If
 	else If new.Length = 4 Or new.Length = 9 Or new.Length = 14 Then ' Insert space?
 		txtCardNumber.Text = new & " "
@@ -181,39 +203,7 @@ End Sub
 
 ' Handle expiry date changes.
 private Sub txtExpiryDate_TextChanged (Old As String, New As String)
-#if B4i	' See https://www.b4x.com/android/forum/threads/strange-text_changed-behaviour.107128/
-	Sleep(0)	' Ensure the new value is ok
-#end if
- ' So cursor can be positioned correctly see https://www.b4x.com/android/forum/threads/b4xfloattextfield-filter-characters-allowed.114681/
-#if B4A
-	Dim et As EditText = txtExpiryDate.TextField
-#else ' B4i
-	Dim et As TextField = txtExpiryDate.TextField
-#end if
-	If Old.Length > New.Length Then
-		Dim x As String = FormatExpiryDate(New)
-		If New.Length = 4 Then ' backspace over "/20"?
-			x = x.SubString2(0, New.Length - 3)
-			If x <> New Then
-				txtExpiryDate.Text = x
-				If x.Length > 0 Then
-					et.SetSelection(x.Length, 0)
-				End If				
-			End If
-		End If
-	else If New.Length = 2 Then ' Insert "/20"?
-		Dim x As String = FormatExpiryDate(New)
-		txtExpiryDate.Text = New & "/20"	
-		et.SetSelection(5, 0)
-	else if New.Length > 7 Then
-		txtExpiryDate.Text = New.SubString2(0, 7)
-		et.SetSelection(7, 0)
-	else if New.Length = 1 Then
-		If New.CompareTo("1") > 0 Then 'Do we need to reformat?
-			txtExpiryDate.Text = FormatExpiryDate(New)
-			et.SetSelection(5,0)
-		End If
-	End If
+	processedDate.Handler_TextChanged_MMYY(txtExpiryDate, Old, New)
 End Sub
 
 ' Tab to next field
@@ -334,11 +324,10 @@ Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
 		wait for Msgbox_Result(tempResult As Int)
 		If tempResult = xui.DialogResponse_Positive Then ' Another card?
 #if B4A
-			' CallSubDelayed2(aCardEntry, "CardEntryAndCharge", paymentInfo.total)
 			CallSubDelayed3(aCardEntry, "CardEntryAndPayment", paymentInfo.total, False) 
 #else 'B4I
 			' xCardEntry.CardEntryAndCharge(paymentInfo.total)
-			xCardEntry.CardEntryAndPayment(paymentInfo.total, false)
+			xCardEntry.CardEntryAndPayment(paymentInfo.total, False)
 #end if	
 		else if tempResult = xui.DialogResponse_Negative Then ' Cash?
 			Dim msg As String = "Please go to the counter to pay."
@@ -398,29 +387,7 @@ End Sub
 
 ' Formats a Expiry Data string into MM/YY.
 Private Sub FormatExpiryDate(expiryDate As String) As String
-	Dim tempDate As String = expiryDate.Trim.Replace( "/20", "")
-	Dim processeedText As String = ""
-	If tempDate.Length > 0 Then
-		If tempDate.Length > 4 Then
-			tempDate = tempDate.SubString2(0, 3)
-		End If
-		If tempDate.Length = 1 Then
-			If tempDate.CompareTo("1") > 0 Then 'Month less than 10?
-				processeedText = "0" & tempDate & "/20" ' Skip to year.
-			Else
-				processeedText = tempDate
-			End If
-		Else
-			Dim indexEnd As Int = tempDate.Length - 1
-			For charIndex = 0 To indexEnd
-				If charIndex = 2 Then 
-					processeedText = processeedText & "/20"
-				End If
-				processeedText = processeedText & tempDate.SubString2(charIndex, charIndex + 1)
-			Next
-		End If
-	End If
-	Return processeedText
+	Return processedDate.FormatDateMMYY(expiryDate)
 End Sub
 
 ' Handles Stripe response to request a token
@@ -436,6 +403,10 @@ End Sub
 	
 ' Initialize the locals etc.
 private Sub InitializeLocals
+#if B4A
+	kk.Initialize("")
+#End If
+	processedDate.Initialize
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 	cardInfo.Initialize
 	stripe.Initialize(Me, "sk_test_4eC39HqLyjWDarjtT1zdp7dc","Stripe")
@@ -447,7 +418,7 @@ End Sub
 private Sub LoadTestData
 	txtCardNumber.Text = "4242 4242 4242 4242"
 	txtCvc.Text = "123"
-	txtExpiryDate.Text = "01/2021"
+	txtExpiryDate.Text = "01/21"
 End Sub
 
 ' Show the process box
@@ -515,14 +486,14 @@ Private Sub SendPayment(amount As Float)
 End Sub
 
 ' Setup the tab order (adjust as necessary).
-' Code taken from https://www.b4x.com/android/forum/threads/tab-order-of-textedit-views.19489/
 Private Sub SetupTabOrder
-	txtCardNumber.Tag = txtExpiryDate
-	txtExpiryDate.Tag = txtCvc
-	txtCvc.Tag = txtName
-	txtName.Tag = txtLine1
-	txtLine1.Tag = txtPostCode
-	txtPostCode.Tag = txtCardNumber
+	' This shows the accept button and stops the tab to next field (found thro' experimentation).
+	txtCardNumber.NextField = txtCardNumber	
+	txtExpiryDate.NextField = txtExpiryDate
+	txtCvc.NextField = txtCvc
+	txtName.NextField = txtName
+	txtLine1.NextField = txtLine1
+	txtPostCode.NextField = txtPostCode
 End Sub
 
 ' Submit card information to Strip.
@@ -540,20 +511,5 @@ Private Sub SubmitCard
 	ProgressShow("Checking your card...")
 	stripe.GetCardToken(Me, cardInfo)
 End Sub
-
-'' Tab to next field (Removed as it cause problems with operation.
-' Android need a method to hide keyboard.
-' iOS - the focus don't appear to work.
-'' Code taken from https://www.b4x.com/android/forum/threads/tab-order-of-textedit-views.19489/
-'private Sub TabToNext(pSender As B4XFloatTextField)
-'	Dim currentView, nextView As B4XFloatTextField 
-'	currentView = pSender
-'	nextView = currentView.Tag
-'#if B4A
-'	nextView.RequestFocusAndShowKeyboard
-'#else 
-'	nextView.Focused = True
-'#End If
-'End Sub
 
 #End Region  Local Subroutines

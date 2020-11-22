@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCheckAccountStatus
-	' Release...: 18
-	' Date......: 02/08/20
+	' Release...: 19
+	' Date......: 20/11/20
 	'
 	' History
 	' Date......: 03/08/19
@@ -21,68 +21,13 @@ Version=9.3
 	' Details...: First release to support version tracking
 	'
 	' Version 2 - 8 see v9.
-	'			
-	' Date......: 26/04/20
-	' Release...: 9
-	' Overview..: Bug #0186: Problem moving accounts support for new customerId (with embedded rev).
+	'         9 - 18 see v18
+	'
+	' Date......: 20/11/20
+	' Release...: 19
+	' Overview..: Issue: #0559 Improve Account not activated report.
 	' Amendee...: D Morris.
-	' Details...:  Mod: pCheckAccountStatus(), CheckWebAccount(), ResendActivationEmail().
-	'
-	' Date......: 09/02/20
-	' Release...: 10
-	' Overview..: Bugfix: 0398 - Timeout sometimes tripping at startup.
-	' Amendee...: D Morris.
-	' Details...:  Mod: DFT_MIN_DISPLAY_TIME reduced to 1sec.
-	'
-	' Date......: 11/05/20
-	' Release...: 11
-	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
-	' Amendee...: D Morris.
-	' Details...:  Mod: OnClose().
-		'
-	' Date......: 03/06/20
-	' Release...: 12
-	' Overview..: Issue #0175 - work improving signon.
-	' Amendee...: D Morris.
-	' Details...: Removed: ShowConnectPage().  
-	'			      Mod: ReportInternetProblem() and ReportNoInternet() old Wifi connection code removed.
-	'
-	' Date......: 11/06/20
-	' Release...: 13
-	' Overview..: Improved checks on Server and internet.
-	' Amendee...: D Morris
-	' Details...:  Mod: CheckWebAccount(), IsOnLine(), ResendActivationEmail().
-	'
-	' Date......: 18/06/20
-	' Release...: 14
-	' Overview..: Add #0395: Select Centre with Logos (Experimental).
-	' Amendee...: D Morris.
-	' Details...: Mod: ShowSelectPlayCentre() compiler option to select type of centre list. 
-	'
-	' Date......: 28/06/20
-	' Release...: 15
-	' Overview..: Experiments why iOS has problems with no internet.
-	' Amendee...: D Morris 
-	' Details...:   Mod: IsOnLine() - timeout moved after the download().
-	'								  timeout increased to 5 seconds.
-	'
-	' Date......: 09/07/20
-	' Release...: 16
-	' Overview..: Mod: Activate account - check junk folder added.
-	' Amendee...: D Morris.
-	' Details...: Mod: NonActivatedAccount() and ResendActivationEmail().
-	'
-	' Date......: 22/07/20
-	' Release...: 17
-	' Overview..: New UI startup.
-	' Amendee...: D Morris
-	' Details...: Mod: Now support a loading indicate (using clsProgressIndicator) - general changes.
-	'
-	' Date......: 02/08/20
-	' Release...: 18
-	' Overview..: Support for new UI - Select Centre.
-	' Amendee...: D Morris
-	' Details...:  Mod: ShowSelectPlayCentre().
+	' Details...: Mod: NonActivatedAccount() The "not activated" account report reworded. 
 	'
 	' Date......: 
 	' Release...: 
@@ -324,9 +269,9 @@ End Sub
 ' Handles the situation when user account is not activated.
 private Sub NonActivatedAccount
 	xui.Msgbox2Async("You have not clicked the link in the activation email we sent to you " & _
-							" (if not found check your Junk folder)." & CRLF & _
+							" (IF NOT FOUND, CHECK YOUR JUNK FOLDER)." & CRLF & _
 	 						"Please do so and then press 'Retry' or 'New account' to create a new account." _
-							, "Email Not Activated", "Resend email", "Retry","New account" , Null)
+							, "Account Not Activated", "Resend email", "Retry","New account" , Null)
 	Wait for msgbox_result (result As Int)
 	If result = xui.DialogResponse_Positive Then	' Resend activation email
 		wait for (ResendActivationEmail(Starter.myData.customer.customerIdStr)) complete (successful As Boolean)

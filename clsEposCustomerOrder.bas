@@ -106,11 +106,11 @@ Public Sub XmlSerialize As String
 	
 	x = x.create("clsEposCustomerOrder").attribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") _
 			.attribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema")
-	x = x.element("centreId").text(centreId).up		
+	x = x.element("centreId").text(centreId).up
 	x = x.element("customerNumber").text(customerNumber).up
 	x = x.element("deliverToTable").text(deliverToTable).up
 	x = x.element("orderMessage").text(orderMessage).up
-	x = x.element("tableNumber").text(tableNumber).up	
+	x = x.element("tableNumber").text(tableNumber).up
 	
 	x = x.element("orderList")
 	For Each item As clsCustomerOrderItemRec In orderList

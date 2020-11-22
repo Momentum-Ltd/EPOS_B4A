@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 8
-	' Date......: 16/11/20
+	' Release...: 9
+	' Date......: 20/11/20
 	'
 	' History
 	' Date......: 08/08/20
@@ -74,6 +74,12 @@ Version=10
 	' Details...:  Mode: B4A ListView changed to CustomListView (and associated code).
 	'				Mod: B4A Order list backgroud change to grey (as the iOS).
 	'             Bugfix: (#0535) - pHandleOrderInfo() status and position removed. And report reworded.
+	'		
+	' Date......: 20/11/20
+	' Release...: 9
+	' Overview..: Issue: #0451 Replace "Default Card" with "Saved Card".
+	' Amendee...: D Morris
+	' Details...: Mod: QueryPayment() shown text fixed.
 	'			
 	' Date......: 
 	' Release...: 
@@ -109,11 +115,7 @@ Sub Class_Globals
 	Private lblCentreName As B4XView					' Centre name	
 	Private lblShowOrder As Label						' Instruction to show order information.
 	Private pnlHeader As B4XView	
-'#if B4A
 	Private lvwOrderSummary As CustomListView			' The listview which displays all the customer's orders.
-'#else ' B4I
-'	Private lvwOrderSummary As usrListView 
-'#End If
 	Private pnlLoadingTouch As B4XView					' Clickable show loading circle display progress dialog.
 	
 	' Misc objects
@@ -174,13 +176,6 @@ Private Sub btnPlaceOrder_Click
 	End If
 End Sub
 
-'' Handles refresh display button.
-'Private Sub imgRefresh_Click
-'	If enableViews = True Then
-'		pSendRequestForOrderStatusList		
-'	End If
-'End Sub
-
 ' Click on progress circles to show the dialog progress box.
 ' This is always enabled.
 Private Sub pnlLoadingTouch_Click
@@ -188,18 +183,14 @@ Private Sub pnlLoadingTouch_Click
 End Sub
 
 ' Touch area for the refesh operation
-Sub pnlRefreshTouch_Click
+Private Sub pnlRefreshTouch_Click
 	If enableViews = True Then
 		pSendRequestForOrderStatusList
 	End If
 End Sub
 
 ' Handles Show more order information i.e. clicking on an order summary list.
-'#if B4A
 Private Sub lvwOrderSummary_ItemClick(Position As Int, Value As Object)
-'#else ' B4I
-'Private Sub lvwOrderSummary_ItemClick(Value As Object, Index As Int)
-'#End If
 	If enableViews = True Then
 		Dim statusObj As clsEposOrderStatus = Value
 		If statusObj.status <> modConvert.statusUnknown And statusObj.orderId <> 0 Then			
@@ -261,17 +252,10 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 			If orderInfoObj.orderStarted = "00:00:00" Then
 				timestampStr = "Payment required!"
 			End If
-'			Dim queueStr As String = " (" & modConvert.ConvertNumberToOrdinalString(mPressedOrderStatus.queuePosition) & ")"
-'			If mPressedOrderStatus.queuePosition < 1 Then
-'				queueStr = ""
-'			End If
 			Dim deliveryTypeStr As String = "Will be delivered to table " & orderInfoObj.tableNumber & "."
 			If orderInfoObj.deliverToTable = False Then 
 				deliveryTypeStr = "To be collected when ready."
 			End If
-'			msg = timestampStr & "." & CRLF & "Status: " & _
-'					modConvert.ConvertStatusToUserString(mPressedOrderStatus.status, mPressedOrderStatus.deliverToTable) & _
-'					queueStr & "." & CRLF & deliveryTypeStr & CRLF & CRLF & "Items in this order:"
 			msg = timestampStr & CRLF & deliveryTypeStr & CRLF & CRLF & "Items in this order:"
 			For Each item As clsCustomerOrderItemRec In orderInfoObj.itemList
 				Dim sizePriceObj As clsSizePriceTableRec = Starter.DataBase.GetSizePriceRec(item.priceId)
@@ -280,8 +264,7 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 				Dim itemPriceStr As String = modEposApp.FormatCurrency(itemPrice)
 				msg = msg & CRLF & item.qty & "x " & itemName & " @ £" & itemPriceStr & " each"
 				totalCost = totalCost + (itemPrice * item.qty)
-			Next
-			
+			Next		
 			Dim orderPaidStr As String = "This order is currently unpaid."
 			If orderInfoObj.paid Then
 				orderPaidStr = "This order has been paid for."
@@ -325,10 +308,9 @@ Public Sub HandleOrderStart(orderStartStr As String)
 		End If
 		Starter.myData.centre.allowDeliverToTable = responseObj.allowDeliverToTable
 		Starter.myData.centre.disableCustomMessage = responseObj.disableCustomMessage
-		#if B4A
+#if B4A
 		StartActivity(aPlaceOrder)
 #else ' B4I
-'		xTaskSelect.ClrPageTitle()	' fixes page title operation.
 		xPlaceOrder.Show
 #end if
 	Else ' Not allowed to place an order - display the reason why
@@ -350,6 +332,7 @@ Public Sub pHandleOrderStatusList(orderStatusStr As String)
 		displayUpdateInProgress = True
 		Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
 		invalidItem.status = modConvert.statusUnknown
+
 		lvwOrderSummary.Clear
 		If orderListObj.customerId <> 0 Then ' XML string was deserialised OK
 			If orderListObj.order.Size > 0 Then ' List contains orders
@@ -357,32 +340,16 @@ Public Sub pHandleOrderStatusList(orderStatusStr As String)
 					lAddOrderEntryToListview(order)
 				Next
 				If orderListObj.overflowFlag Then ' Order list overflowed?
-'#if B4A
-''					lvwOrderSummary.AddSingleLine2("More orders....", invalidItem)
 					lvwOrderSummary.AddTextItem("More orders....", invalidItem)
-'#else ' B4I
-'					lvwOrderSummary.AddItem("More orders....", "", invalidItem)
-'#End If
 				End If
 			Else ' No orders found in order list
-'#if B4A
-'			'	lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
 				lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
-'#else ' B4I
-'				lvwOrderSummary.AddItem("No active orders found", "", invalidItem)
-'#End If
 			End If
 		Else ' XML failed to deserialise properly
-'#if B4A
-'			' lvwOrderSummary.AddTwoLines2("Error reading order list", "Please retry", invalidItem)
 			lvwOrderSummary.AddTextItem("Error reading order list" & CRLF & "Please retry", invalidItem)
-'#else ' B4I
-'			lvwOrderSummary.AddItem("Error reading order list", "Please retry", invalidItem)
-'#End If
-		End If		
+		End If
 		displayUpdateInProgress = False
 	End If
-
 	ProgressHide
 #if B4i
 	tmrUpdateOrderStatus.Enabled = False
@@ -458,18 +425,9 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 	If Not(displayUpdateInProgress) Then
 		displayUpdateInProgress = True
 		' Assemble a list containing all of the items' info, and detect if the whole list needs to be refreshed
-'#if B4A
 		For itemIndex = 0 To (lvwOrderSummary.Size - 1)
-'#else ' B4I
-'		For itemIndex = 0 To (lvwOrderSummary.Count - 1)
-'#End If
 			' Detect multiple orders in the list which have the 'waiting' status.
-'#if B4A
-'			' Dim listviewStatus As  clsEposOrderStatus = lvwOrderSummary.GetItem(itemIndex)
 			Dim listviewStatus As  clsEposOrderStatus = lvwOrderSummary.GetValue(itemIndex)
-'#else ' B4I
-'			Dim listviewStatus As clsEposOrderStatus = lvwOrderSummary.GetItemAtIndex(itemIndex)
-'#End If	
 			' Update and add the item to the list as necessary
 			If listviewStatus.orderId = statusObj.orderId Then
 				listviewStatus = statusObj
@@ -491,12 +449,7 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 		Else ' No orders left in order list
 			Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
 			invalidItem.status = modConvert.statusUnknown
-'#if B4A
-'			'lvwOrderSummary.AddSingleLine2("No active orders found", invalidItem)
 			lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
-'#else ' B4I
-'			lvwOrderSummary.AddItem("No active orders found", "", invalidItem)
-'#End If
 		End If
 		displayUpdateInProgress = False
 	End If
@@ -506,13 +459,11 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 #End If
 End Sub
 
-
 #End Region  Public Subroutines
 
 #Region  Local Subroutines
 
-' Adds a two-line item to the listview containing the specified order information. The listview item will be set up so that the
-' specified order status object is returned as the Value in e.g. lvwOrderSummary.GetItem() or lvwOrderSummary_ItemClick().
+' Adds a order item to the listview.
 Private Sub lAddOrderEntryToListview(statusObj As clsEposOrderStatus)
 	Dim topStr As String = "Order #" & statusObj.orderId
 	Dim statusStr As String = modConvert.ConvertStatusToUserString(statusObj.status, statusObj.deliverToTable)
@@ -524,12 +475,7 @@ Private Sub lAddOrderEntryToListview(statusObj As clsEposOrderStatus)
 		queueStr = ""
 	End If
 	Dim bottomStr As String = "Status: " & statusStr & queueStr
-'#if B4A
-''	lvwOrderSummary.AddTwoLines2(topStr, bottomStr, statusObj)
 	lvwOrderSummary.AddTextItem(topStr & CRLF & bottomStr, statusObj)
-'#else ' B4I
-'	lvwOrderSummary.AddItem(topStr, bottomStr, statusObj)
-'#End If
 End Sub
 
 ' Checks if connected to centre.
@@ -644,16 +590,15 @@ Private Sub QueryPayment(orderPayment As clsOrderPaymentRec)As ResumableSub
 	If Starter.myData.centre.acceptCards Then ' Cards accepted
 		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
 	#if B4A
-		xui.Msgbox2Async(msg, "Payment Options", "Default" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
+		xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
 	#else ' B4i - don't support CRLF in button text.
-		xui.Msgbox2Async(msg, "Payment Options", "Default Card", "Cash", "Another Card", Null)
+		xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
 	#end if
 		Wait For MsgBox_Result(Result As Int)
 		If Result = xui.DialogResponse_Positive Then ' Default Card?
 #if B4A
 			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
 #else ' b4i
-'			xCardEntry.CardEntryAndPayment(amount, True)
 			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
 #end if
 		else if Result = xui.DialogResponse_Cancel Then ' Cash?
