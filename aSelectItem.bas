@@ -60,6 +60,12 @@ Version=9.5
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..: Changes to support new style UI. 
+	' Amendee...: D Morris
+	' Details...: Mods: References to Tilebar removed.
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..: 
 	' Amendee...: 
 	' Details...: 
@@ -68,7 +74,7 @@ Version=9.5
 
 #Region  Activity Attributes
 	#FullScreen: False
-'	#IncludeTitle: False
+	#IncludeTitle: False
 #End Region  Activity Attributes
 
 #Region  Mandatory Subroutines & Data
@@ -78,7 +84,7 @@ Sub Process_Globals
 End Sub
 
 Sub Globals
-	Private bar As StdActionBar		' New title bar
+'	Private bar As StdActionBar		' New title bar
 	Private hc As hSelectItem		' This activity's helper class.
 End Sub
 
@@ -88,7 +94,7 @@ private Sub Activity_ActionBarHomeClick
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
-	modEposApp.InitializeStdActionBar(bar, "bar")
+'	modEposApp.InitializeStdActionBar(bar, "bar")
 	hc.Initialize(Activity)
 End Sub
 
@@ -102,7 +108,7 @@ End Sub
 
 Sub Activity_Resume
 	
-	Activity.Title = modEposApp.FormatSelectedCentre 'TODO could this be moved to the helper?
+'	Activity.Title = modEposApp.FormatSelectedCentre 'TODO could this be moved to the helper?
 End Sub
 #End Region  Mandatory Subroutines & Data
 

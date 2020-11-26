@@ -183,8 +183,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 187                                                                                                                                                                      
-	' Date......: 22/11/20
+	' Release...: 188                                                                                                                                                                      
+	' Date......: 26/11/20
 	'
 	' History
 	'
@@ -264,6 +264,21 @@ Version=10.2
 	'             Forms: frmCardEntry_v8, frmPlaceOrder_v4.
 	'			    Mod: hPlaceOrder_v25.
 	'		
+	' Date......: 26/11/20
+	' Release...: 188
+	' Overview..: Bugfix: #0466 Android phone restart after screen locked. 
+	'			   Issue: #0561(In-progress About page only Viewing website information. 
+	'              Issue: #0563 Place order slider thumb colour now orange (also orange border around tablenumber).
+	'             Bugfix: (Android only) Select Centre - not scrolling to top list after refresh.
+	'			  Bugfix: #0565 Place order screen message and order buttons not enabled correctly.
+	'             Bugfix: #0566 Home screen not displaying size in order information.
+	'			     Mod: More pages support new Style UI (About, PlaceOrder and SelectItem screens).
+	' 	     	     Mod: Usage of null for strings and objects removed.
+	' Amendee...: D Morris
+	' Details...:   Mod: hAbout_v7, hValidateCentreSelection2_v8, hHome_v10, hSelectPlayCentre3_v8, About_v4, aPlaceOrder_v11,
+	'				       hPlaceOrder_v26, clsDataBaseTables_v11, ModEposApp_v28.
+	'			  Forms: frmAbout_v3. frmPlaceOrder_v5, frmSelectItem_v6.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -277,8 +292,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 187
-	#VersionName: 1.0.0.187
+	#VersionCode: 188
+	#VersionName: 1.0.0.188
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

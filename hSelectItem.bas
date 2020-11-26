@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hSelectItem
-	' Release...: 12
-	' Date......: 17/07/20
+	' Release...: 12-
+	' Date......: 25/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -25,7 +25,7 @@ Version=9.5
 	' Release...: 8
 	' Overview..: Bugfix: #0332 - Back button problem.
 	' Amendee...: D Morris
-	' Details...:  Mod: lCloseActivity().
+	' Details...:  Mod: ExitToPlaceOrder().
 	'
 	' Date......: 02/04/20
 	' Release...: 9
@@ -57,6 +57,15 @@ Version=9.5
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..: Changed to new style UI.
+	' Amendee...: D Morris
+	' Details...: Mod: lblTitle removed.
+	'             Mod: ICloseActivity() renamed to ExitToPlaceOrder().
+	'			  Mod: replace lvwItemSize ursListView with customListView.
+	'			  Mod: GetSizeName() now used version of clsDataBaseTables.
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..:
 	' Amendee...: 
 	' Details...: 
@@ -70,8 +79,6 @@ Version=9.5
 Sub Class_Globals
 	' X-platform related.
 	Private xui As XUI							'ignore
-	
-	Private notification As clsNotifications	' Handles notifications
 	
 	' Local constants
 	Private Const BTNTEXT_UPDATE As String = "Update Item" 	' Text displayed on btnAddUpdateItem when updating an existing order item.
@@ -105,20 +112,22 @@ Sub Class_Globals
 #End If
 	Private btnTopLevel As SwiftButton 			' The button which returns the user to the top (Main Category) level of the selection tree.
 	Private btnUpOneLevel As SwiftButton		' The button which returns the user to the previous selection level.
+	Private imgSuperorder As B4XView 			' SuperOrder header icon.
 	Private lblQty As B4XView 					' The label which displays the currently selected item quantity.
 	Private lblSelection As B4XView 			' The label which displays the current selection and its 'path' (parent categories).
-#if B4A
-	Private lblTitle As B4XView 				' The label which displays whether the activity will currently add or update an item.
-#end if
+'#if B4A
+'	Private lblTitle As B4XView 				' The label which displays whether the activity will currently add or update an item.
+'#end if
 	Private lblTotal As B4XView 				' The label which displays the item subtotal (item's individual cost * quantity).
-#if B4A
 	Private lvwSelectItem As CustomListView		' The listview used to display the selection choices available at the current level.
+#if B4A
+'	Private lvwSelectItem As CustomListView		' The listview used to display the selection choices available at the current level.
 #else
-	Private lvwItemSize As usrListView 			' The listview which can be shown to allow the user to select the desired item size option.
-'	Private lvwSelectItem As usrListView 
-	Private lvwSelectItem As CustomListView 	' The listview used to display the selection choices available at the current level.
+	Private lvwItemSize As CustomListView 		' The listview which can be shown to allow the user to select the desired item size option.
+'	Private lvwSelectItem As CustomListView 	' The listview used to display the selection choices available at the current level.
 	Private pnlSizeMask As Panel 				' The full-screen-size panel, used to block controls beneath the Size listview from being clicked.
 #End If
+	Private pnlHeader As B4XView				' Page header panel.
 	Private pnlItemDetails As B4XView 			' The panel which holds the views used to change the selected item's size option or quantity.
 #if B4A
 	'TODO Need a B4X version of spinner?
@@ -128,11 +137,13 @@ Sub Class_Globals
 	' TODO need a spinner for B4I.
 #End If
 	
+	' Misc objects	
+	Private notification As clsNotifications	' Handles notifications
 End Sub
 
 ' Cancel the Select Item process.
 Public Sub CancelSelectItem
-	lCloseActivity
+	ExitToPlaceOrder
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -183,7 +194,7 @@ Private Sub btnAddUpdateItem_Click
 		 ' See the duplicateMsg_Click() handler for continuation, as it should only proceed when the user has dismissed the message
 #End If
 	End If
-	lCloseActivity
+	ExitToPlaceOrder
 End Sub
 
 ' Handles the Click event of the Decrement Quantity button.
@@ -199,7 +210,7 @@ End Sub
 Private Sub btnDelete_Click
 	' TODO - Should there be a confirmation request at this point?
 	Starter.customerOrderInfo.orderList.RemoveAt(mEditingOrderItem)
-	lCloseActivity
+	ExitToPlaceOrder
 End Sub
 
 ' Handles the Click event of the Increment Quantity button.
@@ -216,7 +227,6 @@ Private Sub btnItemSize_Click
 		lPopulateSizeDropdown		
 	End If
 End Sub
-
 
 ' IPhone press on more size button.
 Sub btnMoreSizes_Click
@@ -237,13 +247,21 @@ End Sub
 
 ' Asynchronously handles a button being pressed on the "duplicate item" message box invoked in btnAddUpdateItem_Click()
 Private Sub duplicateMsg_Click(ButtonText As String)
-	lCloseActivity ' Message has been read, just close the form
+	ExitToPlaceOrder ' Message has been read, just close the form
+End Sub
+
+
+' Handle back button
+private Sub lblBackButton_Click
+'	If enableViews = True Then
+	ExitToPlaceOrder
+'	End If
 End Sub
 
 #if B4I
 ' Handles the ItemClick event of the Item Size listview.
-Private Sub lvwItemSize_ItemClick(Value As Object, Index As Int)
-	mSelectedSizePriceKey = Value
+Private Sub lvwItemSize_ItemClick(index As Int, value As Object)     ' (Value As Object, Index As Int)
+	mSelectedSizePriceKey = value
 	btnItemSize.Text = GetSizeName(mSelectedSizePriceKey)
 	lUpdateSubtotalLabel
 	pnlSizeMask.Visible = False
@@ -281,9 +299,9 @@ End Sub
 Public Sub pEditItem(orderIndex As Int)
 	' Set up the form's views as required
 	mEditingOrderItem = orderIndex
-#if B4A
-	lblTitle.Text = "Editing Item"
-#end if
+'#if B4A
+'	lblTitle.Text = "Editing Item"
+'#end if
 	btnDelete.mBase.Visible = True
 	btnAddUpdateItem.xLBL.Text = BTNTEXT_UPDATE
 	btnAddUpdateItem.mBase.Visible = True
@@ -367,12 +385,12 @@ End Sub
 
 #Region  Local Subroutines
 
-' Fully closes this activity, and returns to the ShowOrder activity.
-Private Sub lCloseActivity
+' Fully closes this activity, and returns to the Place order activity.
+Private Sub ExitToPlaceOrder
 #if B4A
 	StartActivity(aPlaceOrder)
 #else ' B4I
-	xSelectItem.ClrPageTitle' fixes page title operation.
+'	xSelectItem.ClrPageTitle' fixes page title operation.
 	xPlaceOrder.Show
 #End If
 End Sub
@@ -380,15 +398,16 @@ End Sub
 #if B4I
 ' Returns the name text value of the specified goods item size.
 Private Sub GetSizeName(sizePriceKey As Int) As String
-	Dim rtnName As String = "Unknown"
-	Dim sizePriceObj As clsSizePriceTableRec = Starter.DataBase.GetSizePriceRec(sizePriceKey)
-	For Each sizePrice As sizePriceTableRec In mItemSizePriceTable
-		If sizePrice.sizeOptKey = sizePriceObj.size Then
-			rtnName = sizePrice.sizePrice
-			Exit
-		End If
-	Next
-	Return rtnName
+'	Dim rtnName As String = "Unknown"
+'	Dim sizePriceObj As clsSizePriceTableRec = Starter.DataBase.GetSizePriceRec(sizePriceKey)
+'	For Each sizePrice As sizePriceTableRec In mItemSizePriceTable
+'		If sizePrice.sizeOptKey = sizePriceObj.size Then
+'			rtnName = sizePrice.sizePrice
+'			Exit
+'		End If
+'	Next
+'	Return rtnName
+	Return Starter.DataBase.GetSizeTextForSizePriceValue(sizePriceKey)
 End Sub
 #End If
 
@@ -414,13 +433,15 @@ End Sub
 ' Initialize the locals etc.
 private Sub InitializeLocals
 '	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
-
 #if B4A
 #else ' B4I
 	pnlSizeMask.Visible = False ' Just in case
 #End If
 	pStartSelectItem
 	notification.Initialize
+	Dim bt As Bitmap = imgSuperorder.GetBitmap
+	imgSuperorder.SetBitmap(bt.Resize(imgSuperorder.Width, imgSuperorder.Height, True))
+	imgSuperorder.Top = (pnlHeader.Height - imgSuperorder.Height) / 2   ' Centre SuperOrder vertically.
 End Sub
 
 #if B4I
@@ -428,7 +449,8 @@ End Sub
 private Sub lPopulateSizeDropdown
 	lvwItemSize.Clear
 	For Each sizeRec As sizePriceTableRec In mItemSizePriceTable
-		lvwItemSize.AddItem(sizeRec.sizePrice, "", sizeRec.sizePriceKey)
+	'	lvwItemSize.AddItem(sizeRec.sizePrice, "", sizeRec.sizePriceKey)
+		lvwItemSize.AddTextItem(sizeRec.sizePrice & CRLF, sizeRec.sizePriceKey)
 	Next
 	pnlSizeMask.Visible = True
 End Sub
@@ -448,21 +470,21 @@ Private Sub lPopulateListview(selectLevel As Int)
 			lUpdateSelectionLabel
 			itemList = Starter.DataBase.SortSubCat(mSelectedMainCatKey)
 			For Each subCat As clsSubCategoryTableRec In itemList
-#if B4A
+'#if B4A
+'				lvwSelectItem.AddTextItem(subCat.value, subCat.key)
+'#else ' B4I
 				lvwSelectItem.AddTextItem(subCat.value, subCat.key)
-#else ' B4I
-				lvwSelectItem.AddTextItem(subCat.value, subCat.key)
-#End If
+'#End If
 			Next
 		Case LEVEL_GROUPCAT
 			lUpdateSelectionLabel
 			itemList = Starter.DataBase.SortGrpCat(mSelectedSubCatKey, mSelectedMainCatKey)
 			For Each groupCat As clsGroupCategoryTableRec In itemList
-#if B4A
+'#if B4A
+'				lvwSelectItem.AddTextItem(groupCat.value, groupCat.key)
+'#else ' B4I
 				lvwSelectItem.AddTextItem(groupCat.value, groupCat.key)
-#else ' B4I
-				lvwSelectItem.AddTextItem(groupCat.value, groupCat.key)
-#End If
+'#End If
 			Next
 		Case LEVEL_GOODSDESC
 			lUpdateSelectionLabel
@@ -480,8 +502,7 @@ Private Sub lPopulateListview(selectLevel As Int)
 #if B4A
 			spnItemSize.Clear
 #End If
-			Dim itemInStock As Boolean = False
-			
+			Dim itemInStock As Boolean = False	
 			' TODO Does b4A have equivalent to .net list.find(Predicate<T>) type operation?
 			For Each item As sizePriceTableRec In mItemSizePriceTable ' Loop to check if any item is in-stock
 				If item.inStock Then
@@ -528,15 +549,15 @@ Private Sub lPopulateListview(selectLevel As Int)
 				lGoUpALevel
 			End If
 	End Select
-#if B4A
+'#if B4A
+'	If lvwSelectItem.Size = 0 Then
+'		lvwSelectItem.AddTextItem( NO_ITEMS_TEXT & NO_ITEMS_TEXT, 0)	' TODO Check this line is ok.
+'	End If
+'#else ' B4I
 	If lvwSelectItem.Size = 0 Then
 		lvwSelectItem.AddTextItem( NO_ITEMS_TEXT & NO_ITEMS_TEXT, 0)	' TODO Check this line is ok.
 	End If
-#else ' B4I
-	If lvwSelectItem.Size = 0 Then
-		lvwSelectItem.AddTextItem( NO_ITEMS_TEXT & NO_ITEMS_TEXT, 0)	' TODO Check this line is ok.
-	End If
-#End If
+'#End If
 End Sub
 
 ' Changes the selection level to the top (Main) level, clearing out all lower levels' data.
@@ -551,11 +572,11 @@ Private Sub lShowTopLevelOnListView
 	lvwSelectItem.Clear
 	Dim itemList As List = Starter.DataBase.mainCatTable
 	For Each entry As clsMainCategoryTableRec In itemList
-#if B4A
+'#if B4A
+'		lvwSelectItem.AddTextItem(entry.value, entry.key)
+'#else ' B4I
 		lvwSelectItem.AddTextItem(entry.value, entry.key)
-#else ' B4I
-		lvwSelectItem.AddTextItem(entry.value, entry.key)
-#End If
+'#End If
 	Next
 	btnAddUpdateItem.mBase.Visible = False
 	pnlItemDetails.Visible = False
