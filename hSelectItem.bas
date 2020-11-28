@@ -10,7 +10,7 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hSelectItem
-	' Release...: 12-
+	' Release...: 13
 	' Date......: 25/11/20
 	'
 	' History
@@ -55,8 +55,8 @@ Version=9.5
 	' Amendee...: D Morris.
 	' Details...: Mod: Buttons changed to swiftbuttons.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 25/11/20
+	' Release...: 13
 	' Overview..: Changed to new style UI.
 	' Amendee...: D Morris
 	' Details...: Mod: lblTitle removed.

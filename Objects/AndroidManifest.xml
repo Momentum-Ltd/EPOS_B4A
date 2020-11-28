@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="188"
-	android:versionName="1.0.0.188"
+	android:versionCode="189"
+	android:versionName="1.0.0.189"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>
@@ -16,12 +16,12 @@
 	android:maxSdkVersion="18" />
 	<permission android:name="arena.Epos.permission.C2D_MESSAGE"
 	  android:protectionLevel="signature" />
-	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 	<uses-permission android:name="android.permission.VIBRATE"/>
 	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
@@ -157,49 +157,7 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
-			android:name=".about"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".aplaceorder"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".acardentry"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".ahome"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".aselectitem"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
 			android:name=".aselectplaycentre3"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".asyncdatabase"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -231,10 +189,6 @@
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
-		<service android:name=".firebasemessaging">
-		</service>
-		<receiver android:name=".firebasemessaging$firebasemessaging_BR">
-		</receiver>
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
@@ -242,6 +196,59 @@
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".validatecentreselection2"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".validatedevice"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".about"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".acardentry"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".ahome"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".aplaceorder"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".aselectitem"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<service android:name=".firebasemessaging">
+		</service>
+		<receiver android:name=".firebasemessaging$firebasemessaging_BR">
+		</receiver>
 		<service android:name=".srvnotification">
 		</service>
 		<receiver android:name=".srvnotification$srvnotification_BR">
@@ -280,20 +287,6 @@
 		</service>
 		<receiver android:name=".teststartat$teststartat_BR">
 		</receiver>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".validatecentreselection2"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".validatedevice"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
 		<service android:name=".httputils2service">
 		</service>
 		<receiver android:name=".httputils2service$httputils2service_BR">

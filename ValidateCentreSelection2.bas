@@ -65,8 +65,6 @@ Sub Activity_Create(FirstTime As Boolean)
 End Sub
 
 Sub Activity_Resume
-	' This line causes problems by call ValidateSelection twice - however if removed the image is missing
-	'		after the Centre WebSite is shown.
 	ValidateSelection(Starter.selectedCentreLocationRec) ' Calls this to refresh the page with Centre info.
 End Sub
 

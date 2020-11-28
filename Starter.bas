@@ -11,8 +11,8 @@ Version=7.3
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 88
-	' Date......: 14/11/20
+	' Release...: 89
+	' Date......: 28/11/20
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -91,6 +91,12 @@ Version=7.3
 	' Amendee...: D Morris
 	' Details...:  Mod: Comments added statements calling activities "Calls an Activity".
 	'			   Mod: lHandleStatusListMsg() now only shows status list if the Home activity is visiable.
+	'		
+	' Date......: 28/11/20
+	' Release...: 89
+	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
+	' Amendee...: D Morris
+	' Details...: Mod: lHandleSyncDataResponse() now calls Home to handle response.
 	' 			  			    
 	' Date......: 
 	' Release...: 
@@ -645,7 +651,8 @@ End Sub
 
 ' Handles the Server's response to the menu (sync data).
 Private Sub lHandleSyncDataResponse(syncDataResponse As String)
-	CallSubDelayed2(aSyncDatabase, "pHandleSyncDbReponse", syncDataResponse) ' Calls an Activity
+'	CallSubDelayed2(aSyncDatabase, "pHandleSyncDbReponse", syncDataResponse) ' Calls an Activity
+	CallSubDelayed2(aHome, "HandleSyncDbResponse", syncDataResponse) ' Calls Home Activity
 End Sub
 
 ' Deserialises the specified Update Customer XML string, and uses it to update the locally-stored customer info.

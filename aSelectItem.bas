@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: aSelectItem
-	' Release...: 7
-	' Date......: 11/05/20
+	' Release...: 8
+	' Date......: 25/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -58,8 +58,8 @@ Version=9.5
 	' Amendee...: D Morris.
 	' Details...:  Mods: Activity_Pause().
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 25/11/20 
+	' Release...: 8
 	' Overview..: Changes to support new style UI. 
 	' Amendee...: D Morris
 	' Details...: Mods: References to Tilebar removed.

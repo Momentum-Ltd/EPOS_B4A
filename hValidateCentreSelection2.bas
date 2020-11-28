@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 8
-	' Date......: 26/11/20
+	' Release...: 9
+	' Date......: 28/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -51,7 +51,7 @@ Version=10
 	' Amendee...: D Morris.
 	' Details...: Mod:  lExitToSyncData() rename to ExitToSyncData().
 	'					ExitToSyncData() clears the table number.
-	'					IExitBackToSelectCentre() renamed to ExitBackToSelectCentre().
+	'					IExitToSelectCentre() renamed to ExitToSelectCentre().
 	'				    IStartSignOnToCentre() renamed to StartSignOnToCentre().
 	'					lWebSignedOntoCentre() renamed to WebSignedOntoCentre().
 	' 
@@ -68,7 +68,15 @@ Version=10
 	' Release...: 8
 	' Overview..: Bugfix: #0466 Android phone restart after screen locked. 
 	' Amendee...: D Morris
-	' Details...: Mod: ExitBackToSelectCentre() clears centreId from centre information.
+	' Details...: Mod: ExitToSelectCentre() clears centreId from centre information.
+	'		
+	' Date......: 28/11/20
+	' Release...: 9
+	' Overview..: Issue: #0567 Download/sync menu now handled by the Validate centre activity.
+	' Amendee...: D Morris
+	' Details...:    Mod: ExitToSyncData() and renamed to ExitToCentreHomePage().
+	'				 Mod: HandleConnectToServerResponse() and HandleOpenTabConfirmResponse() call ExitToCentreHomePage().
+	'				 Mod: ExitToCentreHomePage() now calls Home activity/page.
 	' 
 	' Date......: 
 	' Release...: 
@@ -115,7 +123,7 @@ Sub Class_Globals
 	Private progressbox As clsProgress							' Progress box
 	Private tmrConnectToCentreTimout As Timer					' Connect to centre timeout
 	Private selectCentreDetails As clsEposWebCentreLocationRec	' Storage for selected centre.
-		
+'	Private hSync As hSyncDatabase								' Helper to handle sync database.
 
 End Sub
 
@@ -135,7 +143,7 @@ End Sub
 ' Customer rejects the Centre selected.
 Sub btnCancel_Click()
 	If enableViews = True Then
-		ExitBackToSelectCentre		
+		ExitToSelectCentre		
 	End If
 End Sub
 
@@ -156,13 +164,13 @@ Sub ConnnectToCentreTimeout_tick
 	tmrConnectToCentreTimout.Enabled = False
 	xui.MsgboxAsync("Unable to communicate with the selected centre - please retry or select another centre.", "Timeout Error")
 	wait for Msgbox_Result(result As Int)
-	ExitBackToSelectCentre
+	ExitToSelectCentre
 End Sub
 
 ' Handle back button
 private Sub lblBackButton_Click
 	If enableViews = True Then
-		ExitBackToSelectCentre		
+		ExitToSelectCentre		
 	End If
 End Sub
 
@@ -204,12 +212,12 @@ public Sub HandleConnectToServerResponse(centreSignonOk As Boolean)
 	If centreSignonOk Then
 		wait for (WebSignedOntoCentre) complete (signonOk As Boolean)
 		If signonOk Then
-			ExitToSyncData
+			ExitToCentreHomePage
 		Else
-			ExitBackToSelectCentre
+			ExitToSelectCentre
 		End If
 	Else
-		ExitBackToSelectCentre
+		ExitToSelectCentre
 	End If
 End Sub
 
@@ -218,11 +226,16 @@ Public Sub HandleOpenTabConfirmResponse
 	tmrConnectToCentreTimout.Enabled = False ' Stop the timeout timer
 	wait for (WebSignedOntoCentre) complete (signonOk As Boolean)
 	If signonOk Then
-		ExitToSyncData
+		ExitToCentreHomePage
 	Else
-		ExitBackToSelectCentre
+		ExitToSelectCentre
 	End If
 End Sub
+
+'' Handles the response from the Server to the Sync Database command.
+'Public Sub HandleSyncDbReponse(syncDbResponseStr As String)
+'	hSync.HandleSyncDbReponse(syncDbResponseStr)
+'End Sub
 
 ' Main method.
 ' centreId is the selected centreId.
@@ -253,7 +266,8 @@ End Sub
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
 	imgCentrePicture.Visible = False	' Clear out old image for next time.
-	ProgressHide		' Just in-case.
+	ProgressHide						' Just in-case.
+'	hSync.OnClose						
 End Sub
 
 #End Region  Public Subroutines
@@ -261,7 +275,7 @@ End Sub
 #Region  Local Subroutines
 
 ' Exits back to Select Centre - usually called when an error has occurred.
-private Sub ExitBackToSelectCentre
+private Sub ExitToSelectCentre
 	ProgressHide
 	tmrConnectToCentreTimout.Enabled = False
 	Starter.myData.centre.centreId = 0 	' This clears the centre information to it is not used after returning from Background
@@ -272,15 +286,20 @@ private Sub ExitBackToSelectCentre
 #End If
 End Sub
 
-' Exits to Sync Data 
-private Sub ExitToSyncData
+' Exits to Home Page
+private Sub ExitToCentreHomePage
 	ProgressHide
 	Starter.customerOrderInfo.tableNumber = 0
 	tmrConnectToCentreTimout.Enabled = False
+'#if B4A
+'	CallSubDelayed(aSyncDatabase, "pSyncDataBase")
+'#Else
+'	xSyncDatabase.Show
+	'#End If
 #if B4A
-	CallSubDelayed(aSyncDatabase, "pSyncDataBase")
-#Else
-	xSyncDatabase.Show
+	StartActivity(aHome)
+#else
+	xHome.Show
 #End If
 End Sub
 
@@ -290,6 +309,7 @@ private Sub InitializeLocals
 	selectCentreDetails.Initialize
 	tmrConnectToCentreTimout.Initialize("ConnnectToCentreTimeout", DFT_CONNECTION_TIMEOUT)
 	ViewControl(True) ' Enable controls
+'	hSync.Initialize()
 End Sub
 
 ' Hide the process box

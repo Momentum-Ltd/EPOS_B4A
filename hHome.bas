@@ -10,76 +10,17 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 10
-	' Date......: 26/11/20
+	' Release...: 11
+	' Date......: 28/11/20
 	'
 	' History
 	' Date......: 08/08/20
 	' Release...: 1
 	' Created by: D Morris 
 	' Details...: based on hShowOrderStatusList_v19 and hTaskSelect_v28.
-	' 
-	' Date......: 11/08/20
-	' Release...: 2
-	' Overview..: Revised how controls are inhibited.
-	' Amendee...: D Morris.
-	' Details...: Mod: controls now inhibited/enabled when Show/HideProgress() called.
 	'
-	' Date......: 28/09/20
-	' Release...: 3
-	' Overview..: Bugfix: #0498 - Problem with switching centres.
-	' Amendee...: D Morris
-	' Details...:  Added: RefreshPage() code moved from LocalInitailize().
-	'		         Mod: LocalInitialize() code moved to RefreshPage().
-	'		
-	' Date......: 02/10/20
-	' Release...: 4
-	' Overview..: Bugfix: #0500 - Validate Centre screen not showing picture after communication timeout.
-	' Amendee...: D Morris
-	' Details...: Mod: progressbox_Timeout() support for Starter selectedCentreLocationRec.
-	'			
-	' Date......: 15/10/20
-	' Release...: 5
-	' Overview..: Bugfix: #0523 - Showing "Order #0" on manually entered orders.
-	'			  Bugfix: #0525 - Crashing when "No Active Orders" clicked.
-	' Amendee...: D Morris
-	' Details...: Mod: pUpdateOrderStatus() code fixes (not sure why Android version worked!) 
-	'			  Mod: pUpdateOrderStatus() code modified so it don't request the status list.
-	'			  Bugfix: pHandleOrderStatusList() - invalidItem not initialized!	
-	'			  Bugfix: pUpdateOrderStatus() - null object in "No active orders".	
-	'
-	' Date......: 02/11/20
-	' Release...: 6
-	' Overview..: Bugfix: (iOS) #0534 Order status list missing updates.
-	' Amendee...: D Morris.
-	' Details...: Mod: (for iOS) - timer to update the order status list periodically.
-	'
-	' Date......: 08/11/20
-	' Release...: 7
-	' Overview..:  Issue #0499 Fix progress circles truncation. 
-	'			   Issue: #0544 Slow screen rebuild after refresh.
-	' Amendee...: D Morris
-	' Details...: Mod: 	pSendRequestForOrderStatusList() - Clear list command removed.
-	'			  Issue #0521 Refresh icon touch area increased.
-	'             Mod: pnlShowDialog rename to pnlLoadingTouch.
-	'			
-	' Date......: 16/11/20
-	' Release...: 8
-	' Overview..: ListViews changed to CustomListViews.
-	'             Bugfix: #0535 Display order information - status and position incorrect.
-	'			   Issue: #0553 Android Tablet Home screen order list too small.
-	'			  Bugfix: #0535 Order information (Status and queue position incorrect). 
-	' Overview..: ListViews changed to CustomListViews.
-	' Amendee...: D Morris
-	' Details...:  Mode: B4A ListView changed to CustomListView (and associated code).
-	'				Mod: B4A Order list backgroud change to grey (as the iOS).
-	'             Bugfix: (#0535) - pHandleOrderInfo() status and position removed. And report reworded.
-	'		
-	' Date......: 20/11/20
-	' Release...: 9
-	' Overview..: Issue: #0451 Replace "Default Card" with "Saved Card".
-	' Amendee...: D Morris
-	' Details...: Mod: QueryPayment() shown text fixed.
+	' Versions
+	' 	v2 - 10 see v10.
 	'		
 	' Date......: 26/11/20
 	' Release...: 10
@@ -90,7 +31,15 @@ Version=10
 	' Amendee...: D Morris
 	' Details...: Mod: btnLeaveCentre_Click() clears centreId from centre information. 
 	'			  Mod: pHandleOrderInfo() - code fixed to include the size in order information.
-	'			  
+	'		
+	' Date......: 28/11/20
+	' Release...: 11
+	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
+	' Amendee...: D Morris
+	' Details...: Mod: lStartPlaceOrder() check if sync menu required.
+	'			Added: syncDbDatabase class.
+	'		   Public: HandleSyncDbReponse().
+	'			  Mod: InitializeLocals(), OnClose() supports syncDbDatabase.
 	'			
 	' Date......: 
 	' Release...: 
@@ -108,9 +57,9 @@ Sub Class_Globals
 	
 	' Local variables
 	Private displayUpdateInProgress As Boolean			' Indicates updating the displayed order status list is in-progress.
+	Private enableViews As Boolean						' When set views (controls) are enabled.	
 	Private mPressedOrderStatus As clsEposOrderStatus 	' Stores the data of the order that was most recently-clicked in the listview
-	Private enableViews As Boolean						' When set views (controls) are enabled.
-	
+		
 	' Local constants
 	Private Const DEFAULT_TIME_STAMP As Int = 1
 #if B4I
@@ -125,17 +74,19 @@ Sub Class_Globals
 	Private lblBackButton As B4XView					' Back button
 	Private lblCentreName As B4XView					' Centre name	
 	Private lblShowOrder As Label						' Instruction to show order information.
+	Private lvwOrderSummary As CustomListView			' The listview which displays all the customer's orders.	
 	Private pnlHeader As B4XView						' Header panel.
-	Private lvwOrderSummary As CustomListView			' The listview which displays all the customer's orders.
-	Private pnlLoadingTouch As B4XView					' Clickable show loading circle display progress dialog.
+	Private pnlLoadingTouch As B4XView					' Clickable region around loading circle display progress dialog.
+	Private pnlRefreshTouch As B4XView					' Clickabke region around the refrest order list button.
 	
 	' Misc objects
 	Private notification As clsNotifications			' Handles notifications	
 	Private progressbox As clsProgress					' Progress indicator and box
+	Private syncDb As clsSyncDatabase					' Handles synchronization of database.	
 #if B4I
 	Private tmrUpdateOrderStatus As Timer				' Timer to handle updating the order status.
 #End If
-	Private pnlRefreshTouch As B4XView
+
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -157,17 +108,7 @@ Private Sub btnLeaveCentre_Click
 		xui.Msgbox2Async("Are you sure?", "Leaving this centre", "Yes", "", "No", Null)
 		Wait For msgbox_result(result As Int)
 		If result = xui.DialogResponse_Positive Then
-			ExitBackTSelectPlayCentre
-'			Starter.myData.centre.signedOn = False ' log off centre.
-'			Starter.myData.centre.centreId = 0 	' This clears the centre information to it is not used after returning from Background
-'			Dim msg As String = modEposApp.EPOS_DISCONNECT & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
-'#if B4A
-'			CallSubDelayed2(Starter, "pSendMessage", msg )
-'			StartActivity(aSelectPlayCentre3)
-'#else 'B4I
-'			Main.SendMessage(msg)
-'			frmXSelectPlayCentre3.Show				
-'#end if		
+			ExitToSelectPlayCentre
 		End If
 	End If
 End Sub
@@ -181,6 +122,12 @@ Private Sub btnPlaceOrder_Click
 		lStartPlaceOrder	
 	End If
 End Sub
+
+' Handles the Snyc database complete
+'private Sub syncDb_SyncComplete(ok As Boolean)
+'	Dim i As Int
+'	i = i +1
+'End Sub
 
 ' Handle back button
 private Sub lblBackButton_Click
@@ -295,7 +242,7 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 	If orderInfoObj.paid = False Then
 		payPrompt = "Pay order"
 	End If
-	xui.Msgbox2Async(msg, title, "OK", payPrompt, "", Null )
+	xui.Msgbox2Async(msg, title, "OK", payPrompt, "", Null ) ' necessary so Wait for is correct.
 	Wait For MsgBox_Result(Result As Int)
 	If Result = xui.DialogResponse_Cancel Then
 		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
@@ -371,22 +318,17 @@ Public Sub pHandleOrderStatusList(orderStatusStr As String)
 #End If
 End Sub
 
+' Handles the response from the Server to the Sync Database command.
+Public Sub HandleSyncDbReponse(syncDbResponseStr As String)
+	syncDb.HandleSyncDbReponse(syncDbResponseStr)
+End Sub
+
 ' Handles customer request to leave the Centre.
 Public Sub LeaveCentre
 	xui.Msgbox2Async("Are you sure?", "Leaving this centre", "Yes", "", "No", Null)
 	Wait For msgbox_result(result As Int)
 	If result = xui.DialogResponse_Positive Then
-'		OnClose
-'		Starter.myData.centre.signedOn = False ' log off centre.
-'		Dim msg As String = modEposApp.EPOS_DISCONNECT & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
-'#if B4A
-'		CallSubDelayed2(Starter, "pSendMessage", msg )
-'		StartActivity(aSelectPlayCentre3)
-'#else 'B4I
-'		Main.SendMessage(msg)
-'		frmXSelectPlayCentre3.Show				
-'#end if
-	ExitBackTSelectPlayCentre
+		ExitToSelectPlayCentre
 	End If
 End Sub
 
@@ -398,27 +340,48 @@ Public Sub OnClose
 #if B4I
 	tmrUpdateOrderStatus.Enabled = False
 #End If
+	If syncDb.IsInitialized Then
+		syncDb.Finished
+	End If
 End Sub
 
 ' Refreshes the page with new centre information.
 '  This method should be called each time a new centre is select.
 ' Note: When user clicks on Notification message (when the phone is locked) this sub is called
 ' 	via aHome.Activity_Resume() - it will check if valid centre information vailable and continue 
-'  	or return to the select play centre as appropriate (See Bugfix #0466). 
 Public Sub RefreshPage()
+'  	or return to the select play centre as appropriate (See Bugfix #0466). 
 	If Starter.myData.centre.centreId <> 0 Then ' Valid centre information?
 		Dim bt As Bitmap = Starter.myData.centre.pictureBitMap
 		imgCentrePicture.SetBitmap(bt.Resize(imgCentrePicture.Width, imgCentrePicture.Height, True))
-		lblCentreName.Text = Starter.myData.centre.name
-		pSendRequestForOrderStatusList
+		lblCentreName.Text = Starter.myData.centre.name		
+		If Starter.menuRevision <> 0 Then
+			pSendRequestForOrderStatusList		
+		Else
+'			syncDb.InvokeDatabaseSync ' This allows the Wait for in identify the Sender.
+'			Wait for syncDb_SyncComplete(ok As Boolean)
+			Wait for (syncDb.AsyncSyncDatabase) complete(ok As Boolean) ' uses the Async version
+			If ok Then
+				pSendRequestForOrderStatusList
+			Else ' Problem with Sync Database.
+				xui.Msgbox2Async("No response to request menu!, what would you like to do?", "Timeout Error", "Retry", "Try another Centre", "", Null)
+				Wait for msgbox_result (result As Int)
+				ViewControl(True)				
+				If result = xui.DialogResponse_Positive  Then ' Retry?
+					syncDb.Finished
+					syncDb.InvokeDatabaseSync
+				Else ' Try another centre
+					ExitToSelectPlayCentre
+				End If						
+			End If
+		End If
 	Else ' Not valid centre information.
-		ExitBackTSelectPlayCentre	
+		ExitToSelectPlayCentre	
 	End If
 End Sub
 
-' Sends to the Server the message which requests the customer's order status list.
+' Sends a request to Server for the customer's order status list.
 public Sub pSendRequestForOrderStatusList
-	' lvwOrderSummary.Clear ' Clear down previous displayed information.
 	ProgressShow("Getting your order status, please wait...")
 	Dim msg As String = modEposApp.EPOS_ORDERSTATUSLIST & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
 #if B4A
@@ -535,10 +498,13 @@ private Sub CheckConnection(handleProgress As Boolean) As ResumableSub
 	Return centreConnectedOk
 End Sub
 
-' Exit back to Select Play Centre screen.
-Private Sub ExitBackTSelectPlayCentre
+' Exit to Select Play Centre screen.
+Private Sub ExitToSelectPlayCentre
 	Starter.myData.centre.signedOn = False ' log off centre.
-	Starter.myData.centre.centreId = 0 	' This clears the centre information to it is not used after returning from Background
+	Starter.myData.centre.centreId = 0 	' This clears the centre information to ensure is not used after returning from Background
+	Starter.DataBase.Initialize
+	Starter.menuRevision = 0
+	lvwOrderSummary.Clear ' Clear down previous displayed information (Prevent it shown when page redisplayed).
 	Dim msg As String = modEposApp.EPOS_DISCONNECT & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
 #if B4A
 	CallSubDelayed2(Starter, "pSendMessage", msg )
@@ -553,16 +519,6 @@ End Sub
 private Sub InitializeLocals
 	indLoading.mBase.Visible = False
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
-#if B4A
-	' DH: The HACK below ensures the listview always displays black text
-'	lvwOrderSummary.SingleLineLayout.Label.TextColor = Colors.Black
-'	lvwOrderSummary.SingleLineLayout.Label.TextSize = 16
-'	lvwOrderSummary.TwoLinesLayout.Label.TextColor = Colors.Black
-'	lvwOrderSummary.TwoLinesLayout.Label.TextSize = 14
-'	lvwOrderSummary.TwoLinesLayout.SecondLabel.TextColor = Colors.Black
-'	lvwOrderSummary.TwoLinesLayout.SecondLabel.TextSize = 14
-	' End HACK
-#End If
 	notification.Initialize
 #if B4I
 	tmrUpdateOrderStatus.Initialize("tmrUpdateOrderStatus", DFT_UPDATE_ORDERSTATUS)
@@ -571,7 +527,9 @@ private Sub InitializeLocals
 	Dim bt As Bitmap = imgSuperorder.GetBitmap
 	imgSuperorder.SetBitmap(bt.Resize(imgSuperorder.Width, imgSuperorder.Height, True))
 	imgSuperorder.Top = (pnlHeader.Height - imgSuperorder.Height) / 2   ' Centre SuperOrder vertically.
+	syncDb.Initialize(Me, "syncDb")
 End Sub
+
 
 ' Checks if a centre is open
 private Sub IsCentreOpen(centreId As Int) As ResumableSub
@@ -681,11 +639,8 @@ Private Sub lStartPlaceOrder()
 		Else ' Menu error = resync data.
 			xui.MsgboxAsync("Your will need to resync your menu with the Centre.", "Menu out of date!" )
 			Wait For Msgbox_Result (Result As Int)
-#if B4A
-			CallSubDelayed(aSyncDatabase, "pSyncDataBase")
-#Else
-			xSyncDatabase.show
-#End If			
+
+			syncDb.InvokeDatabaseSync
 		End If
 	End If
 End Sub

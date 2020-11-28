@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: aHome
-	' Release...: 2
-	' Date......: 28/09/20
+	' Release...: 3
+	' Date......: 28/11/20
 	'
 	' History
 	' Date......: 08/08/20
@@ -24,6 +24,12 @@ Version=10
 	' Overview..: Bugfix: #0498 - Not displaying correct centre after switching (Second attempt to fix).
 	' Amendee...: D Morris
 	' Details...: Mod: Activity_Resume() - calls RefreshPage().
+	'		
+	' Date......: 28/11/20
+	' Release...: 3
+	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
+	' Amendee...: D Morris
+	' Details...: Added: Public HandleSyncDbReponse(). 
 	'
 	' Date......: 
 	' Release...: 
@@ -98,6 +104,11 @@ End Sub
 ' Populates the listview with each of the orders and their statuses in the specified XML string.
 Public Sub pHandleOrderStatusList(orderStatusStr As String)
 	hc.pHandleOrderStatusList(orderStatusStr)
+End Sub
+
+' Handles the response from the Server to the Sync Database command.
+Public Sub HandleSyncDbResponse(syncDbResponseStr As String)
+	hc.HandleSyncDbReponse(syncDbResponseStr)
 End Sub
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
