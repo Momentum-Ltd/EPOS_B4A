@@ -10,76 +10,25 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCreateAccount
-	' Release...: 17
-	' Date......: 25/07/20
+	' Release...: 17-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 02/05/20
-	' Release...: 1-
+	' Release...: 1
 	' Created by: D Morris (started 3/8/19)
 	' Details...: First release to support version tracking
 	'
 	' Versions
 	'    v2 - 8 see v9
-	'			
-	' Date......: 26/04/20
-	' Release...: 9
-	' Overview..: Bug #0186: Problem moving accounts support for new customerId (with embedded rev).
-	'			  Bug #0382: Spaces in passwords - now filtered out.
-	' Amendee...: D Morris.
-	' Details...:  Mod: SubmitNewCustomer()
-	'			   Mod: lCreateAccount() - code addded to create new FCM Token and prompt customer to activate account. 
-	'			   Bugfix 0382:ICreateAccount().
-	'
-	' Date......: 03/05/20
-	' Release...: 10
-	' Overview..: Added: #381 - Reveal passwords.	
+	'    v9 - 17 see v17
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..:  Issue: #0559 Email address now included in activation messages.
+	'			   Issue: #0561 Uses wb viewer for viewing website information. 
 	' Amendee...: D Morris
-	' Details...: Mod: Support for reveal passwords.
-	'
-	' Date......: 11/05/20
-	' Release...: 11
-	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
-	' Amendee...: D Morris.
-	' Details...:  Mod: OnClose().
-	'
-	' Date......: 13/05/20
-	' Release...: 12
-	' Overview..: Issue #0315 remove compiler warnings.
-	' Amendee...: D Morris.
-	' Details...: Mod: lReturnToCaller() not used so removed.
-	'
-	' Date......: 11/06/20
-	' Release...: 13
-	' Overview..: Mod: Support for second Server.
-	' Amendee...: D Morris.
-	' Details...:  Mod: SubmitNewCustomer().
-	'
-	' Date......: 09/07/20
-	' Release...: 14
-	' Overview..: Bugfix: Input filter causing system to lockup.
-	' Amendee...: D Morris.
-	' Details...:  Removed: TextChanged events - caused program to lockup.
-	'				   Mod: lCreateAccount() - check junk folder added.
-	'
-	' Date......: 19/07/20
-	' Release...: 15
-	' Overview..: Start on new UI theme (First phase changing buttons to Orange with rounded corners.. 
-	' Amendee...: D Morris.
-	' Details...: Mod: Buttons changed to swiftbuttons.
-	'
-	' Date......: 22/07/20
-	' Release...: 16
-	' Overview..: New UI Create Account.
-	' Amendee...: D Morris
-	' Details...: Mod: General changes.
-	'
-	' Date......: 25/07/20
-	' Release...: 17
-	' Overview..: Fix for frmCreatAccount moving up when return pressed. 
-	' Amendee...: D Morris
-	' Details...: Added: Public MoveUpEnterDetailsPanel(), Resize().
-	'			  Added: AddViewToKeyboard(), GetPanelWidth().
+	' Details...:  Mod: CreateNewAccount() email added to message.
 	'
 	' Date......: 
 	' Release...: 
@@ -103,16 +52,18 @@ Sub Class_Globals
 	
 	' View declarations
 	Private btnSubmit As SwiftButton				' Button to submit customer details.
+	Private btnWebClose As SwiftButton				' close web view button.
 	Private indLoading As B4XLoadingIndicator		' In progress indicator
 	Private lblBackbutton As B4XView				' Back button 
 	Private lblPrivacyPolicy As B4XView				'ignore Link to Privacy Policy
 	Private pnlEnterDetails As Panel				' Panel for entering details.	
 	Private pnlHeader As Panel						' Header panel
+	Private pnlWeb As B4XView						' Web view panel
 	Private txtEmailAddress As B4XFloatTextField	' Customer's email
 	Private txtName As B4XFloatTextField			' Customer's name.
-
 	Private txtPassword As B4XFloatTextField		' Customer's password
 	Private txtVerifyPassword As B4XFloatTextField	' Verify customer's password
+	Private web As WebView							' Web view
 
 	' Used to handle keyboard operation.
 #if B4I 
@@ -148,6 +99,11 @@ Private Sub btnSubmit_Click
 	End If
 End Sub
 
+' Close web view.
+Sub btnWebClose_Click
+	pnlWeb.Visible = False
+End Sub
+
 #if B4i
 ' User clicks on hide keyboard
 Sub Im_Hide_Click
@@ -167,7 +123,7 @@ End Sub
 
 ' Hyperlink to display privacy policy in Browser.
 private Sub lblPrivacyPolicy_Click
-	modEposApp.DisplayPrivacyNotice
+	HandlePrivacyPolicy(True)
 End Sub
 
 #if B4i
@@ -218,6 +174,11 @@ public Sub OnClose
 	If progressbox.IsInitialized = True Then
 		ProgressHide		' Just in-case.
 	End If
+	txtEmailAddress.Text = ""
+	txtVerifyPassword.Text = ""
+	txtPassword.Text = ""
+	txtVerifyPassword.text = ""
+	HandlePrivacyPolicy(False)
 End Sub
 
 #if B4i
@@ -284,9 +245,10 @@ private Sub CreateNewAccount As ResumableSub
 						If submitOk = True Then '
 							ProgressHide
 							Dim activateMsg As String = "Your account information has been accepted," & _
-														" we have sent an activation email to the submitted email address." & CRLF & CRLF & _
-														"Please click the activation link in the email To activation your account." & CRLF & _
-														"(If not found, check your Junk folder)"
+														" we have sent an activation email to your email address." & CRLF & _
+														"At :" & emailAddress & CRLF & CRLF & _
+														"Please click the activation link in the email to activation your account." & CRLF & _
+														"(IF NOT FOUND, CHECK YOUR JUNK FOLDER)"
 							xui.MsgboxAsync( activateMsg , "Please Activate Your Account")
 							wait for Msgbox_Result(tempResult As Int)
 							accountCreated = True
@@ -336,6 +298,13 @@ Private Sub GetPanelWidth As Int
 End Sub
 #End If
 
+' Will show or hide privacy policy
+Private Sub HandlePrivacyPolicy(show As Boolean)
+	web.LoadUrl(modEposWeb.URL_PRIVACY_POLICY)
+	pnlWeb.Visible = show
+	web.Visible = show
+End Sub
+
 #if B4i
 ' Hide the keyboard.
 Private Sub HideKeyboard
@@ -371,6 +340,9 @@ private Sub InitializeLocals
 	AddViewToKeyboard(txtVerifyPassword.TextField, gPnl_Hide)
 
 #End If
+	Private cs As CSBuilder
+	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
+	lblPrivacyPolicy.Text = cs
 End Sub
 
 ' Collects the customer data entered in the form's text fields and submits it to the Web API as a new customer entry.

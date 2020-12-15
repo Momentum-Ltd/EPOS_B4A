@@ -44,7 +44,7 @@ Sub Class_Globals
 	' flags
 	Private minDisplayElapsed As Boolean				' When set indicates the mininum show progress box time has elapased.
 	Private taskCompleted As Boolean					' Indicates the sync task is complete (it can exit when the minimum time has elapsed).
-	Private syncCompleteEventRaised As Boolean			' Indicates the sync complete event has been raised (required prevent race hazards with the timer)
+	Private syncCompleteEventRaised As Boolean			' Indicates the sync complete event has been raised (required to prevent race timer hazards)
 	
 	' Variables
 	Private menuItems As String							' Storage for the Centre menu item list.
@@ -114,7 +114,7 @@ End Sub
 
 ' Sends the Sync Database command to the Server.
 Public Sub InvokeDatabaseSync
-	tmrMinimumDisplayPeriod.Enabled = False ' Just in case wit was previously running.
+	tmrMinimumDisplayPeriod.Enabled = False ' Just in case the timer was previously running.
 	minDisplayElapsed = False				' Also re-initialize the flags.
 	taskCompleted = False
 	syncCompleteEventRaised = False

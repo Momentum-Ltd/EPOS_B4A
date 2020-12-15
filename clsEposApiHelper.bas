@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: clsEposApiHelper
-	' Release...: 9
-	' Date......: 11/06/20
+	' Release...: 9-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 01/07/19
@@ -74,7 +74,15 @@ Version=9.01
 	' Amendee...: D Morris.
 	' Details...:  Mod: CheckCustomerEmailAndPassword(), IncrementCustomerIdRevision(), CheckMenuRevision(),
 	'					 GetCustomerId(), GetCustomerInfo(), SendPasswordEmail(), UpdateCustomerInfo(),
-	'					 QueryUpdateDeviceType(), QueryUpdateFcm(),
+	'					 QueryUpdateDeviceType(), QueryUpdateFcm().
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: 
+	' Amendee...: D Morris
+	' Details...: Mod: Old commented out code removed.
+	'			  Added: IsCustomerActivated(), CustomerMustActivate(), IsInternetAvailable() and CheckWebServerStatus().
+	'			  Added: GetCustomerEmail().
 	'
 	' Date......: 
 	' Release...: 
@@ -89,6 +97,9 @@ Version=9.01
 Sub Class_Globals
 	' X-platform related.
 	Private xui As XUI		'Ignore
+	
+	' Constants
+	Private const DFT_ONLINE_TIMEOUT As Int	= 7000		' Timeout on check for server on-line (and internet) - in msecs.
 End Sub
 
 #End Region  Mandatory Subroutines & Data
@@ -108,10 +119,6 @@ public Sub CheckCustomerEmailAndPassword(email As String, password As String) As
 	Dim emailPwResult As Int = -1
 	
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-'	job.Download("http://www.superord.co.uk/api/customer?email=" & email & "&pw=" & password)
-'	job.Download(modEposWeb.URL_CUSTOMER_API & "/" & modEposWeb.BuildApiCustomerId() & _
-'						 "?" & modEposWeb.API_EMAIL & "=" & email & _
-'						 "&" & modEposWeb.API_PASSWORD  & "=" & password)
 	job.Download(Starter.server.URL_CUSTOMER_API & "/" & modEposWeb.BuildApiCustomerId() & _
 						 "?" & modEposWeb.API_EMAIL & "=" & email & _
 						 "&" & modEposWeb.API_PASSWORD  & "=" & password)
@@ -123,30 +130,56 @@ public Sub CheckCustomerEmailAndPassword(email As String, password As String) As
 	Return emailPwResult
 End Sub
 
-' Increments the customer's revision and returns the new api Customer ID.
-' returns new apiCustomerId if email and password are ok (else -1: both wrong or 0: email ok).
-Public Sub IncrementCustomerIdRevision(email As String, password As String) As ResumableSub
-	Dim apiCustomerId As Int = -1
-	
-	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-'	job.Download("http://www.superord.co.uk/api/customer?EMAIL=" & email & "&PW=" & password & "&UPD=TRUE")
-'	Dim msg As String = modEposWeb.URL_CUSTOMER_API & _
-'						"?" & modEposWeb.API_EMAIL & "=" & email & _
-'						"&" & modEposWeb.API_PASSWORD  & "=" & password & _
-'						"&" & modEposWeb.API_INCREV & "=TRUE"
-	Dim msg As String = Starter.server.URL_CUSTOMER_API & _
-						"?" & modEposWeb.API_EMAIL & "=" & email & _
-						"&" & modEposWeb.API_PASSWORD  & "=" & password & _
-						"&" & modEposWeb.API_INCREV & "=TRUE"
-	job.Download(msg)
+' Checks Web Server status (i.e. Internet connected and Server is on-line).
+' Returns 1 if Server online
+' Returns 0 if not on-line (Internet is ok)
+' Returns -1 if No internet
+public Sub CheckWebServerStatus As ResumableSub
+	Dim internetStatus As Int   = -1 ' Default to both Server and Internet down.
+	wait for (IsInternetAvailable) complete (ok As Boolean)
+	If ok Then
+		Dim job As HttpJob : job.Initialize("UseWebApi", Me)
+		job.Download(Starter.server.URL_CENTRE_API)
+		job.GetRequest.Timeout = DFT_ONLINE_TIMEOUT' (timout is set before the downloads starts)
+		Wait For (job) JobDone(job As HttpJob)
+		If job.Success And job.Response.StatusCode = 200 Then
+			internetStatus = 1 ' Server online.
+		Else ' Problem check if internet
+			Wait For (IsInternetAvailable) complete (internetOk As Boolean)
+			If internetOk Then
+				internetStatus = 0	' Internet ok (no Server)
+			End If
+		End If
+		job.release
+	End If
+	Return internetStatus
+End Sub
+
+' Check customer is activated (reports activated, not-activated or customer not found) 
+' Returns int (customer account status)
+'				 	= 1 customer activated.
+'			  		= 0 not activated (customer found).
+'			  		= -1 customer NOT found.
+'			  		= -2 internet problem.
+Public Sub CheckCustomerActivated(apiCustomerId As Int) As ResumableSub
+	Dim customerAccountStatus As Int = -2
+	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
+	Dim urlStr As String = Starter.server.URL_CUSTOMER_API & "/" & modEposWeb.ConvertApiId(apiCustomerId) & _
+				"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_QUERY_ACTIVATED 
+	job.Download(urlStr)
 	Wait For (job) JobDone(job As HttpJob)
-'	Dim customerIdStrg As String
-	If job.Success And job.Response.StatusCode = 200 Then
-		apiCustomerId = job.GetString		' Need to get string before releasing job.
-'		customerId = customerIdStrg
+	If job.Success And job.Response.StatusCode = 200 Then 'Account valid?
+		Dim rxActivated As String = job.GetString
+		If rxActivated = "1" Then ' Activated?
+			customerAccountStatus = 1
+		Else ' Customer has NOT activated their account
+			customerAccountStatus = 0
+		End If
+	Else if job.Success And job.Response.StatusCode = 204 Then ' Customer not found (or invalid customer number)
+		customerAccountStatus = -1
 	End If
 	job.Release
-	Return apiCustomerId
+	Return customerAccountStatus
 End Sub
 
 ' Checks the Database menu revision against the Web server menu revision.
@@ -156,8 +189,6 @@ Public Sub CheckMenuRevision As ResumableSub
 	Dim centreId As Int = Starter.myData.centre.centreId
 	Dim menuRevision As Int = Starter.menuRevision
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-'	Dim urlStr As String = modEposWeb.URL_CENTREMENU_API & "/" & centreId & _
-'							"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_REVISION 
 	Dim urlStr As String = Starter.server.URL_CENTREMENU_API & "/" & centreId & _
 							"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_REVISION
 	job.Download(urlStr)
@@ -173,8 +204,24 @@ Public Sub CheckMenuRevision As ResumableSub
 			menuOK = True    
 		End If
 	End If
-	job.Release
+	job.Release ' Always release the Http job!
 	Return menuOK
+End Sub
+
+' Force a customer to activate.
+' Returns true if request to a activate successful, false otherwise.
+Public Sub CustomerMustActivate(apiCustomerId As Int)As ResumableSub
+	Dim successful As Boolean = False
+	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
+	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False) & _
+										"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_MUST_ACTIVATE
+	job.PutString(urlStrg, "")
+	Wait For (job) JobDone(job As HttpJob)
+	If job.Success And job.Response.StatusCode = 200 Then
+		successful = True
+	End If
+	job.Release ' Always release the Http job!
+	Return successful
 End Sub
 
 ' Forgot Password handler (when email address known) - sends a email with information. 
@@ -209,14 +256,22 @@ public Sub ForgotPasswordIdKnown(apiCustomerId As Int) As ResumableSub
 	Return emailSent
 End Sub
 
+' Get Customer's Email address 
+' Returned as string ("" not available)
+Public Sub GetCustomerEmail(apiCustomerId As Int) As ResumableSub
+	Wait for (GetCustomerInfo(apiCustomerId)) complete(customerInfo As clsEposWebCustomerRec)
+	Dim emailAddress As String = ""
+	If customerInfo.IsInitialized Then
+		emailAddress = customerInfo.email
+	End If
+	Return emailAddress
+End Sub
+
 ' Gets customer id from server using the email
 ' returns customerId associated with email address (valid customerId >= 1)
 public Sub GetCustomerId(email As String) As ResumableSub
 	Dim customerId As Int = -1
-	
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-'	Dim urlStrg As String = "http://www.superord.co.uk/api/customer" & "?" & modEposWeb.API_EMAIL & "=" & email
-'	Dim urlStrg As String = modEposWeb.URL_CUSTOMER_API & "?" & modEposWeb.API_EMAIL & "=" & email
 	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "?" & modEposWeb.API_EMAIL & "=" & email
 	job.Download(urlStrg)
 	Wait For (job) JobDone(job As HttpJob)
@@ -230,11 +285,8 @@ End Sub
 ' Get the customer information from the Web Server (using the apiCustomerId)
 ' Returns clsEposWebCustomerRec (if error the clsEposWebCustomerRec it not initialised)
 public Sub GetCustomerInfo(apiCustomerId As Int) As ResumableSub
-	Dim customerInfoRec As clsEposWebCustomerRec
+	Dim customerInfoRec As clsEposWebCustomerRec  
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-'	job.Download("http://www.superord.co.uk/api/customer/" & customerId)
-	
-'	job.Download(modEposWeb.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False))
 	job.Download(Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False))
 	Wait For (job) JobDone(job As HttpJob)
 	Dim jsonCustomerInfoStrg As String
@@ -249,11 +301,43 @@ public Sub GetCustomerInfo(apiCustomerId As Int) As ResumableSub
 	Return customerInfoRec
 End Sub
 
+' Increments the customer's revision and returns the new api Customer ID.
+' returns new apiCustomerId if email and password are ok (else -1: both wrong or 0: email ok).
+Public Sub IncrementCustomerIdRevision(email As String, password As String) As ResumableSub
+	Dim apiCustomerId As Int = -1
+	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
+	Dim msg As String = Starter.server.URL_CUSTOMER_API & _
+	"?" & modEposWeb.API_EMAIL & "=" & email & _
+						"&" & modEposWeb.API_PASSWORD  & "=" & password & _
+						"&" & modEposWeb.API_INCREV & "=TRUE"
+	job.Download(msg)
+	Wait For (job) JobDone(job As HttpJob)
+	If job.Success And job.Response.StatusCode = 200 Then
+		apiCustomerId = job.GetString		' Need to get string before releasing job.
+	End If
+	job.Release
+	Return apiCustomerId
+End Sub
+
+' Check If internet available.
+Public Sub IsInternetAvailable() As ResumableSub
+	Dim internetOk As Boolean = False
+	Dim j As HttpJob
+	j.Initialize("checkInternet", Me)
+	j.Download( "https://www.google.com") ' Hopefully google is always running.
+	j.GetRequest.Timeout = DFT_ONLINE_TIMEOUT ' 5 second timeout (timout is set before the downloads starts)
+	Wait For (j) JobDone(j As HttpJob)
+	If j.Success Then
+		internetOk = True
+	End If
+	j.Release		' Important.
+	Return internetOk
+End Sub
+
 ' Will check if FCM token and deviceType compared to values stored on the Web Server and udpates 
 ' the Web server accordingly 
 public Sub QueryUpdateFCMandType(apiCustomerId As Int, fcmToken As String, deviceType As Int) As ResumableSub
 	Dim updateOk As Boolean = False
-
 	Wait For (QueryUpdateFcm(apiCustomerId, fcmToken)) complete (fcmUpdatedOk As Boolean)
 	If fcmUpdatedOk Then
 		Wait For (QueryUpdateDeviceType(apiCustomerId, deviceType)) complete (deviceTypeUpdatedOk As Boolean)
@@ -267,10 +351,7 @@ End Sub
 ' Sends a password email to a customer (using apiCustomerId).
 public Sub SendPasswordEmail(apiCustomerId As Int) As ResumableSub
 	Dim emailSentOk As Boolean = False
-
 	Dim job As HttpJob : job.Initialize("NewCustomer", Me)
-'	Dim urlString As String =  modEposWeb.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0 ,0, False)  & _
-'							"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_SEND_PW_EMAIL 
 	Dim urlString As String =  Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0 ,0, False)  & _
 							"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_SEND_PW_EMAIL 
 	Dim jsonToSend As String = ""
@@ -292,29 +373,12 @@ public Sub SyncPhoneFromWebServer(apiCustomerId As Int) As ResumableSub
 	
 	Wait For (GetCustomerInfo(apiCustomerId)) complete (customerInfoRec As clsEposWebCustomerRec)
 	If customerInfoRec.IsInitialized Then 'Get web data ok?
-'#if B4A
 		Starter.myData.customer.address = customerInfoRec.address
 		Starter.myData.customer.email = customerInfoRec.email
 		Starter.myData.customer.name = customerInfoRec.name
 		Starter.myData.customer.phoneNumber = customerInfoRec.telephone
 		Starter.myData.customer.postCode = customerInfoRec.postCode
 		Starter.myData.customer.Save
-'#Else ' TODO This is the same code to could be removed later!
-''		Starter.CustomerInfoData.address = customerInfoRec.address
-''		Starter.CustomerInfoData.email = customerInfoRec.email
-''		Starter.CustomerInfoData.foreName = customerInfoRec.name
-''		Starter.CustomerInfoData.phoneNumber = customerInfoRec.telephone
-''		Starter.CustomerInfoData.postCode = customerInfoRec.postCode
-''		Starter.CustomerInfoData.SaveCustomerInfo
-'		' TODO This is the same code so conditionals could be removed later!
-'		Starter.myData.customer.address = customerInfoRec.address
-'		Starter.myData.customer.email = customerInfoRec.email
-'		Starter.myData.customer.name = customerInfoRec.name
-'		Starter.myData.customer.phoneNumber = customerInfoRec.telephone
-'		Starter.myData.customer.postCode = customerInfoRec.postCode
-'		Starter.myData.customer.Save
-'#End If
-
 		syncOk = True
 	End If
 	Return syncOk
@@ -325,29 +389,13 @@ End Sub
 ' TODO Not sure the is the correct (or meaningful) name for this sub.
 public Sub SyncWebServerToPhone(apiCustomerId As Int) As ResumableSub
 	Dim syncOk As Boolean = False
-	
 	Wait For (GetCustomerInfo(apiCustomerId)) complete (customerInfoRec As clsEposWebCustomerRec)
 	If customerInfoRec.IsInitialized Then 'Get web data ok?
-'#if B4A
 		customerInfoRec.address = Starter.myData.customer.address
 		customerInfoRec.email = Starter.myData.customer.email
 		customerInfoRec.name = Starter.myData.customer.name 
 		customerInfoRec.telephone = Starter.myData.customer.phoneNumber 
 		customerInfoRec.postCode = Starter.myData.customer.postCode 
-'#else
-''		customerInfoRec.address = Starter.CustomerInfoData.address
-''		customerInfoRec.email = Starter.CustomerInfoData.email
-''		customerInfoRec.name = Starter.CustomerInfoData.foreName
-''		customerInfoRec.telephone = Starter.CustomerInfoData.phoneNumber
-''		customerInfoRec.postCode = Starter.CustomerInfoData.postCode
-'		' TODO This is the same code so conditionals could be removed later!
-'		customerInfoRec.address = Starter.myData.customer.address
-'		customerInfoRec.email = Starter.myData.customer.email
-'		customerInfoRec.name = Starter.myData.customer.name
-'		customerInfoRec.telephone = Starter.myData.customer.phoneNumber
-'		customerInfoRec.postCode = Starter.myData.customer.postCode
-'#End If
-
 		Wait For (UpdateCustomerInfo(apiCustomerId, customerInfoRec)) complete (updateOk As Boolean)
 		If updateOk Then
 			syncOk = True
@@ -363,8 +411,6 @@ Public Sub UpdateCustomerInfo(apiCustomerId As Int, customerInfoRec As clsEposWe
 	Dim jsonToSend As String = customerInfoRec.GetJson
 	Log("Updating customer details to the Web Server:" & CRLF & jsonToSend)
 	Dim job As HttpJob : job.Initialize("NewCustomer", Me)
-	
-'	Dim urlStrg As String = modEposWeb.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False)
 	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False)
 	job.PutString(urlStrg, jsonToSend)
 	job.GetRequest.SetContentType("application/json;charset=UTF-8")
@@ -377,14 +423,11 @@ End Sub
 
 #Region  Local Subroutines
 
-
 ' Query update device type - Returns true if device types are the same or the device type updated successfully.
 private Sub QueryUpdateDeviceType(apiCustomerId As Int, deviceType As Int)As ResumableSub
 	Dim deviceTypeUpdatedOk As Boolean = False
 	Dim apiCustomerIdStr As String = NumberFormat2(apiCustomerId, 3, 0, 0, False)
 	Dim jobGet As HttpJob: jobGet.Initialize("UseWebApi", Me)
-'	jobGet.Download(modEposWeb.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
-'							"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_DEVICE_TYPE)
 	jobGet.Download(Starter.server.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
 							"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_DEVICE_TYPE)
 	wait for (jobGet) jobDone(jobGet As HttpJob)
@@ -396,9 +439,6 @@ private Sub QueryUpdateDeviceType(apiCustomerId As Int, deviceType As Int)As Res
 			deviceTypeUpdatedOk = True
 		Else
 			Dim jobPut As HttpJob: jobPut.Initialize("UseWebApi", Me)
-'			jobPut.PutString(modEposWeb.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
-'								"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_DEVICE_TYPE & _
-'								"&" & modEposWeb.API_SETTING_1 & "=" & deviceType, "")
 			jobPut.PutString(Starter.server.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
 								"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_DEVICE_TYPE & _
 								"&" & modEposWeb.API_SETTING_1 & "=" & deviceType, "")
@@ -409,7 +449,6 @@ private Sub QueryUpdateDeviceType(apiCustomerId As Int, deviceType As Int)As Res
 			Else
 				'TODO Log write device type to WebServer failed
 			End If
-	'		jobPut.Release
 		End If
 	Else
 		'TODO Log get WebServer device type failed
@@ -423,8 +462,6 @@ private Sub QueryUpdateFcm(apiCustomerId As Int, fcmToken As String)As Resumable
 	Dim fcmUpdatedOk As Boolean = False
 	Dim apiCustomerIdStr As String = modEposWeb.ConvertApiId(apiCustomerId)
 	Dim jobGet As HttpJob: jobGet.Initialize("UseWebApi", Me)
-'	Dim urlStr As String = modEposWeb.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
-'							"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_GET_FCMTOKEN
 	Dim urlStr As String = Starter.server.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
 							"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_GET_FCMTOKEN
 	jobGet.Download(urlStr)
@@ -440,9 +477,6 @@ private Sub QueryUpdateFcm(apiCustomerId As Int, fcmToken As String)As Resumable
 			fcmUpdatedOk = True
 		Else
 			Dim jobPut As HttpJob: jobPut.Initialize("UseWebApi", Me)
-'			Dim urlStrg As String = modEposWeb.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
-'									"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_SET_FCMTOKEN & _ 
-'									"&" & modEposWeb.API_SETTING_1 & "=" & fcmToken
 			Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & apiCustomerIdStr & _
 									"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_SET_FCMTOKEN & _ 
 									"&" & modEposWeb.API_SETTING_1 & "=" & fcmToken
@@ -455,7 +489,6 @@ private Sub QueryUpdateFcm(apiCustomerId As Int, fcmToken As String)As Resumable
 			Else
 				'TODO Log write FCM to WebServer failed
 			End If
-'			jobPut.Release
 		End If
 	Else
 		'TODO Log get WebServer FCM failed 
@@ -463,7 +496,5 @@ private Sub QueryUpdateFcm(apiCustomerId As Int, fcmToken As String)As Resumable
 	jobGet.Release
 	Return fcmUpdatedOk	
 End Sub
-
-
 
 #End Region  Local Subroutines

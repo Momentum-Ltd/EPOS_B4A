@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: modEposWeb
-	' Release...: 12
-	' Date......: 02/11/20
+	' Release...: 12-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 01/07/19
@@ -35,6 +35,12 @@ Version=9.01
 	' Overview..: Problems with accessing Server #2.
 	' Amendee...: D Morris.
 	' Details...:   Mod: URL_WEB_SERVER_2 and URL_WEB_SERVER_2_API now https://...
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: URL constant added.
+	' Amendee...: D Morris
+	' Details...: Added: URL_CENTRE_INFO_NOT_AVAILABLE.
 	'
 	' Date......: 
 	' Release...: 
@@ -67,6 +73,9 @@ Sub Process_Globals
 
 	''' <summary>Select centre-menu api controller name.</summary>
 	Public Const CONTROLLER_CENTREMENU_API As String = "/centremenu"
+	
+	''' <summary>Centre Information not available.</summary>
+	Public Const URL_CENTRE_INFO_NOT_AVAILABLE As String = "https://superord.co.uk/nocentredetailsavailable.html"	
 	
 	''' <summary>Privacy policy.</summary>
     Public Const URL_PRIVACY_POLICY As String = "https://www.superorder.co.uk/legal/privacypolicy.html"

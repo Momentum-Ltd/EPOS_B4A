@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsStripe
-	' Release...: 5
-	' Date......: 06/04/20
+	' Release...: 5-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 03/09/19
@@ -48,6 +48,12 @@ Version=9.3
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..: Issue: #0475 Card operation - internal problem with callback. 
+	' Amendee...: D Morris.
+	' Details...: Mod: GetCardToken() SubExits() now used for raising the event.
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..:
 	' Amendee...: 
 	' Details...: 
@@ -62,6 +68,9 @@ Sub Class_Globals
 	
 	'TODO Not required check.
 '	Private const secretKey As String = "sk_test_kgFPxOa8g3heBdIhP0YjBgmV"
+	
+	' X-platform related.
+	Private xui As XUI									'ignore (to remove warning) -  Required for X platform operation.
 	
 	Private cb As Object 'ignore
 	Private apptoken As String 'ignore
@@ -130,11 +139,11 @@ Public Sub GetCardToken(TargetModule As Object, cardInfo As clsStripeTokenRec)
 		
 		Dim token As String = GetToken(result)
 		j.Release	' Release job maybe used by called activities.
-'#if B4A
-		CallSub3(TargetModule, mEventName & "_" & "CardToken", True, token)
-'#else ' B4I
-'	'TODO B4I code required - looks like B4I can use CallSub3().
-'#end if
+		
+	'	CallSub3(TargetModule, mEventName & "_" & "CardToken", True, token)
+		If xui.SubExists(TargetModule, mEventName & "_CardToken", 0) Then ' Raise Sync Complete event
+			CallSubDelayed3(TargetModule, mEventName & "_CardToken", True, token)
+		End If
 	Else
 		result = j.ErrorMessage
 		Log(j.ErrorMessage)
@@ -145,11 +154,11 @@ Public Sub GetCardToken(TargetModule As Object, cardInfo As clsStripeTokenRec)
 			errorMsg = "Please re-enter"	' Workaround for B4I not handling errors correctly.Http 
 		End If
 		j.Release ' Release job maybe used by called activities.
-'#if B4A
-		CallSub3(TargetModule, mEventName & "_" & "CardToken", False, errorMsg)
-'#else ' B4I
-'		'TODO B4I code required. - looks like B4I can use CallSub3().
-'#end if
+
+'		CallSub3(TargetModule, mEventName & "_" & "CardToken", False, errorMsg)
+		If xui.SubExists(TargetModule, mEventName & "_CardToken", 0) Then ' Raise Sync Complete event
+			CallSubDelayed3(TargetModule, mEventName & "_CardToken", False, errorMsg)
+		End If
 	End If
 End Sub
 

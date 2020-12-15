@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hAbout
-	' Release...: 7
-	' Date......: 26/11/20
+	' Release...: 7-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 03/08/19
@@ -60,6 +60,12 @@ Version=9.3
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..: Enhanced web view (supports close button).
+	' Amendee...: D Morris.
+	' Details...: Mod: Support for web view clsoe button.
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..:
 	' Amendee...: 
 	' Details...: 
@@ -72,17 +78,16 @@ Version=9.3
 
 Sub Class_Globals
 	' X-platform related.
-	Private xui As XUI			'ignore
+	Private xui As XUI						'ignore
 	
 	' View declarations
-	Private lblAppName As B4XView		' App name.
-	Private lblBackButton As B4XView	' Back button	
-	Private lblPrivacyPolicy As B4XView	' Hypertext to show privacy policy.
-	Private lblVersion As B4XView		' App version information.
-#if B4A
-	Private pnlWeb As Panel				' Border for the Web view.
-#End If
-	Private web As WebView				' Web view for showing privacy policy.
+	Private btnWebClose As SwiftButton		' close web view button.
+	Private lblAppName As B4XView			' App name.
+	Private lblBackButton As B4XView		' Back button	
+	Private lblPrivacyPolicy As B4XView		' Hypertext to show privacy policy.
+	Private lblVersion As B4XView			' App version information.
+	Private pnlWeb As Panel					' Border for the Web view.
+	Private web As WebView					' Web view for showing privacy policy.
 
 End Sub
 
@@ -96,8 +101,13 @@ End Sub
 
 #Region  Event Handlers
 'Exit form and restart.
-Sub btnExitForm_Click
+Private Sub btnExitForm_Click
 	ExitBackToSelectCentre
+End Sub
+
+' Close web view.
+Sub btnWebClose_Click
+	pnlWeb.Visible = False
 End Sub
 
 ' Handle back button
@@ -106,7 +116,7 @@ private Sub lblBackButton_Click
 End Sub
 
 ' Handler to display the privacy notice request.
-Sub lblPrivacyPolicy_Click
+Private Sub lblPrivacyPolicy_Click
 	HandlePrivacyPolicy(True)
 End Sub
 
@@ -134,9 +144,7 @@ End Sub
 ' Will show or hide privacy policy
 Private Sub HandlePrivacyPolicy(show As Boolean)
 	web.LoadUrl(modEposWeb.URL_PRIVACY_POLICY)
-#if B4A
 	pnlWeb.Visible = show
-#End If	
 	web.Visible = show
 End Sub
 
@@ -149,6 +157,9 @@ private Sub InitializeLocals
 	lblAppName.Text = "App name: " & Main.GetAppName
 	lblVersion.Text = "Version: " & Main.GetAppVersion
 #End If
+	Private cs As CSBuilder
+	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
+	lblPrivacyPolicy.Text = cs
 End Sub
 
 ' Is this form shown

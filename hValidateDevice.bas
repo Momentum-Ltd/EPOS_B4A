@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hValidateDevice
-	' Release...: 17
-	' Date......: 25/07/20
+	' Release...: 17-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 03/08/19
@@ -20,65 +20,17 @@ Version=9.3
 	' Details...: First release to support version tracking
 	' 
 	' Versions
-	'   v2 - 8 see v9
-	'
-	' Date......: 26/04/20
-	' Release...: 9
-	' Overview..: Bug #0186: Problem moving accounts support for new customerId (with embedded rev). 
+	'   v2 - 8 see v9.
+	'   v9 - 17 see v17.
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: #0559 Email address now included in activation messages.
+	'			  Bugfix: Now check email format before using.
 	' Amendee...: D Morris
-	' Details...:     Mod: lValidateDevice() now uses lncCustomerRev() and also updates the device type. 
-	'			  Removed: lGetCustomerId() and lCustomerMustActivate() now redundant.
-	'				  Mod: lUpdateCustomerInfo(), lUpdateStoredCustomerInfo().
-	'
-	' Date......: 03/05/20
-	' Release...: 10
-	' Overview..: Added: #381 - Reveal passwords.	
-	' Amendee...: D Morris
-	' Details...: Mod: Support for check box to show password.
-	'
-	' Date......: 11/05/20
-	' Release...: 11
-	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
-	' Amendee...: D Morris.
-	' Details...:  Mod: OnClose().
-	'
-	' Date......: 13/05/20
-	' Release...: 12
-	' Overview..: Issue #0315 remove compiler warnings.
-	' Amendee...: D Morris.
-	' Details...: Mod: lReturnToCaller() not used so removed.
-	'
-	' Date......: 11/06/20
-	' Release...: 13
-	' Overview..: Mod: Support for second Server.
-	' Amendee...: D Morris.
-	' Details...:  Mod: lUpdateCustomerInfo().
-	'
-	' Date......: 09/07/20
-	' Release...: 14
-	' Overview..: Bugfix: Input filter causing system to lockup.
-	' Amendee...: D Morris.
-	' Details...:  Removed: TextChanged events - caused program to lockup.
-	'				   Mod: lValidateDevice() check junk folder added.
-	'
-	' Date......: 19/07/20
-	' Release...: 15
-	' Overview..: Start on new UI theme (First phase changing buttons to Orange with rounded corners.. 
-	' Amendee...: D Morris.
-	' Details...: Mod: Buttons changed to swiftbuttons.
-		'
-	' Date......: 22/07/20
-	' Release...: 16
-	' Overview..: New UI Move account.
-	' Amendee...: D Morris
-	' Details...: Mod: General changes.
-	'
-	' Date......: 25/07/20
-	' Release...: 17
-	' Overview..: Fix for frmCreatAccount moving up when return pressed. 
-	' Amendee...: D Morris
-	' Details...: Added: Public MoveUpEnterDetailsPanel(), Resize().
-	'			  Added: AddViewToKeyboard(), GetPanelWidth().
+	' Details...:  Mod: ValidateTheDevice() email added to message.
+	'			   Bugfix: lblForgotPassword_Click() checks and reports error if problems with email.
+	'			   Mod: Code to clear email and password moved to OnClose().
 	'
 	' Date......: 
 	' Release...: 
@@ -152,9 +104,16 @@ End Sub
 
 ' Request password email
 Private Sub lblForgotPassword_Click
-	Dim apiHelper As clsEposApiHelper
-	apiHelper.Initialize
-	Wait for (apiHelper.ForgotPasswordEmailKnown(txtEmailAddress.Text.Trim)) complete (customerId As Int)
+	Dim emailAddress As String = modEposWeb.FilterEmailInput(txtEmailAddress.Text) ' Filter email text.
+	txtEmailAddress.Text = emailAddress ' Write it back
+	If modEposApp.CheckEmailFormat(emailAddress) Then
+		Dim apiHelper As clsEposApiHelper
+		apiHelper.Initialize
+		Wait for (apiHelper.ForgotPasswordEmailKnown(emailAddress)) complete (customerId As Int)
+	Else
+		xui.MsgboxAsync("Email not entered correctly" , "Email problem")
+		wait for Msgbox_Result(tempResult As Int)
+	End If
 End Sub
 
 #if B4i
@@ -204,6 +163,8 @@ public Sub OnClose
 	If progressbox.IsInitialized = True Then
 		ProgressHide		' Just in-case.
 	End If
+	txtEmailAddress.Text = ""
+	txtPassword.Text =""
 End Sub
 
 #if B4i
@@ -218,8 +179,7 @@ End Sub
 
 ' Performs the resume operation.
 Public Sub Resume
-	txtEmailAddress.Text = ""
-	txtPassword.Text =""	
+
 End Sub
 
 #End Region  Public Subroutines
@@ -383,8 +343,10 @@ Private Sub ValidateTheDevice
 					If result Then
 						UpdateStoredCustomerInfo(apiCustomerId , customerInfoRec)	' Updates the stored info with the new customerId with revision.
 						ProgressHide
-						xui.MsgboxAsync("Open the activiation email and click on the link to activate your account." & CRLF & _
-						"(If not found, check your Junk folder)" , "Activation Email sent")
+						xui.MsgboxAsync("Open the activation email" & CRLF & _
+						"Sent to: " & customerInfoRec.email & CRLF & _ 
+						"Then click on the link To activate your account." & CRLF & _
+						"(IF NOT FOUND PLEASE CHECK IN YOUR JUNK FOLDER)" , "Activation Email sent")
 						wait for Msgbox_Result(tempResult As Int)
 						ShowCheckAccountStatus	' Exit to Check Account status.
 					Else ' Update customer info on Web failed.

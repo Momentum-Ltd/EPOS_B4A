@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: CheckAccountStatus
-	' Release...: 8
-	' Date......: 11/05/20    
+	' Release...: 8-
+	' Date......: 28/11/20    
 	'
 	' History
 	' Date......: 22/06/19
@@ -62,6 +62,12 @@ Version=9.01
 	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
 	' Amendee...: D Morris.
 	' Details...:  Mods: Activity_Pause().
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..: Bugfix: Check account not timing correctly when restarted. 
+	' Amendee...: D Morris
+	' Details...: Mod: mPage_Appear() pCheckAccountStatus() renamed to StartCheckAccount().
 	'
 	' Date......: 
 	' Release...: 
@@ -101,7 +107,7 @@ Sub Activity_Pause (UserClosed As Boolean)
 End Sub
 
 Sub Activity_Resume
-	hc.pCheckAccountStatus
+	hc.StartCheckAccount
 End Sub
 
 #End Region  Event Handlers

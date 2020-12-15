@@ -86,91 +86,92 @@ Module19=clsDescriptionTableRec
 Module2=aCardEntry
 Module20=clsDeviceInfo
 Module21=clsEposApiHelper
-Module22=clsEposBalanceCheckRec
-Module23=clsEposCustomerBillByItem
-Module24=clsEposCustomerDetails
-Module25=clsEposCustomerInfo
-Module26=clsEposCustomerOrder
-Module27=clsEposCustomerOrderResponse
-Module28=clsEposCustomerPayment
-Module29=clsEposLocationRec
+Module22=clsEposApiResponseRec
+Module23=clsEposBalanceCheckRec
+Module24=clsEposCustomerBillByItem
+Module25=clsEposCustomerDetails
+Module26=clsEposCustomerInfo
+Module27=clsEposCustomerOrder
+Module28=clsEposCustomerOrderResponse
+Module29=clsEposCustomerPayment
 Module3=aHome
-Module30=clsEposMessageRec
-Module31=clsEposOrderInfo
-Module32=clsEposOrderStatus
-Module33=clsEposOrderStatusList
-Module34=clsEposWebCentreLocationRec
-Module35=clsEposWebCommsMessageRec
-Module36=clsEposWebCustomerRec
-Module37=clsEposWebLocationCoordinates
-Module38=clsGoodsTableRec
-Module39=clsGroupCategoryTableRec
+Module30=clsEposLocationRec
+Module31=clsEposMessageRec
+Module32=clsEposOrderInfo
+Module33=clsEposOrderStatus
+Module34=clsEposOrderStatusList
+Module35=clsEposWebCentreLocationRec
+Module36=clsEposWebCommsMessageRec
+Module37=clsEposWebCustomerRec
+Module38=clsEposWebLocationCoordinates
+Module39=clsGoodsTableRec
 Module4=aPlaceOrder
-Module40=clsLocation
-Module41=clsMainCategoryTableRec
-Module42=clsMyData
-Module43=clsNotifications
-Module44=clsOrderPaymentRec
-Module45=clsOrderStartResponse
-Module46=clsOrderStatusRec
-Module47=clsOrderSummary
-Module48=clsOrderSummaryRec
-Module49=clsOrderTableRec
+Module40=clsGroupCategoryTableRec
+Module41=clsLocation
+Module42=clsMainCategoryTableRec
+Module43=clsMyData
+Module44=clsNotifications
+Module45=clsOrderPaymentRec
+Module46=clsOrderStartResponse
+Module47=clsOrderStatusRec
+Module48=clsOrderSummary
+Module49=clsOrderSummaryRec
 Module5=aSelectItem
-Module50=clsPreparationTableRec
-Module51=clsProgress
-Module52=clsProgressDialog
-Module53=clsProgressIndicator
-Module54=clsReportErrors
-Module55=clsServer
-Module56=clsSizeOptionTableRec
-Module57=clsSizePriceTableRec
-Module58=clsStripe
-Module59=clsStripeCardRec
+Module50=clsOrderTableRec
+Module51=clsPreparationTableRec
+Module52=clsProgress
+Module53=clsProgressDialog
+Module54=clsProgressIndicator
+Module55=clsReportErrors
+Module56=clsServer
+Module57=clsSizeOptionTableRec
+Module58=clsSizePriceTableRec
+Module59=clsStripe
 Module6=aSelectPlayCentre3
-Module60=clsStripeTokenRec
-Module61=clsSubCategoryTableRec
-Module62=clsSyncDatabase
-Module63=ConnectionHelper
-Module64=CreateAccount
-Module65=FirebaseMessaging
-Module66=hAbout
-Module67=hCardEntry
-Module68=hChangeAccountInfo
-Module69=hChangeSettings2
+Module60=clsStripeCardRec
+Module61=clsStripeTokenRec
+Module62=clsSubCategoryTableRec
+Module63=clsSyncDatabase
+Module64=ConnectionHelper
+Module65=CreateAccount
+Module66=FirebaseMessaging
+Module67=hAbout
+Module68=hCardEntry
+Module69=hChangeAccountInfo
 Module7=ChangeAccountInfo
-Module70=hCheckAccountStatus
-Module71=hCreateAccount
-Module72=hHome
-Module73=hPlaceOrder
-Module74=hQueryNewInstall
-Module75=hSelectItem
-Module76=hSelectPlayCentre3
-Module77=hValidateCentreSelection2
-Module78=hValidateDevice
-Module79=modConvert
+Module70=hChangeSettings2
+Module71=hCheckAccountStatus
+Module72=hCreateAccount
+Module73=hHome
+Module74=hPlaceOrder
+Module75=hQueryNewInstall
+Module76=hSelectItem
+Module77=hSelectPlayCentre3
+Module78=hValidateCentreSelection2
+Module79=hValidateDevice
 Module8=ChangeSettings
-Module80=modEposApp
-Module81=modEposWeb
-Module82=NB6
-Module83=QueryNewInstall
-Module84=srvNotification
-Module85=srvPhoneTotal
-Module86=Starter
-Module87=svcTestSequence
-Module88=TemplateActivity
-Module89=TemplateClass
+Module80=modConvert
+Module81=modEposApp
+Module82=modEposWeb
+Module83=NB6
+Module84=QueryNewInstall
+Module85=srvNotification
+Module86=srvPhoneTotal
+Module87=Starter
+Module88=svcTestSequence
+Module89=TemplateActivity
 Module9=CheckAccountStatus
-Module90=TemplateCode
-Module91=TemplateService
-Module92=TemplateXactivity
-Module93=TemplateXhelper
-Module94=TestStartAt
-Module95=ValidateCentreSelection2
-Module96=ValidateDevice
+Module90=TemplateClass
+Module91=TemplateCode
+Module92=TemplateService
+Module93=TemplateXactivity
+Module94=TemplateXhelper
+Module95=TestStartAt
+Module96=ValidateCentreSelection2
+Module97=ValidateDevice
 NumberOfFiles=23
 NumberOfLibraries=24
-NumberOfModules=96
+NumberOfModules=97
 Version=10.2
 @EndOfDesignText@
 
@@ -184,7 +185,6 @@ Version=10.2
 	' Date......: 28/11/20
 	'
 	' History
-	'
 	' For releases v1 - 24, see release v28.
 	' For releases v25 - 45, see release v48.
 	' For releases v46 - 62, see release v67. 
@@ -264,7 +264,7 @@ Version=10.2
 	' Date......: 26/11/20
 	' Release...: 188
 	' Overview..: Bugfix: #0466 Android phone restart after screen locked. 
-	'			   Issue: #0561(In-progress About page only Viewing website information. 
+	'			   Issue: #0561(In-progress) About page only Viewing website information. 
 	'              Issue: #0563 Place order slider thumb colour now orange (also orange border around tablenumber).
 	'             Bugfix: (Android only) Select Centre - not scrolling to top list after refresh.
 	'			  Bugfix: #0565 Place order screen message and order buttons not enabled correctly.
@@ -286,6 +286,22 @@ Version=10.2
 	'		
 	' Date......: 
 	' Release...: 
+	' Overview..: Bugfix: Check account not showing sign-on long enough when restarted. 
+	'			  Issue: #0360 Place order backbutton clears order - confirmation required.
+	'             Issue: #0475 Card operation - internal problem with callback. 
+	'             Issue: #0482 Auto retry on non-activated account.
+	'             Issue: #0486 Create account remembering email and password.
+	'			  Issue: #0559 Email address now included in activation messages.
+	'			  Issue: #0561 Uses web viewer for viewing website information. 
+	' Amendee...: D Morris
+	' Details...:  New: clsEposApiResponse_v1
+	'				Mod: hCheckAccountStatus_v20, CheckAccountStatus_v9, hSelectPlayCentre3_v10, clsEposApiHelper_v10,
+	'						hValidateDevice_v18, hCreateAccount_v18, hValidateCentreSelection2_v10, modEposWeb_v13, 
+	'						hCreateAccount_v18, hAbout_v8, hPlaceOrder_v27, clsStripe_v6.
+	'			  FORMS: frmValidateCentreSelection3_v5, frmCreateAccount_v7, frmChangeAccountInfo_v5. frmAbout_v4.
+	'		
+	' Date......: 
+	' Release...: 
 	' Overview..: 
 	' Amendee...: 
 	' Details...: 
@@ -298,7 +314,7 @@ Version=10.2
 
 	#ApplicationLabel: SuperOrder
 	#VersionCode: 189
-	#VersionName: 1.0.0.189
+	#VersionName: 1.0.0.189-
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
@@ -322,7 +338,6 @@ End Sub
 Sub Globals
 	' Currently none
 End Sub
-
 
 #End Region  Mandatory Subroutines & Data
 

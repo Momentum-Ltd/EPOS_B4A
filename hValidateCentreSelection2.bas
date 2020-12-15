@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 9
-	' Date......: 28/11/20
+	' Release...: 9-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -77,6 +77,12 @@ Version=10
 	' Details...:    Mod: ExitToSyncData() and renamed to ExitToCentreHomePage().
 	'				 Mod: HandleConnectToServerResponse() and HandleOpenTabConfirmResponse() call ExitToCentreHomePage().
 	'				 Mod: ExitToCentreHomePage() now calls Home activity/page.
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: #0561(In-progress) only Viewing website information. 
+	' Amendee...: D Morris
+	' Details...:  Mod: Support for webView.
 	' 
 	' Date......: 
 	' Release...: 
@@ -103,27 +109,28 @@ Sub Class_Globals
 	Private Const DFT_CONNECTION_TIMEOUT As Int = 15000			' Connection timeout (mSecs).
 	 
 	' View declarations
-	Private btnCancel As SwiftButton							' Cancel selection
-	Private btnSelect As SwiftButton							' Select centre button
-	Private imgAccount As B4XView 								' Account info button
-	Private imgCentrePicture As B4XView							' Holder for the center's picture	
-	Private imgHome As B4XView									' Home button ico
-	Private imgLogo As B4XView									' Centre logo
-	Private indLoading As B4XLoadingIndicator					' In progress indicator
-	Private lblAddress As Label									' Address of Centre
-	Private lblBackButton As Label								' Back button
-	Private lblCentreNAme As Label								' Name of the Centre
-	Private lblClosed As Label									' Closed label
-	Private lblDescription As Label								' Description of Centre
-'	Private lblInstructions As B4XView							' ignore Instructions about accepting the centre selection
-'	Private lblSelectedCentreDetails As B4XView					' ignore Selected centre details
+	Private btnCancel As SwiftButton							' Cancel selection.
+	Private btnSelect As SwiftButton							' Select centre button.
+	Private btnWebClose As SwiftButton							' close web view button.
+	Private imgAccount As B4XView 								' Account info button.
+	Private imgCentrePicture As B4XView							' Holder for the center's picture.	
+	Private imgHome As B4XView									' Home button ico.
+	Private imgLogo As B4XView									' Centre logo.
+	Private indLoading As B4XLoadingIndicator					' In progress indicator.
+	Private lblAddress As Label									' Address of Centre.
+	Private lblBackButton As Label								' Back button.
+	Private lblCentreNAme As Label								' Name of the Centre.
+	Private lblClosed As Label									' Closed label.
+	Private lblDescription As Label								' Description of Centre.
 	Private pnlLoadingTouch As B4XView							' Clickable loading circles to show progress dialog.
-	
+	Private lblMore As B4XView									' Hyperlink to display more centre information.
+	Private pnlWeb As B4XView									' Web view panel
+	Private web As WebView										' Web view	
+
 	' misc objects
-	Private progressbox As clsProgress							' Progress box
-	Private tmrConnectToCentreTimout As Timer					' Connect to centre timeout
-	Private selectCentreDetails As clsEposWebCentreLocationRec	' Storage for selected centre.
-'	Private hSync As hSyncDatabase								' Helper to handle sync database.
+	Private progressbox As clsProgress							' Progress box.
+	Private selectCentreDetails As clsEposWebCentreLocationRec	' Storage for selected centre.	
+	Private tmrConnectToCentreTimout As Timer					' Connect to centre timeout.
 
 End Sub
 
@@ -158,6 +165,11 @@ Sub btnSelect_Click()
 	End If
 End Sub
 
+' Close web view.
+Sub btnWebClose_Click
+	pnlWeb.Visible = False
+End Sub
+
 ' Connect to centre timout triggered
 Sub ConnnectToCentreTimeout_tick
 	ProgressHide
@@ -176,25 +188,26 @@ End Sub
 
 ' Handles the More button
 private Sub lblMore_Click
-	Dim centreUrl As String = selectCentreDetails.webSite
-	If Not (selectCentreDetails.webSite.StartsWith("http")) Then ' Prefix with http?
-		centreUrl =	"http://" & centreUrl
-	End If	
-#if B4A
-	Dim p As PhoneIntents
-
-	If selectCentreDetails.webSite <> "" Then
-		StartActivity(p.OpenBrowser(centreUrl))
-	Else
-		StartActivity(p.OpenBrowser("https://superord.co.uk/nocentredetailsavailable.html"))
-	End If
-#else ' B4i
-	If selectCentreDetails.website <> "" Then
-		Main.App.OpenURL(centreUrl)
-	Else
-		Main.App.OpenURL("https://" & "superord.co.uk/nocentredetailsavailable.html")
-	End If
-#End If
+'	Dim centreUrl As String = selectCentreDetails.webSite
+'	If Not (selectCentreDetails.webSite.StartsWith("http")) Then ' Prefix with http?
+'		centreUrl =	"http://" & centreUrl
+'	End If	
+'#if B4A
+'	Dim p As PhoneIntents
+'
+'	If selectCentreDetails.webSite <> "" Then
+'		StartActivity(p.OpenBrowser(centreUrl))
+'	Else
+'		StartActivity(p.OpenBrowser("https://superord.co.uk/nocentredetailsavailable.html"))
+'	End If
+'#else ' B4i
+'	If selectCentreDetails.website <> "" Then
+'		Main.App.OpenURL(centreUrl)
+'	Else
+'		Main.App.OpenURL("https://" & "superord.co.uk/nocentredetailsavailable.html")
+'	End If
+'#End If
+	HandleMoreInformation(True)
 End Sub
 
 ' Click on the loading circle to show progress dialog.
@@ -232,10 +245,21 @@ Public Sub HandleOpenTabConfirmResponse
 	End If
 End Sub
 
-'' Handles the response from the Server to the Sync Database command.
-'Public Sub HandleSyncDbReponse(syncDbResponseStr As String)
-'	hSync.HandleSyncDbReponse(syncDbResponseStr)
-'End Sub
+' Show/hide More information about centre.
+Public Sub HandleMoreInformation(show As Boolean)
+	If show Then
+		Dim centreUrl As String = modEposWeb.URL_CENTRE_INFO_NOT_AVAILABLE
+		If  selectCentreDetails.webSite <> "" Then
+			centreUrl = selectCentreDetails.webSite
+			If Not (centreUrl.StartsWith("http")) Then ' Prefix with http?
+				centreUrl =	"http://" & centreUrl
+			End If
+		End If
+		web.LoadUrl(centreUrl)		
+	End If
+	pnlWeb.Visible = show
+	web.Visible = show
+End Sub
 
 ' Main method.
 ' centreId is the selected centreId.
@@ -267,7 +291,7 @@ End Sub
 public Sub OnClose
 	imgCentrePicture.Visible = False	' Clear out old image for next time.
 	ProgressHide						' Just in-case.
-'	hSync.OnClose						
+	HandleMoreInformation(False)				
 End Sub
 
 #End Region  Public Subroutines
@@ -295,7 +319,7 @@ private Sub ExitToCentreHomePage
 '	CallSubDelayed(aSyncDatabase, "pSyncDataBase")
 '#Else
 '	xSyncDatabase.Show
-	'#End If
+'#End If
 #if B4A
 	StartActivity(aHome)
 #else
@@ -309,7 +333,9 @@ private Sub InitializeLocals
 	selectCentreDetails.Initialize
 	tmrConnectToCentreTimout.Initialize("ConnnectToCentreTimeout", DFT_CONNECTION_TIMEOUT)
 	ViewControl(True) ' Enable controls
-'	hSync.Initialize()
+	Private cs As CSBuilder
+	cs.Initialize.Underline.Color(Colors.White).Append("View Website").PopAll
+	lblMore.Text = cs
 End Sub
 
 ' Hide the process box
@@ -363,3 +389,4 @@ Private Sub WebSignedOntoCentre As ResumableSub
 	Return signonSuccessful
 End Sub
 #End Region  Local Subroutines
+

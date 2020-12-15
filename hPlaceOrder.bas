@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 26
-	' Date......: 26/11/20
+	' Release...: 26-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 22/10/19
@@ -32,6 +32,12 @@ Version=9.5
 	' Details...: Mod: General changes to support new style UI.
 	'			  Bugfix: #0565 - added QueryDisplayKeyboardAndButtons().
 	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: #0360 Place order backbutton clears order - confirmation required.
+	' Amendee...: D Morris.
+	' Details...: Mod: lblBackButton_Click() code added to check operation.
+	' 			  
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -179,9 +185,15 @@ End Sub
 
 ' Handle back button
 private Sub lblBackButton_Click
-'	If enableViews = True Then
-	ExitToCentreHomePage
-'	End If
+	If lvwOrderItems.Size > 1 Then ' Items in order - check if OK to clear the order.
+		xui.Msgbox2Async("This will clear your order - do you want to continue?", "Backup button operation", "Yes", "No", "" , Null)
+		Wait For Msgbox_Result (result As Int) 
+		If result = xui.DialogResponse_Positive Then
+			ExitToCentreHomePage		
+		End If		
+	Else ' No items in order - just exit
+		ExitToCentreHomePage
+	End If
 End Sub
 
 ' Handles click off txtTableNumber view to hide the keyboard.

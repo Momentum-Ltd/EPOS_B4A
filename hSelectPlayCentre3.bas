@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 9
-	' Date......: 26/11/20
+	' Release...: 9-
+	' Date......: 28/11/20
 	'
 	' History
 	' Date......: 02/08/20
@@ -77,7 +77,12 @@ Version=10
  	' 			    Mod: Usage of null for strings and objects removed.
 	' Amendee...: D Morris
 	' Details...: Mod: DisplayOnListview() call to ScrollToItem() added.
-
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..: Bugfix: iOS not displaying centres correctly when on a few.
+	' Amendee...: D Morris
+	' Details...: Mod: DisplayOnListview() code excluded for B4i.
 	'
 	' Date......: 
 	' Release...: 
@@ -161,11 +166,6 @@ Private Sub imgAccount_Click
 #End If
 End Sub
 
-'' Handles refresh display button.
-'Private Sub imgRefresh_Click
-'	RefreshCentreList
-'End Sub
-
 ' Location ready (or timeout)
 '  thisLocation() = 0,0 timoutoccurred. 
 private Sub locationDevice_LocationReady(location1 As Location)
@@ -247,8 +247,6 @@ public Sub OnClose
 	If locationDevice.IsInitialized Then
 		locationDevice.Stop		
 	End If
-' removed this line because it caused problem with displaying centre list.
-'	displayUpdateInProgress = False ' TODO to try to do this another way. There is a temporary fix in pnlRefreshTouch_Click().
 End Sub
 
 ' Refrest the list of centres.
@@ -366,31 +364,6 @@ Private Sub DisplayOnListview(inputJson As String) As ResumableSub
 	Dim jp As JSONParser
 	jp.Initialize(inputJson)
 	Dim centreList As List = jp.NextArray
-	' Loop to convert each centre details object to a clsEposWebCentreLocationRec and add it to the listview
-'	clvCentres.Clear	' clear previously displayed information.
-'	For Each centreDetailsMap As Map In centreList
-'		Dim centre As clsEposWebCentreLocationRec
-'		centre.address = centreDetailsMap.Get("address")
-'		centre.centreName = centreDetailsMap.Get("centreName")
-'		centre.centreopen = centreDetailsMap.Get("centreOpen")
-'		centre.description = centreDetailsMap.Get("description")
-'		centre.distance = centreDetailsMap.GetDefault("distance", modEposApp.CENTRE_DISTANCE_UNKNOWN)
-'		centre.id = centreDetailsMap.Get("id")
-'		centre.lanIpAddress = centreDetailsMap.Get("lanIpAddress")
-'		centre.picture = centreDetailsMap.Get("picture")
-'		centre.postCode = centreDetailsMap.Get("postCode")
-'		centre.thumbnail = centreDetailsMap.Get("thumbnail")
-'		centre.webSite = centreDetailsMap.Get("website")
-'		Dim img  As ImageView
-'		img.Initialize("test")
-'		Wait For (Starter.DownloadImage(centre.picture, img)) complete(downloadOk As Boolean)
-'		If downloadOk = True Then
-'			clvCentres.Add(CreateItem(clvCentres.AsView.Width, centre, img), centre)
-'		Else
-'			displayListOk = False
-'		End If
-'	Next
-
 	' First stage write centre info to memory
 	Dim centreInfoList As List : centreInfoList.Initialize
 	For Each centreDetailsMap As Map In centreList
@@ -417,17 +390,16 @@ Private Sub DisplayOnListview(inputJson As String) As ResumableSub
 	' Second stage displays the information
 	clvCentres.Clear	' clear previously displayed information.
 	' Hide the customerListView to stop it jumping when refreshed.
-'	clvCentres.AsView.Visible = False ' See https://www.b4x.com/android/forum/threads/moving-or-hiding-a-customlistview.36861/
 	For Each centreInfoRec As clsCentreInfoAndImgRec In centreInfoList
 		clvCentres.Add(centreInfoRec.imgPanel, centreInfoRec.centre)
-		' Sleep(100) ' This appears to cause problems if switching quick between list centres and centre confirmation pages. 		
 	Next
 	clvCentres.DefaultTextColor = Colors.White
+#if B4A
 	clvCentres.ScrollToItem(0)
+#end if
 	Dim noMoreCentres As clsEposWebCentreLocationRec
 	noMoreCentres.id = 0 	' Indicates no more centres.
 	clvCentres.AddTextItem(CRLF & "No more centres nearby", noMoreCentres)
-'	clvCentres.AsView.Visible = True
 	Return displayListOk
 End Sub
 
@@ -444,18 +416,14 @@ Private Sub DisplayAllCentres() As ResumableSub
 									"&" & modEposWeb.API_LONGITUDE & "=" & modEposWeb.API_GET_ALL					
 	job.Download(urlStr)
 	Wait For (job) JobDone(job As HttpJob)
-'	ProgressHide
 	If job.Success And job.Response.StatusCode = 200 Then
-		' 		Dim rxMsg As String = job.GetString
 		rxMsg = job.GetString
 		Log("Success received from the Web API – response: " & rxMsg)
-		'	DisplayOnListview(rxMsg)
 	Else ' An error of some sort occurred
 		If job.Response.StatusCode = 204 Or job.Response.StatusCode = 404 Then
 			Log("The Web API returned no centres available")
 			xui.MsgboxAsync("There are no centres on the system.", _ 
 								"No Nearby Centres" & "Error:" & job.Response.StatusCode)
-	'		DisplayAllCentres 'TODO Check this out it appears to call itself!
 		Else ' Any other error
 			Log("An error occurred with the HTTP job: " & job.ErrorMessage)
 			xui.MsgboxAsync("An error occurred while trying to get All centres.", _
@@ -470,7 +438,6 @@ End Sub
 '  returns rxMsg if download ok else null if error.
 Private Sub DisplayNearbyCentres(pCurrentLocation As Location) As ResumableSub
 	Dim rxMsg As String = ""
-'	ProgressShow("Finding centres close to you, please wait...")
 	Log("Sending the coordinates to the Web API...")
 	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
 	Dim urlStr As String = Starter.server.URL_CENTRE_API & _
@@ -483,24 +450,19 @@ Private Sub DisplayNearbyCentres(pCurrentLocation As Location) As ResumableSub
 	End If
 	job.Download(urlStr)
 	Wait For (job) JobDone(job As HttpJob)
-'	ProgressHide
 	If job.Success And job.Response.StatusCode = 200 Then
-		' Dim rxMsg As String = job.GetString
 		rxMsg = job.GetString
 		Log("Success received from the Web API – response: " & rxMsg)
-		' DisplayOnListview(rxMsg)
 	Else ' An error of some sort occurred
 		If job.Response.StatusCode = 204 Or job.Response.StatusCode = 404 Then
 			Log("The Web API returned no nearby centres")
 			xui.MsgboxAsync("There are no centres near your current location. All centres will now be displayed.", _
 								"No Nearby Centres" & "Error:" & job.Response.StatusCode)
 			wait for MsgBox_result(tempResult As Int) '' inserted
-		'	DisplayAllCentres 'TODO Check this out it appears to call itself!
 		Else ' Any other error
 			Log("An error occurred with the HTTP job: " & job.ErrorMessage)
 			xui.MsgboxAsync("An error occurred while trying to find nearby centres. All centres will now be displayed.", _
 								 "Cannot Get Nearby Centres" & "Error:" & job.Response.StatusCode)
-		'	DisplayAllCentres 'TODO Check this out it appears to call itself!
 		End If
 	End If
 	job.Release ' Must always be called after the job is complete, to free its resources
@@ -512,10 +474,8 @@ private Sub InitializeLocals
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 	progressbox.Show("Getting your location.")
 	tmrDelayNewLocation.Initialize("tmrDelayNewLocation", DFT_DELAYNEWLOCATION)
-'	tmrLockDisplayUpdTimeout.Initialize("tmrLockDisplayUpdTimeout", DFT_LOCKDISPLAYUPD_TIMEOUT)
 	displayUpdateInProgress = False
 	locationDevice.Initialize(Me, "locationDevice")
-'	progressbox.Initialize(Me, "progressbox",modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 End Sub
 
 ' Is this form shown
@@ -526,16 +486,6 @@ private Sub IsVisible As Boolean
 	Return frmXSelectPlayCentre3.IsVisible
 #End If
 End Sub
-
-'' Show the process box
-'Private Sub ProgressHide
-'	progressbox.Hide
-'End Sub
-
-'' Hide The process box.
-'Private Sub ProgressShow(message As String)
-'	progressbox.Show(message)
-'End Sub
 
 ' Restart Display new location timer
 private Sub RestartDisplayNewLocationTimer
@@ -548,7 +498,6 @@ End Sub
 ' Refreshes the list of centres.
 private Sub RefreshCentreList
 	SelectCentre(True)
-'	clvCentres.ScrollToItem(0)	' Always move to top of list.
 End Sub
 
 #if B4A 

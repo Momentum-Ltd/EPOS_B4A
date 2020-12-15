@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 15
-	' Date......: 09/10/20
+	' Release...: 15-
+	' Date......: 29/11/20
 	'
 	' History
 	' Date......: 03/08/19
@@ -72,6 +72,12 @@ Version=9.3
 	' Overview..: Bugfix: #0511 Screen locking into submit mode
 	' Amendee...: D Morris
 	' Details...: Mod: DisplayInfo() now handles which panels are visible.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Issue: #0561 Uses wb viewer for viewing website information. 
+	' Amendee...: D Morris
+	' Details...:  Mod: Support for web view.
 	'					
 	' Date......: 
 	' Release...: 
@@ -92,26 +98,29 @@ Sub Class_Globals
 	' View declarations (consists of 2 panels)
 	' Authorisation Panel
 #if B4A
-	Private chkAuthShowPw As CheckBox	' Show authorisation password.
+	Private chkAuthShowPw As CheckBox			' Show authorisation password.
 #else 'B4i
-	Private chkAuthShowPw As Switch		' Show authorisation password
+	Private chkAuthShowPw As Switch				' Show authorisation password
 #end if
-	Private pnlAuthorisation As B4XView	' Password authorisation panel
+	Private pnlAuthorisation As B4XView			' Password authorisation panel
 #if B4A 
-	Private txtAuthorisePw As EditText	' Password (entered by user).
+	Private txtAuthorisePw As EditText			' Password (entered by user).
 #else ' B4i
 	Private txtAuthorisePw As TextField
 #end if
 '	Private txtAuthorisePw As B4XView
 	' Enter details panel
-	Private btnClear As SwiftButton		' Clear displayed information button
-	Private btnSubmit As SwiftButton	' Submit information button
-	Private lblPrivacyPolicy As B4XView	' Link to Privacy Policy.
-	Private pnlEnterDetails As B4XView	' Enter details panel
-	Private txtAddress As B4XView		' Customer's address
-	Private txtName As B4XView			' Customer's name
-	Private txtPostCode As B4XView		' Customer's postcode	
-	Private txtTelephone As B4XView		' Customer's telephone number
+	Private btnClear As SwiftButton				' Clear displayed information button
+	Private btnSubmit As SwiftButton			' Submit information button
+	Private btnWebClose As SwiftButton			' close web view button.
+	Private lblPrivacyPolicy As B4XView			' Link to Privacy Policy.
+	Private pnlEnterDetails As B4XView			' Enter details panel
+	Private pnlWeb As B4XView					' Web view panel
+	Private txtAddress As B4XView				' Customer's address
+	Private txtName As B4XView					' Customer's name
+	Private txtPostCode As B4XView				' Customer's postcode	
+	Private txtTelephone As B4XView				' Customer's telephone number
+	Private web As WebView						' Web view
 	
 	' Misc objects	
 #if B4I
@@ -155,6 +164,11 @@ Sub btnSubmit_Click
 	End If
 End Sub
 
+' Close web view.
+Sub btnWebClose_Click
+	pnlWeb.Visible = False
+End Sub
+
 #if B4A
 ' Handle show password checkbox.
 Sub chkAuthShowPw_CheckedChange(Checked As Boolean)
@@ -176,7 +190,7 @@ End Sub
 
 ' Hyperlink to display privacy policy in Browser.
 private Sub lblPrivacyPolicy_Click
-	modEposApp.DisplayPrivacyNotice
+	HandlePrivacyPolicy(True)
 End Sub
 
 #End Region  Event Handlers
@@ -229,6 +243,9 @@ private Sub InitializeLocals
 	If progressbox.IsInitialized = False Then
 		progressbox.Initialize(Me, "progressbox",modEposApp.DFT_PROGRESS_TIMEOUT) 		
 	End If
+	Private cs As CSBuilder
+	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
+	lblPrivacyPolicy.Text = cs
 End Sub
 
 ' Checks if information entered on the form can be accepted.
@@ -259,6 +276,13 @@ Private Sub lGetLastestCustomerInfo As ResumableSub
 		infoOk = True
 	End If
 	Return infoOk
+End Sub
+
+' Will show or hide privacy policy
+Private Sub HandlePrivacyPolicy(show As Boolean)
+	web.LoadUrl(modEposWeb.URL_PRIVACY_POLICY)
+	pnlWeb.Visible = show
+	web.Visible = show
 End Sub
 
 ' Checks if valid password for this user.
