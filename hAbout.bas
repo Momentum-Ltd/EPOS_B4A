@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hAbout
-	' Release...: 7-
-	' Date......: 29/11/20
+	' Release...: 9
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -20,35 +20,8 @@ Version=9.3
 	' Created by: D Morris (started 3/8/19)
 	' Details...: First release to support version tracking
 	'
-	' Date......: 12/08/19
-	' Release...: 2
-	' Overview..: Changes to use latest modEposApp.
-	' Amendee...: D Morris 
-	' Details...:	Mod: Renamed pBuildCustomerName To BuildCustomerName.
-	'
-	' Date......: 22/10/19
-	' Release...: 3
-	' Overview..: Now returns to the Select Centre form when ok button pressed.
-	' Amendee...: D Morris
-	' Details...: Mod: btnExitForm_Click() goes to the Select centre form.
-	'
-	' Date......: 11/05/20
-	' Release...: 4
-	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
-	' Amendee...: D Morris.
-	' Details...:  Added: OnClose().
-	'
-	' Date......: 28/06/20
-	' Release...: 5
-	' Overview..: Add #0395: Select Centre with Logos (Experimental).
-	' Amendee...: D Morris.
-	' Details...: Mod: ????
-	'
-	' Date......: 02/08/20
-	' Release...: 6
-	' Overview..: UI to select centre.
-	' Amendee...: D Morris.
-	' Details...: Mod: btnExitForm_Click().
+	' Versions
+	'  2 - 6 v7
 	'		
 	' Date......: 26/11/20
 	' Release...: 7
@@ -58,11 +31,17 @@ Version=9.3
 	'			  Mod: Support for new UI style.
 	'			  Mod: Will now always move back to select centre.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 8
 	' Overview..: Enhanced web view (supports close button).
 	' Amendee...: D Morris.
 	' Details...: Mod: Support for web view clsoe button.
+	'
+	' Date......: 03/01/21
+	' Release...: 9
+	' Overview..: Bugfix: (Android) Hyperlinks no underlined, (iOS) Hyperlinks now correctly displayed.
+	' Amendee...: D Morris.
+	' Details...:  Mod: InitializeLocals() code fixed.
 	'
 	' Date......: 
 	' Release...: 
@@ -159,7 +138,8 @@ private Sub InitializeLocals
 #End If
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
-	lblPrivacyPolicy.Text = cs
+	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
+	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblPrivacyPolicy, cs)
 End Sub
 
 ' Is this form shown

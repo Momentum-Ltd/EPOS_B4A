@@ -11,8 +11,8 @@ Version=7.3
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 89
-	' Date......: 28/11/20
+	' Release...: 90
+	' Date......: 003/01/21
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -22,68 +22,6 @@ Version=7.3
 	'		versions 65-71 see Starter_v73.
 	'       versions 72-78 see Starter_v79.
 	' 		versions 79-86 see Starter_v87.
-	'
-	' Date......: 11/06/20
-	' Release...: 79
-	' Overview..: bugfix: #420 Order status update problem.
-	'			   Added: Support for second Server.
-	' Amendee...: D Morris.
-	' Details...:  Mod: lNotifyStatus() code to aShowOrderStatusList.pUpdateOrderStatus() and aShowBill.RefreshList() removed.
-	'			   Mod: Old commented code removed. 
-	'			 Added: server object added.
-	'			   Mod: Service_Create() initializes server.
-	'			   Mod: pSendMessage() uses server object.
-	'
-	' Date......: 28/06/20
-	' Release...: 80
-	' Overview..: Add #0395 Select centre pictures (More work to download from Web Server).
-	' Amendee...: D Morris
-	' Details...:  Added: DownloadImage().
-	'
-	' Date......: 02/08/20
-	' Release...: 81
-	' Overview..: UI to select centre.
-	' Amendee...: D Morris.
-	' Details...: Mod: lHandleCustomerDetailsMsg(), lHandleOpenTabConfirm().
-	'
-	' Date......: 08/08/20
-	' Release...: 82
-	' Overview..: Mod: Validate centre page - Confirm centre text added.
-	' Amendee...: D Morris
-	' Details...:  Mods: lNotifyStatus() - Now updates status when order completed. 
-	'			   Mods: pProcessInputStrg(), lHandleStatusListMsg(), lNotifyStatus(),
-	'						ShowMessageNotification(), ShowStatusNotification() - Support for new Centre Home page. 
-	' 			  			    
-	' Date......: 16/09/20
-	' Release...: 83 
-	' Overview..: More log reports added.
-	' Amendee...: D Morris
-	' Details...: Service_Create() - log report added.
-	' 			  			    
-	' Date......: 16/09/20
-	' Release...: 84
-	' Overview..: Investigation into not running in debug
-	' Amendee...: D Morris
-	' Details...: Added: Reference to Astream and CltSocket removed by conditional compiler Symbol "INCLUDE_SOCKET_CODE".
-	'		
-	' Date......: 02/10/20
-	' Release...: 85
-	' Overview..: Bugfix: #0500 - Validate Centre screen not showing picture after communication timeout.
-	' Amendee...: D Morris
-	' Details...: Mod: centreLocationRec added.
-	' 			  			    
-	' Date......: 09/10/20
-	' Release...: 86
-	' Overview..: Bugfix: #0514 - Not displaying text part of messages.
-	' Amendee...: D Morris
-	' Details...: Mod: lNotifyMessage() code fixed.
-	'
-	' Date......: 08/11/20
-	' Release...: 87
-	' Overview..: Issue: #0530 (revisited) Mixed up centre images.
-	'			  Issue #0512 Change the blue hyberlink text to white. 
-	' Amendee...: D Morris
-	' Details...: Mod: DownloadImage() fixed as video on resummable subs. 
 	' 			  			    
 	' Date......: 14/11/20
 	' Release...: 88
@@ -97,6 +35,14 @@ Version=7.3
 	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
 	' Amendee...: D Morris
 	' Details...: Mod: lHandleSyncDataResponse() now calls Home to handle response.
+	' 			  			    
+	' Date......: 03/01/21
+	' Release...: 90
+	' Overview..: Handling GPS coordinates changed. 
+	' Amendee...: D Morris.
+	' Details...: Mod: currentLocation removed.
+	'			  New: latestLocation.
+	'			  Mod: Service_Create(), HandleGetLocationRequest().
 	' 			  			    
 	' Date......: 
 	' Release...: 
@@ -130,7 +76,7 @@ Sub Process_Globals
 	
 	' Public variables:
 	Public connect As clsConnect 						' Object which handles TCP socket operations.
-	Public currentLocation As Location					' Current location of this device.
+'	Public currentLocation As Location					' Current location of this device.
 	Public currentPurchaseOrder As Int 					' The current order number.
 	Public customerInfoAvailable As Boolean = False 	' Whether the customer information is currently available.
 	Public customerOrderInfo As clsEposCustomerOrder 	' The info of the most recent customer's order.
@@ -138,6 +84,7 @@ Sub Process_Globals
 	Public DataBase As clsDataBaseTables 				' Database used to store goods and order information.
 	Public DisconnectedCloseActivities As Boolean 		' Whether all activities (other than Connection) should be ended due to a disconnect command.
 	Public IsConnected As Boolean 						' Whether the device is currently connected to the Server.
+	Public latestLocation As clsLocationCoordinates		' Latest available location (Note: only updated whilst Location device is active)	
 	Public latestOrderTotal As Float 					' The most recent order total (updated by ShowOrder when order button pressed).
 #if INCLUDE_SOCKET_CODE
 	Public MyIpAddress As String 						' This device's IP address.
@@ -198,7 +145,8 @@ Sub Service_Create
 	myData.Initialize
 	selectedCentreLocationRec.Initialize
 	customerInfoAvailable = myData.load ' Load customer information and set flag accordingly.
-	currentLocation.Initialize2(0, 0)
+'	currentLocation.Initialize2(0, 0)
+	latestLocation.Initialize
 	currentPurchaseOrder = 100 ' Get purchase order numbers moving
 	connect.Initialize ' Initialise the connection checking.
 	CallSubDelayed(FirebaseMessaging, "SubscribeToTopics")	'Added for Firebase
@@ -599,8 +547,10 @@ End Sub
 Private Sub HandleGetLocationRequest()
 	Dim locationRec As clsEposLocationRec : locationRec.Initialize
 	locationRec.ID = myData.customer.customerId
-	locationRec.location.latitude = currentLocation.Latitude
-	locationRec.location.longitude = currentLocation.Longitude
+'	locationRec.location.latitude = currentLocation.Latitude
+'	locationRec.location.longitude = currentLocation.Longitude
+	locationRec.location.latitude = latestLocation.Latitude
+	locationRec.location.longitude = latestLocation.Longitude
 	Dim msg As String = modEposApp.EPOS_GET_LOCATION & locationRec.XmlSerialize
 	pSendMessage(msg)
 End Sub

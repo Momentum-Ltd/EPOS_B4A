@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCheckAccountStatus
-	' Release...: 19-
-	' Date......: 28/11/20
+	' Release...: 21
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -29,8 +29,8 @@ Version=9.3
 	' Amendee...: D Morris.
 	' Details...: Mod: NonActivatedAccount() The "not activated" account report reworded. 
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 20
 	' Overview..: Bugfix: Check account not timing correctly when restarted. 
 	'             Issue: #0482 Auto retry on non-activated account.
 	' Amendee...: D Morris
@@ -43,6 +43,13 @@ Version=9.3
 	'			  Mod: IsInternetAvailable() and IsWebServerOnLine() moved to clsEposApiHelp.
 	'			  Mod: StartCheckAccount() and ResendActivationEmail() now uses clsEposApiHelp.
 	'			  Mod: ResendActivationEmail(),  Email address now included in activation messages.  
+	'
+	' Date......: 03/01/21
+	' Release...: 21	
+	' Overview..: Issue: #0482 - Still problems for iOS.
+	' Amendee...: D Morris
+	' Details...: Mod: tmrRetryActivatedAccount_Tick() iOS code fixed.
+	'			  Mod: Now uses B4XDialog.
 	'
 	' Date......: 
 	' Release...: 
@@ -77,6 +84,9 @@ Sub Class_Globals
 	Private emailAddress As String						' Local storage for Customer's email address.
 			
 	' Misc objects
+	Private dialog As B4XDialog							' Dialog message.
+	Private LongTextTemplate As B4XLongTextTemplate		' Template required to show all the text (otherwise it is truncated).
+	Private parentActivity As B4XView					' Storage for parent.
 	Private progressbox As clsProgressIndicator			' Progress Indicator.
 	
 	' View declarations
@@ -124,15 +134,7 @@ Private Sub tmrRetryActivatedAccount_Tick
 #else ' B4i
 		Main.ToastMessageShow("Auto retry has detect your account is now activated!", True)
 #End If
-
-#if b4A
-		ExitToSelectPlayCentre
-#else ' B4i
-'		RestartThisActivity ' Necessary otherwise msgbox is not removed!
-'		frmCheckAccountStatus.Show(False)
-		CallSubDelayed2(Me, "msgbox_result",  xui.DialogResponse_Positive)
-#End If
-
+		dialog.Close(xui.DialogResponse_Cancel)  ' Important - need to close it.
 	Else ' Not activated = restart the timer.
 		tmrRetryActivatedAccount.Enabled = True
 	End If
@@ -145,6 +147,7 @@ End Sub
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize (parent As B4XView)
 	parent.LoadLayout("frmCheckAccountStatus")
+	parentActivity = parent
 	InitializeLocals
 End Sub
 
@@ -158,6 +161,8 @@ public Sub OnClose
 	mainSubRunning = False
 	minDisplayElapsed = False
 	emailAddress = ""
+	' See code snippets in https://www.b4x.com/android/forum/threads/b4x-xui-views-cross-platform-views-and-dialogs.100836/#content
+	dialog.Close(xui.DialogResponse_Cancel)  ' Important - need to close it.
 End Sub
 
 ' Starts check account operation.
@@ -213,30 +218,10 @@ End Sub
 ' Checks the web server for information on this customer 
 private Sub CheckWebAccount(apiCustomerId As Int) As ResumableSub
 	Dim accountOk As Boolean = False
-'	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
-'	Dim urlStr As String = Starter.server.URL_CUSTOMER_API & "/" & modEposWeb.ConvertApiId(apiCustomerId) & _
-'					"?" & modEposWeb.API_QUERY & "=" & modEposWeb.API_QUERY_ACTIVATED ' "?search=activated")
-'	job.Download(urlStr)		
-'	Wait For (job) JobDone(job As HttpJob)
 	Dim apiHelper As clsEposApiHelper : apiHelper.Initialize
 	Wait for (apiHelper.CheckCustomerActivated(apiCustomerId)) complete (result As Int)
 	Wait for (apiHelper.GetCustomerEmail(apiCustomerId)) complete (email As String)
 	emailAddress = email
-'	If job.Success And job.Response.StatusCode = 200 Then 'Account valid?
-'		Dim rxActivated As String = job.GetString
-'		If rxActivated = "1" Then ' Activated?
-'			CheckFcmAndDeviceType(apiCustomerId) ' Update the FCM and/of device type (they could change) 
-'			accountOk = True
-'			DelayedSelectPlayCentre
-'		Else ' Customer has NOT activated their account
-'			DelayedNonActivatedAccount
-'		End If
-'	Else if job.Success And job.Response.StatusCode = 204 Then ' Customer not found (or invalid customer number)
-'		DelayedQueryNewInstall	
-'	Else ' Something went wrong with the HTTP job
-'		ReportInternetProblem
-'	End If
-'	job.Release
 	Select result
 		Case 1: ' Customer found and activated.
 			wait for (CheckFcmAndDeviceType(apiCustomerId)) complete (updateOk As Boolean) ' Update the FCM and/of device type (they could change)
@@ -281,6 +266,8 @@ End Sub
 
 ' Initialize the locals etc.
 private Sub InitializeLocals
+	dialog.Initialize(parentActivity)
+	LongTextTemplate.Initialize
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 	tmrMinimumDisplayPeriod.Initialize("tmrMinimumDisplayPeriod", DFT_MIN_DISPLAY_TIME)
 	tmrMinimumDisplayPeriod.Enabled = False	' Just in-case the timer is already running.
@@ -292,55 +279,18 @@ private Sub InitializeLocals
 	exitToNonActivatedAccount = False
 End Sub
 
-'' Check If internet available.
-'Private Sub IsInternetAvailable() As ResumableSub
-'	Dim internetOk As Boolean = False
-'	Dim j As HttpJob
-'	j.Initialize("checkInternet", Me)
-'	j.Download( "https://www.google.com") ' Hopefully google is always running.
-'	j.GetRequest.Timeout = 5000 ' 5 second timeout (timout is set before the downloads starts)
-'	Wait For (j) JobDone(j As HttpJob)
-'	If j.Success Then
-'		internetOk = True
-'	End If
-'	j.Release		' Important.
-'	Return internetOk
-'End Sub
-
-'' Checks Server is on-line (and internet connected).
-'' Returns 1 if Server online
-'' Returns 0 if not on-line (Internet is ok)
-'' Returns -1 if No internet
-'private Sub IsWebServerOnLine As ResumableSub
-'	Dim internetStatus As Int   = -1 ' Default to both Server and Internet down.
-'	wait for (IsInternetAvailable) complete (ok As Boolean)
-'	If ok Then
-'		Dim job As HttpJob : job.Initialize("UseWebApi", Me)
-'		job.Download(Starter.server.URL_CENTRE_API)
-'		job.GetRequest.Timeout = DFT_ONLINE_TIMEOUT' (timout is set before the downloads starts)
-'		Wait For (job) JobDone(job As HttpJob)
-'		If job.Success And job.Response.StatusCode = 200 Then
-'			internetStatus = 1 ' Server online.
-'		Else ' Problem check if internet
-'			Wait For (IsInternetAvailable) complete (internetOk As Boolean)
-'			If internetOk Then
-'				internetStatus = 0	' Internet ok (no Server)			
-'			End If
-'		End If
-'		job.release
-'	End If
-'	Return internetStatus
-'End Sub
-
 ' Handles the situation when user account is not activated.
 private Sub NonActivatedAccount()
 	tmrRetryActivatedAccount.Enabled = True	' Start the auto retry timer.
-	xui.Msgbox2Async("You have not clicked the link in the activation email we sent" & CRLF & _
+	dialog.Title = "Account Not Activated"
+	Dim dialogString As String = "You have not clicked the link in the activation email we sent" & CRLF & _
 							"To: " & emailAddress & CRLF & CRLF & _
 							" (if not found CHECK YOUR JUNK FOLDER)." & CRLF & CRLF &  _
-	 						"Please do so and then press 'Retry', if the email address is incorrect press 'New account'." _
-							, "Account Not Activated", "Resend email", "Retry","New account" , Null)
-	Wait for  msgbox_result (result As Int)
+	 						"Please click on the link and press 'Retry'." & CRLF & "If the email address Is incorrect press 'New'."
+	LongTextTemplate.Text = dialogString ' Using long text template is necessary to prevent the text truncating.
+	Wait For (dialog.ShowTemplate(LongTextTemplate, "Resend", "New", "Retry")) Complete (result As Int)
+	' See code snippets in https://www.b4x.com/android/forum/threads/b4x-xui-views-cross-platform-views-and-dialogs.100836/#content
+	dialog.Close(xui.DialogResponse_Cancel)  ' Important - need to close it.
 	If result = xui.DialogResponse_Positive Then	' Resend activation email
 		wait for (ResendActivationEmail(Starter.myData.customer.customerIdStr)) complete (successful As Boolean)
 		RestartThisActivity
@@ -408,35 +358,11 @@ End Sub
 
 ' Resends activation email
 Private Sub ResendActivationEmail(apiCustomerId As Int)As ResumableSub
-'	Dim successful As Boolean = False
-'	ProgressShow
-'	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
-'	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False) & _
-'								 "?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_MUST_ACTIVATE
-'	job.PutString(urlStrg, "")
-'	Wait For (job) JobDone(job As HttpJob)
-'	ProgressHide	
-'	If job.Success And job.Response.StatusCode = 200 Then
-'		xui.MsgboxAsync("Has been sent to your email address!" & CRLF & "(If not found check your Junk Folder)" , "Activation email")
-'		Wait For msgbox_result(tempResult As Int) 
-'		successful = True
-'	Else
-'		xui.MsgboxAsync("Error has occurred, unable to send a activation email!", "Email problem")
-'		Wait For msgbox_result(tempResult As Int)
-'	End If
-'	job.Release
-'	Return successful
 	Dim successful As Boolean = False
 	ProgressShow
-'	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
-'	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0, 0, False) & _
-'	"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_MUST_ACTIVATE
-'	job.PutString(urlStrg, "")
-'	Wait For (job) JobDone(job As HttpJob)
 	Dim apiHelper As clsEposApiHelper : apiHelper.Initialize
 	wait for (apiHelper.CustomerMustActivate(apiCustomerId)) complete(emailSent As Boolean)
 	ProgressHide
-'	If job.Success And job.Response.StatusCode = 200 Then
 	If emailSent Then ' Email sent ok?
 		xui.MsgboxAsync("Has been sent to your email address!" & CRLF & _ 
 							emailAddress & CRLF & CRLF & "(if not found CHECK YOUR JUNK FOLDER)" , "Activation email")
@@ -447,7 +373,6 @@ Private Sub ResendActivationEmail(apiCustomerId As Int)As ResumableSub
 							"To: " & emailAddress, "Email problem")
 		Wait For msgbox_result(tempResult As Int)
 	End If
-'	job.Release
 	Return successful
 End Sub
 
@@ -460,7 +385,6 @@ Private Sub RestartThisActivity
 #else ' B4I
 	StartCheckAccount
 #End If
-
 End Sub
 
 ' Exit Query New Installation page.
@@ -480,6 +404,5 @@ private Sub ExitToSelectPlayCentre
 	frmXSelectPlayCentre3.Show
 #End If
 End Sub
-
 
 #End Region  Local Subroutines

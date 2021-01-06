@@ -11,8 +11,8 @@ Version=9.9
 #Region  Documentation
 	'
 	' Name......: clsLocation
-	' Release...: 3
-	' Date......: 02/11/20
+	' Release...: 4
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 12/07/20
@@ -31,6 +31,12 @@ Version=9.9
 	' Overview..: Version for B4A.
 	' Amendee...: D Morris
 	' Details...: Working version for B4A.
+		'
+	' Date......: 03/01/21
+	' Release...: 4
+	' Overview..: Updates Starter.latestLocation.
+	' Amendee...: D Morris.
+	' Details...: Mod: flp_LocationChanged() and locManager_LocationChanged().
 	'
 	' Date......: 
 	' Release...: 
@@ -43,8 +49,8 @@ Version=9.9
 #Region  Mandatory Subroutines & Data
 
 Sub Class_Globals
+	Private xui As XUI								'ignore (to remove warning) -  Required for X platform operation.	
 #if B4A
-	Private xui As XUI								'ignore (to remove warning) -  Required for X platform operation.
 	Public flp As FusedLocationProvider
 	Private flpStarted As Boolean
 #else ' B4i
@@ -84,13 +90,6 @@ End Sub
 
 #Region  Event Handlers
 
-'#if B4i
-'Private Sub EventName_LocationChanged (Location1 As Location)
-'	
-'End Sub
-'#End If
-
-
 #if B4A
 ' Handles Connection Success event.
 Private Sub flp_ConnectionSuccess
@@ -108,7 +107,8 @@ End Sub
 Private Sub flp_LocationChanged (thisLocation As Location)
 	tmrLocationReadyTimeout.Enabled = False
 	mCurrentLocation = thisLocation
-	If xui.SubExists(mCallback, mEvent & "_LocationReady", 0) Then
+	Starter.latestLocation.update(thisLocation.Latitude, thisLocation.Longitude)
+	If xui.SubExists(mCallback, mEvent & "_LocationReady", 1) Then
 		CallSubDelayed2(mCallback, mEvent & "_LocationReady", thisLocation)
 	End If
 End Sub
@@ -118,7 +118,10 @@ End Sub
 private Sub locManager_LocationChanged (thisLocation As Location)
 	tmrLocationReadyTimeout.Enabled = False
 	mCurrentLocation = thisLocation
-	CallSub2(mCallback, mEvent & "_LocationReady" , thisLocation)
+	Starter.latestLocation.update(thisLocation.Latitude, thisLocation.Longitude)
+	If xui.SubExists(mCallback, mEvent & "_LocationReady", 1) Then
+		CallSubDelayed2(mCallback, mEvent & "_LocationReady" , thisLocation)	
+	End If
 End Sub
 
 ' Raised when Authorizations status changed (raised when the location manager is intialiized).

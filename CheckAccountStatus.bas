@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: CheckAccountStatus
-	' Release...: 8-
-	' Date......: 28/11/20    
+	' Release...: 9
+	' Date......: 15/12/20    
 	'
 	' History
 	' Date......: 22/06/19
@@ -63,8 +63,8 @@ Version=9.01
 	' Amendee...: D Morris.
 	' Details...:  Mods: Activity_Pause().
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 9
 	' Overview..: Bugfix: Check account not timing correctly when restarted. 
 	' Amendee...: D Morris
 	' Details...: Mod: mPage_Appear() pCheckAccountStatus() renamed to StartCheckAccount().

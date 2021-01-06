@@ -10,14 +10,20 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: clsSyncDatabase
-	' Release...: 1
-	' Date......: 28/11/20
+	' Release...: 2
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 28/11/20
 	' Release...: 1
 	' Created by: D Morris
 	' Details...: Based on code from hSyncDatabase_v11.
+	'
+	' Date......: 03/01/21
+	' Release...: 2
+	' Overview..: Bugfix: iOS sync complete callback no working.
+	' Amendee...: D Morris
+	' Details...:  Mod: RaiseSyncCompleteEvent() code fixed.
 	'
 	' Date......: 
 	' Release...: 
@@ -200,8 +206,8 @@ End Sub
 ' Note: OK to call this sub multiple times. However, it will only Raise the event once.
 Private Sub RaiseSyncCompleteEvent(success As Boolean)
 	If Not( syncCompleteEventRaised) Then ' Only raise Sync complete event once.
-		If xui.SubExists(mCallback, mEvent & "_SyncComplete", 0) Then ' Raise Sync Complete event
-			CallSub2(mCallback, mEvent & "_SyncComplete", success)
+		If xui.SubExists(mCallback, mEvent & "_SyncComplete", 1) Then ' Raise Sync Complete event
+			CallSubDelayed2(mCallback, mEvent & "_SyncComplete", success)
 			syncCompleteEventRaised = True
 		End If
 		CallSubDelayed2(Me, "Local_SyncComplete", success) ' Raises a local event indicating Sync is complete (used by AsyncSyncDatabase).

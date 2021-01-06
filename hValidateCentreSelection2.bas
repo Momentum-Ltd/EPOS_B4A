@@ -11,64 +11,17 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 9-
-	' Date......: 29/11/20
+	' Release...: 11
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 02/08/20
 	' Release...: 1
 	' Created by: D Morris
 	' Details...: Based on hValidateCentreSelection_v21 First release to support version tracking.
-	' 
-	' Date......: 08/08/20
-	' Release...: 2
-	' Overview..: Support for storing a centre picture bitmap. 
-	' Amendee...: D Morris
-	' Details...: Mod: MainValidateCentreSelection().
-	'			  Mod: Old commented code removed.
 	'
-	' Date......: 11/08/20
-	' Release...: 3
-	' Overview..: Bugfix: #0490 - crashes when double click centre confirm.
-	' Amendee...: D Morris.
-	' Details...:  Mod: Mod: controls now inhibited/enabled when Show/HideProgress() called.
-	'
-	' Date......: 16/09/20
-	' Release...: 4
-	' Overview..: Bugfix: 0497 (Android)  - Problem with centre's web url. 
-	' Amendee...: D Morris
-	' Details...: Mod: lblMore_Click() - Bugfix.
-		'		
-	' Date......: 02/10/20
-	' Release...: 5
-	' Overview..: Mod: Support for Centre Web site with full URL.
-	' Amendee...: D Morris
-	' Details...: Mod: lblMore_Click() - database supplies full URL.
-	'		
-	' Date......: 04/11/20
-	' Release...: 6
-	' Overview..: Issue: #0415 Clear table number when new Centre is selected.
-	' Amendee...: D Morris.
-	' Details...: Mod:  lExitToSyncData() rename to ExitToSyncData().
-	'					ExitToSyncData() clears the table number.
-	'					IExitToSelectCentre() renamed to ExitToSelectCentre().
-	'				    IStartSignOnToCentre() renamed to StartSignOnToCentre().
-	'					lWebSignedOntoCentre() renamed to WebSignedOntoCentre().
-	' 
-	' Date......: 08/11/20
-	' Release...: 7
-	' Overview..: Issue: Confirm centre displays old image before it is overwritten.
-	'			  Added: Support for hot spot on progress circles.
-	' Amendee...: D Morris
-	' Details...: Mod: OnClose() clears out the old image.
-	'			  Issue #0521 Refresh icon touch area increased.
-	'             Added: Support for touch on progress circles.
-	'		
-	' Date......: 26/211/20
-	' Release...: 8
-	' Overview..: Bugfix: #0466 Android phone restart after screen locked. 
-	' Amendee...: D Morris
-	' Details...: Mod: ExitToSelectCentre() clears centreId from centre information.
+	' Versions
+	'  2 - 8 see v9
 	'		
 	' Date......: 28/11/20
 	' Release...: 9
@@ -78,11 +31,19 @@ Version=10
 	'				 Mod: HandleConnectToServerResponse() and HandleOpenTabConfirmResponse() call ExitToCentreHomePage().
 	'				 Mod: ExitToCentreHomePage() now calls Home activity/page.
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 10
 	' Overview..: Issue: #0561(In-progress) only Viewing website information. 
 	' Amendee...: D Morris
 	' Details...:  Mod: Support for webView.
+	'
+	' Date......: 03/01/21
+	' Release...: 11
+	' Overview..: Bugfix: (Android) Hyperlinks no underlined, (iOS) Hyperlinks now correctly displayed.
+	' Amendee...: D Morris.
+	' Details...:  Mod: InitializeLocals() code fixed.
+	'			   Mod: HandleMoreInformation() now will only prefix https to URL.
+	'			   Mod: OnClose() now disables timer.
 	' 
 	' Date......: 
 	' Release...: 
@@ -170,15 +131,6 @@ Sub btnWebClose_Click
 	pnlWeb.Visible = False
 End Sub
 
-' Connect to centre timout triggered
-Sub ConnnectToCentreTimeout_tick
-	ProgressHide
-	tmrConnectToCentreTimout.Enabled = False
-	xui.MsgboxAsync("Unable to communicate with the selected centre - please retry or select another centre.", "Timeout Error")
-	wait for Msgbox_Result(result As Int)
-	ExitToSelectCentre
-End Sub
-
 ' Handle back button
 private Sub lblBackButton_Click
 	If enableViews = True Then
@@ -188,31 +140,21 @@ End Sub
 
 ' Handles the More button
 private Sub lblMore_Click
-'	Dim centreUrl As String = selectCentreDetails.webSite
-'	If Not (selectCentreDetails.webSite.StartsWith("http")) Then ' Prefix with http?
-'		centreUrl =	"http://" & centreUrl
-'	End If	
-'#if B4A
-'	Dim p As PhoneIntents
-'
-'	If selectCentreDetails.webSite <> "" Then
-'		StartActivity(p.OpenBrowser(centreUrl))
-'	Else
-'		StartActivity(p.OpenBrowser("https://superord.co.uk/nocentredetailsavailable.html"))
-'	End If
-'#else ' B4i
-'	If selectCentreDetails.website <> "" Then
-'		Main.App.OpenURL(centreUrl)
-'	Else
-'		Main.App.OpenURL("https://" & "superord.co.uk/nocentredetailsavailable.html")
-'	End If
-'#End If
 	HandleMoreInformation(True)
 End Sub
 
 ' Click on the loading circle to show progress dialog.
 Sub pnlLoadingTouch_Click
 	progressbox.ShowDialog	
+End Sub
+
+' Connect to centre timout triggered
+Sub tmrConnnectToCentreTimeout_tick
+	ProgressHide
+	tmrConnectToCentreTimout.Enabled = False
+	xui.MsgboxAsync("Unable to communicate with the selected centre - please retry or select another centre.", "Timeout Error")
+	wait for Msgbox_Result(result As Int)
+	ExitToSelectCentre
 End Sub
 
 #End Region  Event Handlers
@@ -252,7 +194,7 @@ Public Sub HandleMoreInformation(show As Boolean)
 		If  selectCentreDetails.webSite <> "" Then
 			centreUrl = selectCentreDetails.webSite
 			If Not (centreUrl.StartsWith("http")) Then ' Prefix with http?
-				centreUrl =	"http://" & centreUrl
+				centreUrl =	"https://" & centreUrl ' NOTE iOS only allows https sites!
 			End If
 		End If
 		web.LoadUrl(centreUrl)		
@@ -264,10 +206,9 @@ End Sub
 ' Main method.
 ' centreId is the selected centreId.
 Public Sub MainValidateCentreSelection(centreDetails As clsEposWebCentreLocationRec)
-	' TODO May new function to get more information about the centre (to establish ok for customer)
+	' TODO May need new function to get more information about the centre (to establish ok for customer)
 	selectCentreDetails = centreDetails	' update local copy of Centre information
 	tmrConnectToCentreTimout.Enabled = False	' ensure timeout timer is stopped.
-'	lblSelectedCentreDetails.Text = "You have selected Centre:" & CRLF & selectCentreDetails.centreName & CRLF & "Postcode:" &selectCentreDetails.postCode
 	lblAddress.text = selectCentreDetails.postCode & ": " & modEposApp.GetFirstLine(selectCentreDetails.address) 
 	lblCentreNAme.Text = selectCentreDetails.centreName
 	lblDescription.Text = selectCentreDetails.description
@@ -291,7 +232,8 @@ End Sub
 public Sub OnClose
 	imgCentrePicture.Visible = False	' Clear out old image for next time.
 	ProgressHide						' Just in-case.
-	HandleMoreInformation(False)				
+	HandleMoreInformation(False)	
+	tmrConnectToCentreTimout.Enabled = False
 End Sub
 
 #End Region  Public Subroutines
@@ -315,11 +257,6 @@ private Sub ExitToCentreHomePage
 	ProgressHide
 	Starter.customerOrderInfo.tableNumber = 0
 	tmrConnectToCentreTimout.Enabled = False
-'#if B4A
-'	CallSubDelayed(aSyncDatabase, "pSyncDataBase")
-'#Else
-'	xSyncDatabase.Show
-'#End If
 #if B4A
 	StartActivity(aHome)
 #else
@@ -331,11 +268,12 @@ End Sub
 private Sub InitializeLocals
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 	selectCentreDetails.Initialize
-	tmrConnectToCentreTimout.Initialize("ConnnectToCentreTimeout", DFT_CONNECTION_TIMEOUT)
+	tmrConnectToCentreTimout.Initialize("tmrConnnectToCentreTimeout", DFT_CONNECTION_TIMEOUT)
 	ViewControl(True) ' Enable controls
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("View Website").PopAll
-	lblMore.Text = cs
+	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
+	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblMore, cs)
 End Sub
 
 ' Hide the process box

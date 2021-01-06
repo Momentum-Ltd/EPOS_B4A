@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hValidateDevice
-	' Release...: 17-
-	' Date......: 29/11/20
+	' Release...: 19
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -23,14 +23,20 @@ Version=9.3
 	'   v2 - 8 see v9.
 	'   v9 - 17 see v17.
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 18
 	' Overview..: Issue: #0559 Email address now included in activation messages.
 	'			  Bugfix: Now check email format before using.
 	' Amendee...: D Morris
 	' Details...:  Mod: ValidateTheDevice() email added to message.
 	'			   Bugfix: lblForgotPassword_Click() checks and reports error if problems with email.
 	'			   Mod: Code to clear email and password moved to OnClose().
+	'
+	' Date......: 03/01/21
+	' Release...: 19
+	' Overview..: Added: Forgot password Hyperlink now underlined.
+	' Amendee...: D Morris.
+	' Details...:  Mod: InitializeLocals() code added.
 	'
 	' Date......: 
 	' Release...: 
@@ -263,6 +269,7 @@ private Sub InitializeLocals
 	AddViewToKeyboard(txtPassword.TextField, gPnl_Hide)
 
 #End If
+
 End Sub
 
 ' Show the process box

@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 9-
-	' Date......: 28/11/20
+	' Release...: 11
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -19,57 +19,8 @@ Version=10
 	' Created by: D Morris
 	' Details...: Based on hSelectPlayCentre2_v4.
 	'
-	' Date......: 08/08/20
-	' Release...: 2
-	' Overview..: Old commented code removed.
-	' Amendee...: D Morris
-	' Details...:  Mod: Old comments removed - no code changed.
-	'
-	' Date......: 09/08/20
-	' Release...: 3
-	' Overview..: Colour of "No more centres nearby" changed.
-	' Amendee...: D Morris
-	' Details...: Mod: Code changed in DisplayOnListview().
-	'		
-	' Date......: 02/10/20
-	' Release...: 4
-	' Overview..: Bugfix: #0500 - Validate Centre screen not showing picture after communication timeout.
-	' Amendee...: D Morris
-	' Details...: Bugfix: clvCentres_ItemClick() updates Starter.selectedCentreLocationRec.
-	'
-	' Date......: 15/10/20
-	' Release...: 5
-	' Overview..: Bugfix: #0519 - Now periodically updates the Centre list.
-	' Amendee...: D Morris
-	' Details...:  Mod: LocManager_LocationChanged() and tmrDelayNewLocation_Tick().
-	'	           Mod: RestartDisplayNewLocationTimer() check if page visible. 
-	'
-	' Date......: 02/11/20
-	' Release...: 6
-	' Overview..: Issue: #0529 GPS not always working at startup
-	'			  Issue: #0530 Mixed up centre images.
-	'			  Issue: #0536 Power comsumption - now will ensure location is off when not shown.  
-	' Amendee...: D Morris
-	' Details...: Mod: Constants added for timer values.
-	' 			  Mod: Restructured code to wait for the download to complete before next download 
-	'						DisplayAllCentres(), DisplayNearbyCentres() and DisplayOnListview return values.
-	'			  Mod: SelectCentre() "wait for" inserted (to help with mixed up Centre images).
-	'             Removed: lblMore_Click().
-	'			  Mod: LocationDeviceOFF() is now private.
-	'
-	' Date......: 08/11/20
-	' Release...: 7
-	' Overview..: Issue: #0544 Slow screen rebuild after refresh.
-	' Amendee...: D Morris
-	' Details...: Mod: DisplayOnListview() code changed to split processing and rendering code.
-	'			  Mod: SelectCentre() - now controls the progress indicator.
-	'			  Mod: Progress indicator removed from DisplayNearbyCentres() and DisplayNearbyCentres().
-	'		
-	' Date......: 11/11/20
-	' Release...: 8
-	' Overview..: Issue #0554 (Android – tablets) Select centre screen – panel height is small.
-	' Amendee...: D Morris
-	' Details...: Mod: CreateItem() code to handle height added.
+	' Versions
+	'   2 - 8 see v9
 	'
 	' Date......: 26/11/20
 	' Release...: 9
@@ -78,11 +29,17 @@ Version=10
 	' Amendee...: D Morris
 	' Details...: Mod: DisplayOnListview() call to ScrollToItem() added.
 	'		
-	' Date......: 
-	' Release...: 
-	' Overview..: Bugfix: iOS not displaying centres correctly when on a few.
+	' Date......: 15/12/20
+	' Release...: 10
+	' Overview..: Bugfix: iOS not displaying centres correctly when only a few.
 	' Amendee...: D Morris
 	' Details...: Mod: DisplayOnListview() code excluded for B4i.
+	'
+	' Date......: 03/01/21
+	' Release...: 11
+	' Overview..: Bugfix: iOS not restarted when account information is cleared.
+	' Amendee...: D Morris
+	' Details...: Mod: ClearAccount() Code fixed.
 	'
 	' Date......: 
 	' Release...: 
@@ -215,6 +172,8 @@ public Sub ClearAccount
 		Starter.settings.SaveDefaults				' Setting back to default
 #if B4A
 		StartActivity(CheckAccountStatus)
+#else ' B4I
+		frmCheckAccountStatus.show(False)
 #End If
 	End If
 End Sub
@@ -270,7 +229,6 @@ Public Sub SelectCentre(permissionResult As Boolean)
 		End If	
 #else ' B4i
 		If locationDevice.IsLocationAvailable Then
-			' DisplayNearbyCentres(currentLocation)
 			wait for (DisplayNearbyCentres(locationDevice.GetLocation)) complete(rxMsg As String)
 		Else ' Location permission has been denied
 			Dim msg As String = "This App will not run correctly without location permissions." & CRLF & _
@@ -281,7 +239,6 @@ Public Sub SelectCentre(permissionResult As Boolean)
 			If Result = xui.DialogResponse_Positive Then
 				Main.DisplaySettings
 			End If
-			'DisplayAllCentres
 			Wait For (DisplayAllCentres) complete(rxMsg As String)
 		End If
 #End If ' End B4i	
@@ -360,8 +317,7 @@ End Sub
 '  Return displayListOk = true if all centres downloaded ok. 
 Private Sub DisplayOnListview(inputJson As String) As ResumableSub
 	Dim displayListOk As Boolean = True
-	' Get all the centres out of the JSON and put them in a list
-	Dim jp As JSONParser
+	Dim jp As JSONParser	' Get all the centres out of the JSON and put them in a list
 	jp.Initialize(inputJson)
 	Dim centreList As List = jp.NextArray
 	' First stage write centre info to memory

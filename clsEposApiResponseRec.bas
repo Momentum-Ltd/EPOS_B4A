@@ -10,12 +10,12 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: clsEposApiResponsemRec
-	' Release...: -
-	' Date......: 29/11/20
+	' Release...: 1
+	' Date......: 15/12/20
 	'
 	' History
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 1
 	' Created by: D Morris
 	' Details...: First release to support version tracking
 	'

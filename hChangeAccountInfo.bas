@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 15-
-	' Date......: 29/11/20
+	' Release...: 16
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -22,50 +22,8 @@ Version=9.3
 	'
 	'	Versions
 	'   v2 - 7 see v8.
+	'   v8 - 14 see v15.
 	'
-	' Date......: 26/04/20
-	' Release...: 8
-	' Overview..: Bug #0186: Problem moving accounts support for new customerId (with embedded rev).
-	' Amendee...: D Morris
-	' Details...: Mod: lblAuthForgotPw_Click(), lGetLastestCustomerInfo(), lQueryPassword(), lUpdateAccountInfo().
-	'
-	' Date......: 03/05/20
-	' Release...: 9
-	' Overview..: Added: #381 - Reveal passwords.	
-	' Amendee...: D Morris
-	' Details...: Mod: Support for check box to show password.
-	'		      Mod: Now must press OK to send password.
-	'
-	' Date......: 11/05/20
-	' Release...: 10
-	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
-	' Amendee...: D Morris.
-	' Details...:  Added: OnClose().
-	'
-	' Date......: 26/05/20
-	' Release...: 11
-	' Overview..: Improvements to form (also checks on hinding views with keyboard).
-	' Amendee...: D Morris
-	' Details...: Mod: txtTelephone type now b4xFloattestfield.
-	'			  Mod: txtTelephone_TextChanged() processing of text removed.
-	'
-	' Date......: 05/06/20
-	' Release...: 12
-	' Overview..: Bugfix: Typo error.
-	' Amendee...: D Morris.
-	' Details...: Mod: InitializeLocals() progressbox name spelt wrong.
-	'
-	' Date......: 09/07/20
-	' Release...: 13
-	' Overview..: Bugfix: Input filter causing system to lockup
-	' Amendee...: D Morris.
-	' Details...:  Removed: TextChanged events - caused program to lockup.
-	'
-	' Date......: 19/07/20
-	' Release...: 14
-	' Overview..: Start on new UI theme (First phase changing buttons to Orange with rounded corners.. 
-	' Amendee...: D Morris.
-	' Details...: Mod: Buttons changed to swiftbuttons.
 	'					
 	' Date......: 09/10/20 
 	' Release...: 15
@@ -73,11 +31,13 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...: Mod: DisplayInfo() now handles which panels are visible.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 03/01/21
+	' Release...: 16
 	' Overview..: Issue: #0561 Uses wb viewer for viewing website information. 
+	'			  Bugfix: (Android) Hyperlinks no underlined, (iOS) Hyperlinks now correctly displayed.
 	' Amendee...: D Morris
-	' Details...:  Mod: Support for web view.
+	' Details...:  Mod (issue): Support for web view.
+	'			   Mod (bugfix): InitializeLocals() code fixed.
 	'					
 	' Date......: 
 	' Release...: 
@@ -245,7 +205,9 @@ private Sub InitializeLocals
 	End If
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
-	lblPrivacyPolicy.Text = cs
+'	lblPrivacyPolicy.Text = cs
+	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
+	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblPrivacyPolicy, cs)
 End Sub
 
 ' Checks if information entered on the form can be accepted.

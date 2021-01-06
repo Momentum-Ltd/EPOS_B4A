@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 26-
-	' Date......: 29/11/20
+	' Release...: 28
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -32,11 +32,19 @@ Version=9.5
 	' Details...: Mod: General changes to support new style UI.
 	'			  Bugfix: #0565 - added QueryDisplayKeyboardAndButtons().
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 27
 	' Overview..: Issue: #0360 Place order backbutton clears order - confirmation required.
 	' Amendee...: D Morris.
 	' Details...: Mod: lblBackButton_Click() code added to check operation.
+	' 			  
+	' Date......: 03/01/21
+	' Release...: 28
+	' Overview..: Bugfix: #0571 Place order - problem if table number not a number digit.	
+	'             Bugfix: #0572 (Android) Place order cursor missplaced after backspace or number digit entered. 
+	' Amendee...: D Morris
+	' Details...: Mod: txtTableNumber_TextChanged() Bug #0572.
+	'			  Mod: ProcessTableNumer() Bugfix #0571 - if negative table number.
 	' 			  
 	' Date......: 
 	' Release...: 
@@ -55,8 +63,9 @@ Sub Class_Globals
 	Private xui As XUI							'ignore
 				
 	' Local constants
-	Private const TABLE_NUMBER_MAX_LEN As Int = 3 	' The table number text field's contents can be up to this maximum length.
-	Private const TABLE_NUMBER_MAX As Int = 999		' The table number maximum value.
+'	Private const TABLE_NUMBER_MAX_LEN As Int = 3 	' The table number text field's contents can be up to this maximum length.
+	Private const MAX_TABLE_NUMBER As Int = 999	' Maximum table number value.
+	Private const MIN_TABLE_NUMBER As Int = 1	' Minimum table number value.
 
 	' Activity view declarations
 	Private btnMessage As SwiftButton	 		' Button which allows the user to add/edit the order message.
@@ -184,9 +193,9 @@ End Sub
 #End If
 
 ' Handle back button
-private Sub lblBackButton_Click
+Private Sub lblBackButton_Click
 	If lvwOrderItems.Size > 1 Then ' Items in order - check if OK to clear the order.
-		xui.Msgbox2Async("This will clear your order - do you want to continue?", "Backup button operation", "Yes", "No", "" , Null)
+		xui.Msgbox2Async("This will clear your order - do you want to continue?", "Back button operation", "Yes", "No", "" , Null)
 		Wait For Msgbox_Result (result As Int) 
 		If result = xui.DialogResponse_Positive Then
 			ExitToCentreHomePage		
@@ -271,17 +280,36 @@ End Sub
 ' Handles the TextChanged event of the Table Number edittext view.
 ' Uses https://www.b4x.com/android/forum/threads/edittext-max-characters-limit.23409/ to limit the length of input
 Private Sub txtTableNumber_TextChanged(strOld As String, strNew As String)
-	Dim tableNumber As Int = modEposApp.Val(strNew)
-	If strNew.Length > TABLE_NUMBER_MAX_LEN Or tableNumber > TABLE_NUMBER_MAX  Then
-		tableNumber = TABLE_NUMBER_MAX
-	End If
+#if B4i	' See https://www.b4x.com/android/forum/threads/strange-text_changed-behaviour.107128/
+	Sleep(0)	' Ensure the new value is ok
+#end if
+'	Dim tableNumber As Int = modEposApp.Val(strNew)
+'	If tableNumber > 0 Then
+'		If strNew.Length > TABLE_NUMBER_MAX_LEN Or tableNumber > TABLE_NUMBER_MAX  Then
+'			tableNumber = TABLE_NUMBER_MAX
+'		End If		
+'	Else ' Negative table number is always zero.
+'		tableNumber = 0
+'	End If
+'	Dim tableNumber As Int = modEposApp.CheckNumberRange(strNew.Trim, MAX_TABLE_NUMBER, MIN_TABLE_NUMBER, modEposApp.DFT_TABLE_NUMBER)
+	Dim tableNumber As Int = modEposApp.CheckNumberRange(strNew.Trim, MAX_TABLE_NUMBER, MIN_TABLE_NUMBER, 0)
 	Starter.CustomerOrderInfo.tableNumber = tableNumber	
 	If strNew <> strOld Then
 		If tableNumber <> 0 Then
 			txtTableNumber.Text = tableNumber				
 		Else
-			txtTableNumber.Text = "" ' Table = 0 displayed as blank.
-		End If	
+			txtTableNumber.Text = "" ' Table number = 0 displayed as blank.
+		End If
+		' So cursor can be positioned correctly (appears only necessary for Android).
+		' Adapted from https://www.b4x.com/android/forum/threads/b4xfloattextfield-filter-characters-allowed.114681/
+#if B4A
+		Dim et As EditText = txtTableNumber.TextField
+#else ' B4i
+		Dim et As TextField = txtTableNumber.TextField
+#end if
+		If txtTableNumber.Text.Length > 0 Then
+			et.SetSelection(txtTableNumber.Text.Length, 0)
+		End If
 	End If
 End Sub
 
@@ -293,16 +321,6 @@ End Sub
 Public Sub CancelOrder
 	ClearOrder ' Clear the database's order information
 	ExitToCentreHomePage
-End Sub
-
-' Handles exit to Centre Home page.
-Private Sub ExitToCentreHomePage()
-#if B4A
-	StartActivity(aHome)
-#else ' B4I
-'	xPlaceOrder.ClrPageTitle()	' fixes page title operation.
-	xHome.Show
-#End If	
 End Sub
 
 ' Handles the Order Acknowledgement response from the Server and takes appropriate action.
@@ -527,6 +545,16 @@ Private Sub ClearOrder
 	HandleOrderButton
 End Sub
 
+' Handles exit to Centre Home page.
+Private Sub ExitToCentreHomePage()
+#if B4A
+	StartActivity(aHome)
+#else ' B4I
+'	xPlaceOrder.ClrPageTitle()	' fixes page title operation.
+	xHome.Show
+#End If	
+End Sub
+
 ' Displays the relevant text on the Message button and enables/disables the button accordingly.
 Private Sub HandleMessageButton
 	If Starter.customerOrderInfo.orderMessage <> "" Then
@@ -585,7 +613,7 @@ private Sub InitializeLocals
 End Sub
 
 ' Checks if a table number is valid
-' REturns true if table number not required or valid table number entered.
+' Returns true if table number not required or valid table number entered.
 Private Sub isTableNumberValid() As Boolean
 	Dim tableNumberValid As Boolean = False
 	If Not(Starter.myData.centre.allowDeliverToTable) Or _ 
@@ -606,9 +634,12 @@ Private Sub ProgressShow(message As String)
 End Sub
 
 ' Process the Table number enter and check if valid t - then take appropriate action.
-Private Sub ProcessTableNumer(enteredTableNo As String) 
-	If (enteredTableNo <> "" And enteredTableNo <> 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
-		Starter.customerOrderInfo.tableNumber = modEposApp.Val(enteredTableNo)
+Private Sub ProcessTableNumer(enteredTableNo As String)
+'	Dim tableNumber As Int = modEposApp.Val(enteredTableNo) 
+	Dim tableNumber As Int = modEposApp.CheckNumberRange(enteredTableNo, MAX_TABLE_NUMBER, MIN_TABLE_NUMBER, 0) ' = 0 if invalid table string.
+'	If (enteredTableNo <> "" And enteredTableNo <> 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+	If (tableNumber > 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
+		Starter.customerOrderInfo.tableNumber = tableNumber
 		ResumeOp
 	Else
 		xui.MsgboxAsync("You must enter a table number.", "Table Number Required")
@@ -693,6 +724,9 @@ Private Sub ShowKeyboard
 #End If
 	txtTableNumber.RequestFocusAndShowKeyboard
 	txtTableNumber.mBase.RequestFocus ' Necessary for the B4A otherwise the keyboard don't appear automatically!
+#if B4A 
+	Sleep(0) ' Necessary for the B4A otherwise the keyboard don't appear automatically!
+#End If	
 End Sub
 
 #if B4A
@@ -745,4 +779,3 @@ Private Sub ShowOrderList
 End Sub
 
 #End Region  Local Subroutines
-

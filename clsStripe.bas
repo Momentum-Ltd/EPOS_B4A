@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsStripe
-	' Release...: 5-
-	' Date......: 29/11/20
+	' Release...: 6
+	' Date......: 15/12/20
 	'
 	' History
 	' Date......: 03/09/19
@@ -46,11 +46,19 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...:  Mod: Class_Globals - unused variables cb and apptocken ignored.
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 6
 	' Overview..: Issue: #0475 Card operation - internal problem with callback. 
 	' Amendee...: D Morris.
 	' Details...: Mod: GetCardToken() SubExits() now used for raising the event.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Bugfix: iOS unable to centre a card for payment.
+	'				 Mod: Parameters in Initialize() and GetCardToken().
+	' Amendee...: D Morris.
+	' Details...: Bugfix: GetCardToken() code fixed.
+	'			     Mod: Changes in Initialize() and GetCardToken().
 	'
 	' Date......: 
 	' Release...: 
@@ -63,18 +71,13 @@ Version=9.3
 #Region  Mandatory Subroutines & Data
 
 Sub Class_Globals
-	'TOOD This should be provided by the Centre.
-'	Private Const publishedKey As String = "pk_test_SHzfU1eChNxeqK9vEO8lKWOR"
-	
-	'TODO Not required check.
-'	Private const secretKey As String = "sk_test_kgFPxOa8g3heBdIhP0YjBgmV"
-	
 	' X-platform related.
 	Private xui As XUI									'ignore (to remove warning) -  Required for X platform operation.
 	
-	Private cb As Object 'ignore
-	Private apptoken As String 'ignore
-	Private mEventName As String 
+	
+	Private mCallback As Object 							' Storage for callback object.
+'	Private apptoken As String 'ignore
+	Private mEventName As String 							' Event
 	Private sdkurl As String = "https://api.stripe.com/v1"
 End Sub
 
@@ -86,63 +89,37 @@ End Sub
 #Region  Public Subroutines
 
 'Initializes the object. You can add parameters to this method if needed.
-Public Sub Initialize(TargetModule As Object, token As String, EventName As String)
-	cb = TargetModule
-	apptoken = token
-	mEventName = EventName
+'Public Sub Initialize(callBackModule As Object, token As String, eventName As String)
+Public Sub Initialize(callBackModule As Object, eventName As String)
+'	cb = TargetModule
+'	apptoken = token
+	mCallback = callBackModule
+	mEventName = eventName
 End Sub
 
-'' Get Charges
-'public Sub GetCharges(TargetModule As Object)
-'	Dim job As HttpJob
-'	job.Initialize("",Me)
-'	job.Tag = "GetCharges"
-'	job.Download($"${sdkurl}/charges"$)
-'	job.GetRequest.SetHeader("Authorization", "Bearer "&apptoken)
-'	Wait For (job) JobDone(j As HttpJob)
-'	Dim result As String
-'	If j.Success Then
-'		Log(j.GetString)
-'		result = j.GetString
-'		CallSub3(TargetModule, mEventName & "_" & "Charges",True,result)
-'	Else
-'		result = j.ErrorMessage
-'		'Log(j.ErrorMessage)
-'		CallSub3(TargetModule, mEventName & "_" & "Charges",False,result)
-'	End If
-'	j.Release
-'End Sub
-
 ' Send card details to stripe - and raises an event when a response is received. 
-Public Sub GetCardToken(TargetModule As Object, cardInfo As clsStripeTokenRec)
-	'Dim ttt As String = "card[number]=4242424242424242&card[exp_month]=12&card[exp_year]=2020&card[cvc]=123"
-	Dim cardStrgToSend As String = cardInfo.UrlEncoded ' Needs a string as above.(application/x-www-form-urlencoded;charset=utf-8)
-
+'Public Sub GetCardToken(TargetModule As Object, cardInfo As clsStripeTokenRec)
+Public Sub GetCardToken(cardInfo As clsStripeTokenRec)
+	Dim cardStrgToSend As String = cardInfo.UrlEncoded ' Needs a string like "card[number]=4242424242424242&card[exp_month]=12&card[exp_year]=2020&card[cvc]=123"
 	Dim job As HttpJob
 	job.Initialize("",Me)
 	job.Tag = "GetCardToken"
-	
 	job.poststring($"${sdkurl}/tokens"$, cardStrgToSend)
-	'job.poststring($"${sdkurl}/tokens"$, ttt)
-
 	job.GetRequest.SetContentType("application/x-www-form-urlencoded;charset=utf-8")
-	
-'	job.GetRequest.SetHeader("Authorization", "Bearer "& publishedKey)
-'	job.GetRequest.SetHeader("Authorization", "Bearer "& secretKey)
 	job.GetRequest.SetHeader("Authorization", "Bearer "& Starter.myData.centre.publishedKey)
 
 	Wait For (job) JobDone(j As HttpJob)
 	Dim result As String
 	If j.Success Then
 		Log(j.GetString)
-		result = j.GetString
-		
+		result = j.GetString		
 		Dim token As String = GetToken(result)
-		j.Release	' Release job maybe used by called activities.
-		
-	'	CallSub3(TargetModule, mEventName & "_" & "CardToken", True, token)
-		If xui.SubExists(TargetModule, mEventName & "_CardToken", 0) Then ' Raise Sync Complete event
-			CallSubDelayed3(TargetModule, mEventName & "_CardToken", True, token)
+		j.Release	' Release job here! Maybe used by called activities.
+'		If xui.SubExists(TargetModule, mEventName & "_CardToken", 2) Then ' Raise Sync Complete event (note the '2' is required for iOS operation)
+'			CallSubDelayed3(TargetModule, mEventName & "_CardToken", True, token)
+'		End If
+		If xui.SubExists(mCallback, mEventName & "_CardToken", 2) Then ' Raise Sync Complete event (note the '2' is required for iOS operation)
+			CallSubDelayed3(mCallback, mEventName & "_CardToken", True, token)
 		End If
 	Else
 		result = j.ErrorMessage
@@ -153,12 +130,13 @@ Public Sub GetCardToken(TargetModule As Object, cardInfo As clsStripeTokenRec)
 		Else
 			errorMsg = "Please re-enter"	' Workaround for B4I not handling errors correctly.Http 
 		End If
-		j.Release ' Release job maybe used by called activities.
-
-'		CallSub3(TargetModule, mEventName & "_" & "CardToken", False, errorMsg)
-		If xui.SubExists(TargetModule, mEventName & "_CardToken", 0) Then ' Raise Sync Complete event
-			CallSubDelayed3(TargetModule, mEventName & "_CardToken", False, errorMsg)
+		j.Release ' Release job here! Maybe used by called activities.
+'		If xui.SubExists(TargetModule, mEventName & "_CardToken", 2) Then ' Raise Sync Complete event (note the '2' is required for iOS operation)
+'			CallSubDelayed3(TargetModule, mEventName & "_CardToken", False, errorMsg)
+		If xui.SubExists(mCallback, mEventName & "_CardToken", 2) Then ' Raise Sync Complete event (note the '2' is required for iOS operation)
+			CallSubDelayed3(mCallback, mEventName & "_CardToken", False, errorMsg)
 		End If
+'		End If
 	End If
 End Sub
 
@@ -185,10 +163,6 @@ Private Sub GetToken(responseString As String) As String
 	json.Initialize(responseString)
 	' TODO We need an error - just in case the string is corrupted.
 	map1 = json.NextObject
-'	Dim m As Map' If you wanted card information - something like this. 
-' 	m = map1.Get("card") 
-'   Dim t as string = m.Get("card)
-	
 	Return map1.GetDefault("id", "")
 End Sub
 

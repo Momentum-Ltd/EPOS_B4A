@@ -11,8 +11,8 @@ Version=8.28
 #Region  Documentation
 	'
 	' Name......: clsConfigSettings
-	' Release...: 18
-	' Date......: 05/10/20
+	' Release...: 19
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 06/07/18
@@ -87,6 +87,13 @@ Version=8.28
 	' Details...: Added: Support for maxCentres, searchRadius, showTestCentres and unitKm.
 	'			    Mod: LoadDefaults() now public.
 	'
+	' Date......: 03/01/21
+	' Release...: 19
+	' Overview..: Changes to constants.
+	' Amendee...: D Morris.
+	' Details...: Removed: DFT_MAX_CENTRES and DFT_SEARCH_RADIUS.
+	'			      Mod: LoadSettings() and LoadDefaults() now uses constants from modEposApp for centre and radius defaults. 
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -120,8 +127,8 @@ Sub Class_Globals
 	Private Const DFT_WIFI_HYSTERESIS As Int = 10
 	Private Const DFT_WIFI_LOW_THRESHOLD As Int = 30
 	' New values 
-	Private Const DFT_MAX_CENTRES As Int = 20
-	Private Const DFT_SEARCH_RADIUS As Int = 250
+'	Private Const DFT_MAX_CENTRES As Int = 20
+'	Private Const DFT_SEARCH_RADIUS As Int = 250
 	Private Const DFT_SHOW_TEST_CENTRES As Boolean = False
 	Private Const DFT_UNIT_KM As Boolean = False ' Miles selected
 	
@@ -194,8 +201,8 @@ public Sub LoadDefaults
 	webOnlyComms = DFT_WEB_ONLY_COMMS
 	
 	' New values
-	maxCentres = DFT_MAX_CENTRES
-	searchRadius = DFT_SEARCH_RADIUS
+	maxCentres = modEposApp.DFT_MAX_CENTRES
+	searchRadius = modEposApp. DFT_SEARCH_RADIUS
 	showTestCentres = DFT_SHOW_TEST_CENTRES
 	unitKm = DFT_UNIT_KM
 End Sub
@@ -228,8 +235,8 @@ Public Sub LoadSettings
 			enableStreamLineSignon = DFT_STREAMLINE_SIGNON	' Now always true (redundant)
 			
 			' New values
-			maxCentres = mapConfig.GetDefault(MAPKEY_MAX_CENTRES, DFT_MAX_CENTRES)
-			searchRadius = mapConfig.GetDefault(MAPKEY_SEARCH_RADIUS, DFT_SEARCH_RADIUS)
+			maxCentres = mapConfig.GetDefault(MAPKEY_MAX_CENTRES, modEposApp.DFT_MAX_CENTRES)
+			searchRadius = mapConfig.GetDefault(MAPKEY_SEARCH_RADIUS, modEposApp.DFT_SEARCH_RADIUS)
 			showTestCentres = ReadBooleanStrgValue(mapConfig.GetDefault(MAPKEY_SHOW_TEST_CENTRES, WriteBooleanStrgValue(DFT_SHOW_TEST_CENTRES)))
 			unitKm = ReadBooleanStrgValue(mapConfig.GetDefault(MAPKEY_UNIT_KM, WriteBooleanStrgValue(DFT_UNIT_KM)))
 		End If		

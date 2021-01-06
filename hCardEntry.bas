@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 17
-	' Date......: 20/11/20
+	' Release...: 18
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -43,6 +43,15 @@ Version=9.5
 	'			  Added: (for Android) clicking on background hides keyboard. 
 	'			  Mod: uses clsMMYYhandler to process date string.
 	'
+	' Date......: 03/01/21
+	' Release...: 18
+	' Overview..: Bugfix: iOS unable to accept card.
+	'			  Issue: Test data expiry date replaced with later date. 
+	' Amendee...: D Morris
+	' Details...: Mod: InitializeLocals() - Problem with iOS initialization of clsStripe case changed.
+	'			  Mod: LoadTestData() - Expiry date changed.
+	'             Mod: clsStripe - now uses latest parameters InitializeLocals() and SubmitCard().			  
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -58,7 +67,7 @@ Sub Class_Globals
 	Private xui As XUI							'ignore (to remove warning).
 	
 	' Misc objects
-	Private processedDate As clsDatehandler		' Handles processing date.
+	Private processedDate As clsDateHandler		' Handles processing date.
 	Private progressbox As clsProgressDialog	' Progress box.
 	Private cardInfo As clsStripeTokenRec		' Strip relating objects.
 #if B4A
@@ -81,7 +90,7 @@ Sub Class_Globals
 	Private pnlDefaultCard As B4XView 			' The default card panel.
 	
 	' Local variables
-	Private stripe As clsStripe					' Used communication with the Stripe server.	
+	Private stripe As clsStripe					' Used for Stripe payments.	
 	Private total As Float 						' Amount to charge (if register card and take payment at the same time).
 	Private mOrderId As Int						' The order to pay (if n.a. then = 0)
 
@@ -409,7 +418,8 @@ private Sub InitializeLocals
 	processedDate.Initialize
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 	cardInfo.Initialize
-	stripe.Initialize(Me, "sk_test_4eC39HqLyjWDarjtT1zdp7dc","Stripe")
+'	stripe.Initialize(Me, "sk_test_4eC39HqLyjWDarjtT1zdp7dc","Stripe")
+	stripe.Initialize(Me, "stripe") ' 
 	btnTestData.mBase.Visible = Starter.settings.testMode ' Short cut for setting Test Card button.
 	SetupTabOrder
 End Sub
@@ -418,7 +428,7 @@ End Sub
 private Sub LoadTestData
 	txtCardNumber.Text = "4242 4242 4242 4242"
 	txtCvc.Text = "123"
-	txtExpiryDate.Text = "01/21"
+	txtExpiryDate.Text = "01/23" ' Set to a date in the future.
 End Sub
 
 ' Show the process box
@@ -509,7 +519,8 @@ Private Sub SubmitCard
 	cardInfo.card.name = txtName.Text.trim
 	cardInfo.card.number = FormatCardNumber(txtCardNumber.Text).Replace(" ", "")
 	ProgressShow("Checking your card...")
-	stripe.GetCardToken(Me, cardInfo)
+'	stripe.GetCardToken(Me,cardInfo)
+	stripe.GetCardToken(cardInfo)
 End Sub
 
 #End Region  Local Subroutines

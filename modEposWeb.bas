@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: modEposWeb
-	' Release...: 12-
-	' Date......: 29/11/20
+	' Release...: 13
+	' Date......: 15/12/20
 	'
 	' History
 	' Date......: 01/07/19
@@ -36,8 +36,8 @@ Version=9.01
 	' Amendee...: D Morris.
 	' Details...:   Mod: URL_WEB_SERVER_2 and URL_WEB_SERVER_2_API now https://...
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 13
 	' Overview..: URL constant added.
 	' Amendee...: D Morris
 	' Details...: Added: URL_CENTRE_INFO_NOT_AVAILABLE.

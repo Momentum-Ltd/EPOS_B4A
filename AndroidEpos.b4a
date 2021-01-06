@@ -108,70 +108,71 @@ Module39=clsGoodsTableRec
 Module4=aPlaceOrder
 Module40=clsGroupCategoryTableRec
 Module41=clsLocation
-Module42=clsMainCategoryTableRec
-Module43=clsMyData
-Module44=clsNotifications
-Module45=clsOrderPaymentRec
-Module46=clsOrderStartResponse
-Module47=clsOrderStatusRec
-Module48=clsOrderSummary
-Module49=clsOrderSummaryRec
+Module42=clsLocationCoordinates
+Module43=clsMainCategoryTableRec
+Module44=clsMyData
+Module45=clsNotifications
+Module46=clsOrderPaymentRec
+Module47=clsOrderStartResponse
+Module48=clsOrderStatusRec
+Module49=clsOrderSummary
 Module5=aSelectItem
-Module50=clsOrderTableRec
-Module51=clsPreparationTableRec
-Module52=clsProgress
-Module53=clsProgressDialog
-Module54=clsProgressIndicator
-Module55=clsReportErrors
-Module56=clsServer
-Module57=clsSizeOptionTableRec
-Module58=clsSizePriceTableRec
-Module59=clsStripe
+Module50=clsOrderSummaryRec
+Module51=clsOrderTableRec
+Module52=clsPreparationTableRec
+Module53=clsProgress
+Module54=clsProgressDialog
+Module55=clsProgressIndicator
+Module56=clsReportErrors
+Module57=clsServer
+Module58=clsSizeOptionTableRec
+Module59=clsSizePriceTableRec
 Module6=aSelectPlayCentre3
-Module60=clsStripeCardRec
-Module61=clsStripeTokenRec
-Module62=clsSubCategoryTableRec
-Module63=clsSyncDatabase
-Module64=ConnectionHelper
-Module65=CreateAccount
-Module66=FirebaseMessaging
-Module67=hAbout
-Module68=hCardEntry
-Module69=hChangeAccountInfo
+Module60=clsStripe
+Module61=clsStripeCardRec
+Module62=clsStripeTokenRec
+Module63=clsSubCategoryTableRec
+Module64=clsSyncDatabase
+Module65=ConnectionHelper
+Module66=CreateAccount
+Module67=FirebaseMessaging
+Module68=hAbout
+Module69=hCardEntry
 Module7=ChangeAccountInfo
-Module70=hChangeSettings2
-Module71=hCheckAccountStatus
-Module72=hCreateAccount
-Module73=hHome
-Module74=hPlaceOrder
-Module75=hQueryNewInstall
-Module76=hSelectItem
-Module77=hSelectPlayCentre3
-Module78=hValidateCentreSelection2
-Module79=hValidateDevice
+Module70=hChangeAccountInfo
+Module71=hChangeSettings2
+Module72=hCheckAccountStatus
+Module73=hCreateAccount
+Module74=hHome
+Module75=hPlaceOrder
+Module76=hQueryNewInstall
+Module77=hSelectItem
+Module78=hSelectPlayCentre3
+Module79=hValidateCentreSelection2
 Module8=ChangeSettings
-Module80=modConvert
-Module81=modEposApp
-Module82=modEposWeb
-Module83=NB6
-Module84=QueryNewInstall
-Module85=srvNotification
-Module86=srvPhoneTotal
-Module87=Starter
-Module88=svcTestSequence
-Module89=TemplateActivity
+Module80=hValidateDevice
+Module81=modConvert
+Module82=modEposApp
+Module83=modEposWeb
+Module84=NB6
+Module85=QueryNewInstall
+Module86=srvNotification
+Module87=srvPhoneTotal
+Module88=Starter
+Module89=svcTestSequence
 Module9=CheckAccountStatus
-Module90=TemplateClass
-Module91=TemplateCode
-Module92=TemplateService
-Module93=TemplateXactivity
-Module94=TemplateXhelper
-Module95=TestStartAt
-Module96=ValidateCentreSelection2
-Module97=ValidateDevice
+Module90=TemplateActivity
+Module91=TemplateClass
+Module92=TemplateCode
+Module93=TemplateService
+Module94=TemplateXactivity
+Module95=TemplateXhelper
+Module96=TestStartAt
+Module97=ValidateCentreSelection2
+Module98=ValidateDevice
 NumberOfFiles=23
 NumberOfLibraries=24
-NumberOfModules=97
+NumberOfModules=98
 Version=10.2
 @EndOfDesignText@
 
@@ -181,8 +182,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 189                                                                                                                                                                      
-	' Date......: 28/11/20
+	' Release...: 190                                                                                                                                                                    
+	' Date......: 06/01/21
 	'
 	' History
 	' For releases v1 - 24, see release v28.
@@ -284,9 +285,14 @@ Version=10.2
 	'				 Mod: Starter_v89, hHome_v11, hValidateCentreSelection2_v9, aHome_v3.
 	'			  Rmoved: aSyncDatabase, frmSyncDatabase, hSyncDatabase.
 	'		
-	' Date......: 
-	' Release...: 
-	' Overview..: Bugfix: Check account not showing sign-on long enough when restarted. 
+	' Date......: 06/01/21
+	' Release...: 190
+	' Overview..: Bugfix: Check account not showing sign-on long enough when restarted.
+	'			  Bugfix: (Android) Hyperlinks no underlined (iOS) Hyperlinks now correctly displayed. 
+	'             Bugfix: Settings form and Get location EPOS message - Display location option now works.
+	'             Bugfix #0570 Crashes when search radius increased to > 999.	
+	'			  Bugfix: #0571 Place order - problem if table number not a number digit.	
+	'             Bugfix: #0572 (Android) Place order cursor missplaced after backspace or non number digit entered. 
 	'			  Issue: #0360 Place order backbutton clears order - confirmation required.
 	'             Issue: #0475 Card operation - internal problem with callback. 
 	'             Issue: #0482 Auto retry on non-activated account.
@@ -297,8 +303,11 @@ Version=10.2
 	' Details...:  New: clsEposApiResponse_v1
 	'				Mod: hCheckAccountStatus_v20, CheckAccountStatus_v9, hSelectPlayCentre3_v10, clsEposApiHelper_v10,
 	'						hValidateDevice_v18, hCreateAccount_v18, hValidateCentreSelection2_v10, modEposWeb_v13, 
-	'						hCreateAccount_v18, hAbout_v8, hPlaceOrder_v27, clsStripe_v6.
-	'			  FORMS: frmValidateCentreSelection3_v5, frmCreateAccount_v7, frmChangeAccountInfo_v5. frmAbout_v4.
+	'						hAbout_v8, hPlaceOrder_v27, clsStripe_v6, hChangeSettings2_v3.
+	'			  FORMS: frmValidateCentreSelection3_v5, frmCreateAccount_v7, frmChangeAccountInfo_v5. frmAbout_v4, frmChangeSettings2_v2.
+	'			    Mod: ModEposApp_v29, hPlaceOrder_v28, clsConfigSettings_v19, hCheckAccountStatus_v21, hSelectPlayCentre3_v11, hAbout_v9,
+	'						hCreateAccount_v19, hChangeAccountInfo_v16, hValidateCentreSelection2_v11, hValidateDevice_v19, clsSyncDatabase_v2,
+	'						clsLocationCoordinates_v1, Starter_v90, clsLocation_v4, hCardEntry_v18, hChangeSettings2_v3.
 	'		
 	' Date......: 
 	' Release...: 
@@ -313,8 +322,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 189
-	#VersionName: 1.0.0.189-
+	#VersionCode: 190
+	#VersionName: 1.0.0.190
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

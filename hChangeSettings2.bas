@@ -11,14 +11,28 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: hChangeSettings2
-	' Release...: 1
-	' Date......: 05/10/20
+	' Release...: 3
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 05/10/20
 	' Release...: 1
 	' Created by: D Morris 
-	' Details...: Based on hChangeSettings_v15
+	' Details...: Based on hChangeSettings_v15.
+	'
+	' Date......: 15/02/20
+	' Release...: 2
+	' Overview..: Bugfix #0570 Crashes when search radius increased to > 999.
+	' Amendee...: D Morris
+	' Details...: Mode SaveAllSettings() code fixed.
+	'
+	' Date......: 03/01/21
+	' Release...: 3
+	' Overview..: Bugfix: Radius values shown without commas.
+	'			  Mod: Now uses Starter.latestLocation.
+	' Amendee...: D Morris.
+	' Details...: Mod: UpdateDisplay().
+	'			  Mod: Old commented out code removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -36,6 +50,12 @@ Sub Class_Globals
 	' X-platform related.
 	Private xui As XUI			'ignore
 	
+	' Constants
+	Private Const MAX_CENTRES As Int = 99	' Maximum centres to display setting.
+	Private Const MAX_RADIUS As Int = 9999	' Maximum search radius setting.
+	Private Const MIN_CENTRES As Int = 5	' Minimum centres to display setting.
+	Private Const MIN_RADIUS As Int = 2		' Minimum search radius setting (km).
+	
 	' Activity view declarations
 	Private btnDefault As SwiftButton			' Load default settings button.
 	
@@ -48,9 +68,11 @@ Sub Class_Globals
 	Private swUnitsKm As B4XSwitch				' Switch to select units.
 	
 	Private swServer2 As B4XSwitch				' Select server (unchecked = Server1).
-	Public dialog As B4XDialog					' Dialog enter number for permission to change settings (public so it can be access by form).
+	
+	' Misc objects	
+	Public dialog As B4XDialog					' Dialog enter number for permission to change settings (public so it can be accessed by the parent form).
 #if B4A	
-	Private saveParent As Activity
+	Private saveParent As Activity				' Storage for the parent activity.
 #end if
 End Sub
 
@@ -59,7 +81,7 @@ End Sub
 Public Sub Initialize (parent As Activity)
 	saveParent = parent
 #else ' B4I
-public Sub Initialize(parent As B4XView)
+ public Sub Initialize(parent As B4XView)
 #End If
 	parent.LoadLayout("frmChangeSettings2")
 	dialog.Initialize(parent)
@@ -72,14 +94,28 @@ End Sub
 #Region  Event Handlers
 
 ' Handle Default button
-Sub btnDefault_Click
+Private Sub btnDefault_Click
 	Starter.settings.LoadDefaults
 	UpdateDisplay
 End Sub
 
-' Handle the select server switch
-private Sub swServer2_ValueChanged (Value As Boolean)
+' Handle Max Centres enter button.
+Private Sub edtMaxCentres_EnterPressed
+	Log("Max Centres Return")
+	Starter.settings.maxCentres = modEposApp.CheckNumberRange(edtMaxCentres.Text, MAX_CENTRES, MIN_CENTRES, modEposApp.DFT_MAX_CENTRES)
+	edtMaxCentres.Text = Starter.settings.maxCentres	' Ensure screen text updated with latest value
+End Sub
+'
+' Handle Max Centres enter button.
+Private Sub edtRadus_EnterPressed
+	Log("Max Centres Return")
+	Starter.settings.searchRadius = ProcessSearchRadius(edtRadus.Text)
+	edtRadus.text = GetRadiusText ' Ensure screen text updated with latest value
+End Sub
 
+' Handle units switch
+Private Sub swUnitsKm_ValueChanged (Value As Boolean)
+	Starter.settings.unitKm = Value
 End Sub
 
 #End Region  Event Handlers
@@ -117,21 +153,12 @@ End Sub
 
 ' Saves all the values displayed by the views, and then saves the settings to disk.
 Public Sub SaveAllSettings
-	If IsNumber(edtMaxCentres.Text.Trim) Then
-		Starter.settings.maxCentres = edtMaxCentres.Text.Trim
-	End If
-	If IsNumber(edtRadus.Text.Trim) Then 
-		Dim searchRadius As Double = edtRadus.Text.Trim
-		If Starter.settings.unitKm = False Then ' If miles entered convert to km.
-			searchRadius = modConvert.ConvertMilesToKm(searchRadius)
-		End If
-		Starter.settings.searchRadius = NumberFormat(searchRadius, 1, 0)
-	End If
+	Starter.settings.maxCentres = modEposApp.CheckNumberRange(edtMaxCentres.Text, MAX_CENTRES, MIN_CENTRES, modEposApp.DFT_MAX_CENTRES) 
+	Starter.settings.searchRadius = ProcessSearchRadius(edtRadus.Text)
 	Starter.settings.allFcmNotification = swAllFcmNotifications.Value
 	Starter.settings.showTestCentres = swShowTestCentres.value
 	Starter.settings.testMode = swTestMode.value
 	Starter.settings.unitKm = swUnitsKm.Value
-
 	If swServer2.Value = True Then		' Select server
 		Starter.server.SelectServer(2)	' Server #2
 	Else
@@ -167,7 +194,7 @@ End Sub
 ' Show location
 Public Sub ShowLocation
 	Dim locationString As String
-	locationString = "LAT:" & Starter.currentLocation.Latitude & CRLF & "LONG:" & Starter.currentLocation.Longitude
+	locationString = "LAT:" & Starter.latestLocation.Latitude & CRLF & "LONG:" & Starter.latestLocation.Longitude
 	xui.MsgboxAsync(locationString, "Location")
 	wait for MsgBox_result(tempResult As Int)
 End Sub
@@ -176,9 +203,28 @@ End Sub
 
 #Region  Local Subroutines
 
+' Gets the stored Radius text and displays it as km or miles.
+Private Sub GetRadiusText As String
+	Dim radiusStrg As String = Starter.settings.searchRadius	
+	If Starter.settings.unitKm = False Then ' Display as miles?
+		radiusStrg = NumberFormat2(Round(modConvert.ConvertKmToMiles(radiusStrg)), 1, 0, 0, False)
+	End If
+	Return radiusStrg
+End Sub
+
 ' Initialize the locals etc.
 private Sub InitializeLocals
 	' Currently no action.
+End Sub
+
+' Process the Search radius setting.
+' Return processed value as int.
+Private Sub ProcessSearchRadius(numberStrg As String) As Int
+	Dim searchRadius As Int = modEposApp.CheckNumberRange(numberStrg, MAX_RADIUS, MIN_RADIUS, modEposApp.DFT_SEARCH_RADIUS)
+	If Starter.settings.unitKm = False Then ' If miles entered convert to km.
+		searchRadius = Round(modConvert.ConvertMilesToKm(searchRadius))
+	End If
+	Return searchRadius
 End Sub
 
 ' Update display
@@ -189,11 +235,7 @@ Private Sub UpdateDisplay()
 	swShowTestCentres.Value = Starter.settings.showTestCentres
 	swTestMode.Value = Starter.settings.testMode
 	swUnitsKm.Value = Starter.settings.unitKm
-	If Starter.settings.unitKm = True Then ' Display as km?
-		edtRadus.Text = Starter.settings.searchRadius		
-	Else
-		edtRadus.Text = NumberFormat(modConvert.ConvertKmToMiles(Starter.settings.searchRadius), 1, 0)
-	End If
+	edtRadus.text = GetRadiusText
 	If Starter.server.GetServerNumber = 2 Then
 		swServer2.Value = True
 	Else
@@ -202,4 +244,5 @@ Private Sub UpdateDisplay()
 End Sub
 
 #End Region  Local Subroutines
+
 

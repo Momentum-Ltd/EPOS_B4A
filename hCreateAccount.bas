@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCreateAccount
-	' Release...: 17-
-	' Date......: 29/11/20
+	' Release...: 19
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 02/05/20
@@ -23,12 +23,18 @@ Version=9.3
 	'    v2 - 8 see v9
 	'    v9 - 17 see v17
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 15/12/20
+	' Release...: 18
 	' Overview..:  Issue: #0559 Email address now included in activation messages.
 	'			   Issue: #0561 Uses wb viewer for viewing website information. 
 	' Amendee...: D Morris
 	' Details...:  Mod: CreateNewAccount() email added to message.
+	'
+	' Date......: 03/01/21
+	' Release...: 19
+	' Overview..: Bugfix: (Android) Hyperlinks no underlined, (iOS) Hyperlinks now correctly displayed.
+	' Amendee...: D Morris.
+	' Details...:  Mod: InitializeLocals() code fixed.
 	'
 	' Date......: 
 	' Release...: 
@@ -342,7 +348,9 @@ private Sub InitializeLocals
 #End If
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
-	lblPrivacyPolicy.Text = cs
+'	lblPrivacyPolicy.Text = cs
+	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
+	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblPrivacyPolicy, cs)
 End Sub
 
 ' Collects the customer data entered in the form's text fields and submits it to the Web API as a new customer entry.

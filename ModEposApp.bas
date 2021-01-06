@@ -11,8 +11,8 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: ModEposApp
-	' Release...: 28
-	' Date......: 26/11/20
+	' Release...: 29
+	' Date......: 03/01/21
 	'
 	' History
 	' Date......: 23/12/16
@@ -60,6 +60,14 @@ Version=7.3
 	' Overview..: Special not added to User types: 
 	' Amendee...: D Morris
 	' Details...: Mod: user type (see sizePriceTableRec) note added. 
+	'
+	' Date......: 03/01/21
+	' Release...: 29
+	' Overview..: Bugfix: #0571 Place order - problem if table number not a number.	
+	' Amendee...: D Morris
+	' Details...: Mod: Val() - checks if string can be converted to a number.
+	'			  Added: CheckNumberRange().
+	'			  Added: DFT_MAX_CENTRES and DFT_SEARCH_RADIUS.
 	'
 	' Date......: 
 	' Release...: 
@@ -158,6 +166,11 @@ Sub Process_Globals
 	Public const DFT_CENTRE_ID As Int = 1 		' Default centre ID.
 	Public Const DFT_CUSTOMER_ID As Int = 1		' Default customer ID.
 	
+	' Default search constants.
+	Public Const DFT_TABLE_NUMBER As Int = 1	' Default table number (usually used if invalid string entry).
+	Public Const DFT_MAX_CENTRES As Int = 20	' Default Maximum number of centres to display in search (usually used if invalid string entry).
+	Public Const DFT_SEARCH_RADIUS As Int = 250 ' Default search radius value - km (usually used if invalid string entry).
+	
 	' User types: (not good practice but list will only work with user types
 	'     DM 25/11/20 not sure this is still true as list of classes can be built see modEposApp.SortSizeOption().
 	Type descriptionAbridgedTableRec(key As Int, value As String)
@@ -187,6 +200,17 @@ End Sub
 
 #Region  Public Subroutines
 
+' Builds customer's name and returns it as a string.
+Public Sub BuildCustomerName() As String ' TODO - may need to support nickname.
+#if B4A
+	Dim customerName As String = Starter.myData.Customer.name ' & " " & Starter.CustomerDetails.nickName
+#Else
+'	Dim customerName As String = Starter.CustomerDetails.foreName
+	Dim customerName As String = Starter.myData.Customer.name ' & " " & Starter.CustomerDetails.nickName
+#End If
+	Return customerName
+End Sub
+
 ' Checks the email format (returns true if ok).
 Public Sub CheckEmailFormat(email As String) As Boolean
 	Dim emailFormatOk As Boolean = False
@@ -198,15 +222,21 @@ Public Sub CheckEmailFormat(email As String) As Boolean
 	Return emailFormatOk
 End Sub
 
-' Builds customer's name and returns it as a string.
-Public Sub BuildCustomerName() As String ' TODO - may need to support nickname.
-#if B4A
-	Dim customerName As String = Starter.myData.Customer.name ' & " " & Starter.CustomerDetails.nickName
-#Else
-'	Dim customerName As String = Starter.CustomerDetails.foreName
-	Dim customerName As String = Starter.myData.Customer.name ' & " " & Starter.CustomerDetails.nickName
-#End If
-	Return customerName
+' Check Range of number (number is a string).
+' 	minValue/maxValue min/max allowed values.
+'   defaultValue - value returned if string cannot be parsed as number 
+' Returns check/adjusted value as integer.
+Public Sub CheckNumberRange(valueStrg As String, maxValue As Int, minValue As Int, defaultValue As Int)  As Int
+	Dim numberValue As Int = defaultValue
+	If IsNumber(valueStrg) Then
+		numberValue = Val(valueStrg)
+		If numberValue > maxValue Then
+			numberValue = maxValue
+		else if numberValue < minValue Then
+			numberValue = minValue
+		End If
+	End If
+	Return numberValue
 End Sub
 
 ' Display a privacy notice.
@@ -254,10 +284,14 @@ End Sub
 
 ' Converts a number string to an integer (similar to Vbasic Val() function).
 '  Returns 0 if number string = ""
+' NOTE: The input string is trimmed and parsed for the number.
 Public Sub Val(numberString As String) As Int
 	Dim number As Int = 0
-	If numberString <> "" And numberString <> Null Then
-		number = numberString
+	Dim trimNumberStrg As String = numberString.trim
+	If IsNumber(trimNumberStrg) Then
+		If trimNumberStrg <> "" Then
+			number = trimNumberStrg
+		End If		
 	End If
 	Return number
 End Sub

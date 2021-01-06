@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="189"
-	android:versionName="1.0.0.189-"
+	android:versionCode="190"
+	android:versionName="1.0.0.190"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>
@@ -17,14 +17,14 @@
 	<permission android:name="arena.Epos.permission.C2D_MESSAGE"
 	  android:protectionLevel="signature" />
 	<uses-permission android:name="android.permission.INTERNET"/>
-	<uses-permission android:name="android.permission.VIBRATE"/>
-	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 	<uses-permission android:name="arena.Epos.permission.C2D_MESSAGE"/>
@@ -157,17 +157,6 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
-			android:name=".validatedevice"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<service android:name=".svctestsequence">
-		</service>
-		<receiver android:name=".svctestsequence$svctestsequence_BR">
-		</receiver>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
 			android:name=".about"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
@@ -258,6 +247,10 @@
 		</service>
 		<receiver android:name=".starter$starter_BR">
 		</receiver>
+		<service android:name=".svctestsequence">
+		</service>
+		<receiver android:name=".svctestsequence$svctestsequence_BR">
+		</receiver>
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
@@ -284,6 +277,13 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".validatecentreselection2"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".validatedevice"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>

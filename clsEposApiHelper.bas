@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: clsEposApiHelper
-	' Release...: 9-
-	' Date......: 29/11/20
+	' Release...: 10
+	' Date......: 15/12/20
 	'
 	' History
 	' Date......: 01/07/19
@@ -19,54 +19,8 @@ Version=9.01
 	' Created by: D Morris
 	' Details...: First release to support version tracking
 	'
-	' Date......: 07/08/19
-	' Release...: 2
-	' Overview..: Support myData.
-	' Amendee...: D Morris
-	' Details...:  mod: SyncPhoneFromWebServer() and SyncWebServerToPhone().
-	'
-	' Date......: 09/08/19
-	' Release...: 3
-	' Overview..: Support check and update of FCM token and device type.
-	' Amendee...: D Morris
-	' Details...:   Mod: Constants from modEposWeb used.
-	'			  Added: QueryUpdateFCMandDeviceType().
-	'
-	' Date......: 09/08/19
-	' Release...: 4
-	' Overview..: Mods to support x-platform.
-	' Amendee...: D Morris
-	' Details...: mod: SyncWebServerToPhone() and SyncPhoneFromWebServer() - ref old files
-	'			  mod: msgboxasync - x-platform version used.
-	'
-	' Date......: 12/10/19
-	' Release...: 5
-	' Overview..: Changes to support starter.myData.
-	' Amendee...: D Morris
-	' Details...:  Mods: SyncPhoneFromWebServer() and SyncWebServerToPhone() support for B4I code.
-	'
-	' Date......: 22/10/19
-	' Release...: 6
-	' Release...: Bugfix problem  B4I code  "wait for MsgBox_result()"
-	' Amendee...: D Morris
-	' Details...: Bugfix: MsgBox_result() changed to MsgBox_result(tempResult as int): ForgotPasswordIdKnown().
-	'
-	' Date......: 25/03/20
-	' Release...: 7
-	' Overview..: Bugfix: 0259 - Menu revision not checked.
-	' Amendee...: D Morris.
-	' Details...:  Added:CheckMenuRevision().
-	'
-	' Date......: 26/04/20
-	' Release...: 8
-	' Overview..: Bug #0186: Problem moving accounts support for new customerId (with embedded rev).
-	' Amendee...: D Morris.
-	' Details...:  Added: IncrementCustomerIdRevision().
-	' 				 Mod: UpdateCustomerInfo(), QueryUpdateDeviceType(), SendPasswordEmail(), QueryUpdateFcm(),
-	'						CheckCustomerEmailAndPassword(), GetCustomerInfo(), CheckMenuRevision(),
-	'						ForgotPasswordEmailKnown(), ForgotPasswordIdKnown(), QueryUpdateFCMandType(),
-	'						SyncPhoneFromWebServer(), SyncWebServerToPhone(),
-	'						UpdateCustomerInfo().
+	' Versions
+	'	2 - 9 see v9
 	'
 	' Date......: 11/06/20
 	' Release...: 9
@@ -76,9 +30,9 @@ Version=9.01
 	'					 GetCustomerId(), GetCustomerInfo(), SendPasswordEmail(), UpdateCustomerInfo(),
 	'					 QueryUpdateDeviceType(), QueryUpdateFcm().
 	'
-	' Date......: 
-	' Release...: 
-	' Overview..: 
+	' Date......: 15/02/20
+	' Release...: 10
+	' Overview..: New features added.
 	' Amendee...: D Morris
 	' Details...: Mod: Old commented out code removed.
 	'			  Added: IsCustomerActivated(), CustomerMustActivate(), IsInternetAvailable() and CheckWebServerStatus().
