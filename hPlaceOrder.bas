@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 28
-	' Date......: 03/01/21
+	' Release...: 29
+	' Date......: 20/01/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -45,6 +45,19 @@ Version=9.5
 	' Amendee...: D Morris
 	' Details...: Mod: txtTableNumber_TextChanged() Bug #0572.
 	'			  Mod: ProcessTableNumer() Bugfix #0571 - if negative table number.
+	'
+	' Date......: 20/01/21
+	' Release...: 29
+	' Overview..: Bugfix: #0578 - Payment message orderId is now included in the message.
+	'			  Bugfix: #0583 - Payment query saved card option is now not shown when no saved card available.
+	'		         Mod: General maintenance.
+	' Amendee...: D Morris
+	' Details...: Mod: Old commented out code removed.
+	'			  Mod: QueryPayment() now private.
+	'			  Mod: QueryPayment() parameter changed to clsOrderPaymentRec type and 
+	'							calls aCardEntry.CardEntryAndOrderPayment() to make payment.
+	'			  Mod: QueryPayment() - removes Saved Card option when not available.
+	'			  Mod: HandleOrderAcknResponse() now handles new QueryPayment() parameters.
 	' 			  
 	' Date......: 
 	' Release...: 
@@ -63,7 +76,6 @@ Sub Class_Globals
 	Private xui As XUI							'ignore
 				
 	' Local constants
-'	Private const TABLE_NUMBER_MAX_LEN As Int = 3 	' The table number text field's contents can be up to this maximum length.
 	Private const MAX_TABLE_NUMBER As Int = 999	' Maximum table number value.
 	Private const MIN_TABLE_NUMBER As Int = 1	' Minimum table number value.
 
@@ -283,15 +295,6 @@ Private Sub txtTableNumber_TextChanged(strOld As String, strNew As String)
 #if B4i	' See https://www.b4x.com/android/forum/threads/strange-text_changed-behaviour.107128/
 	Sleep(0)	' Ensure the new value is ok
 #end if
-'	Dim tableNumber As Int = modEposApp.Val(strNew)
-'	If tableNumber > 0 Then
-'		If strNew.Length > TABLE_NUMBER_MAX_LEN Or tableNumber > TABLE_NUMBER_MAX  Then
-'			tableNumber = TABLE_NUMBER_MAX
-'		End If		
-'	Else ' Negative table number is always zero.
-'		tableNumber = 0
-'	End If
-'	Dim tableNumber As Int = modEposApp.CheckNumberRange(strNew.Trim, MAX_TABLE_NUMBER, MIN_TABLE_NUMBER, modEposApp.DFT_TABLE_NUMBER)
 	Dim tableNumber As Int = modEposApp.CheckNumberRange(strNew.Trim, MAX_TABLE_NUMBER, MIN_TABLE_NUMBER, 0)
 	Starter.CustomerOrderInfo.tableNumber = tableNumber	
 	If strNew <> strOld Then
@@ -344,13 +347,11 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 		Wait For MsgBox_Result(Result As Int)
 		ExitToCentreHomePage
 	Else If responseObj.status = modConvert.statusWaitingForPayment Then ' Payment required before order is processed
-		wait for (QueryPayment(responseObj.amount)) complete(Result1 As Boolean)
+		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
+		orderPayment.amount = responseObj.amount
+		orderPayment.orderId = responseObj.orderId
+		wait for (QueryPayment(orderPayment)) complete(Result1 As Boolean)
 	End If
-#if B4A
-'	StartActivity(aTaskSelect)	'WARNING Causes problems with paying for an order.
-#else 'B4i
-'	xPlaceOrder.ClrPageTitle()	' fixes page title operation.
-#End If
 End Sub
 
 ' Handles the response from the Server to the Order message.
@@ -397,11 +398,6 @@ Public Sub HandleOrderResponse(orderResponseStr As String)
 				svcPhoneTotal.AdjustPhoneTotal(Main.LatestOrderTotal)
 #End If
 				ClearOrder ' Important to do this as it updates the Starter service's database
-#if B4A
-	'			StartActivity(aTaskSelect)
-#else 'B4i
-'				xPlaceOrder.ClrPageTitle()	' fixes page title operation.
-#End If
 			End If
 		Else ' Order was not accepted
 			If responseObj.itemList.Size > 0 Then ' Items in the order are out of stock
@@ -433,56 +429,8 @@ public Sub OnClose
 	End If
 End Sub
 
-' Query and implement payment operation
-Public Sub QueryPayment(amount As Float)As ResumableSub
-	Dim msg As String = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
-	pnlHideOrder.Visible = True
-	btnOrder.mBase.Visible = False 	'TODO Not sure why these buttons show thro panel?
-	btnMessage.mBase.Visible = False
-	Dim exitToTaskSelect As Boolean = False 'HACK to deal with problem with blank form.
-		If Starter.myData.centre.acceptCards Then ' Cards accepted
-	#if B4A
-		xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
-	#else ' B4i - don't support CRLF in button text.
-		xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
-	#end if
-		Wait For MsgBox_Result(Result As Int)
-		If Result = xui.DialogResponse_Positive Then ' Default Card?
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndPayment", amount, True)
-#else ' b4i
-			xCardEntry.CardEntryAndPayment(amount, True)
-#end if
-		else if Result = xui.DialogResponse_Cancel Then ' Cash?
-			msg = "Please go to the counter to pay."
-			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
-			Wait For MsgBox_Result(Result2 As Int)
-			exitToTaskSelect = True 'HACK to deal with problem with blank form.
-		Else ' Another Card?
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndPayment", amount, False)
-#else ' B4i
-			xCardEntry.CardEntryAndPayment(amount, False)
-#end if
-		End If
-	Else ' Cards not accepted - must go to the counter
-		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
-		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
-		Wait For MsgBox_Result(Result3 As Int)
-	End If
-
-	pnlHideOrder.Visible = False
-	btnOrder.mBase.Visible = True 	'TODO Not sure why these buttons show thro panel?
-	btnMessage.mBase.Visible = True
-	If exitToTaskSelect Then 'HACK to deal with problem with blank form.
-		ExitToCentreHomePage
-	End If
-	Return True
-End Sub
-
 ' Performs the resume operation.
 public Sub ResumeOp
-	' SetupCollectDeliverViews
 	HandleMessageButton
 	HandleOrderButton	
 	ShowOrderList	
@@ -593,19 +541,6 @@ private Sub InitializeLocals
 	kk.Initialize("")	
 #End If
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
-#if B4A
-'	SetupViews
-#else ' B4I
-'	Dim greyColour As Int = Colors.RGB(169, 169, 169)
-'	btnHideKeyboard.Initialize("btnHideKeyboard", btnHideKeyboard.STYLE_SYSTEM)
-'	btnHideKeyboard.CustomLabel.Font = Font.CreateNew(25)
-'	btnHideKeyboard.Text = "Enter table number"
-'	btnHideKeyboard.Width = 100
-'	btnHideKeyboard.Height = 50
-'	btnHideKeyboard.Color = greyColour
-'	btnHideKeyboard.SetBorder(1, Colors.Black, 3)
-'	AddViewToKeyboard(txtTableNumber, btnHideKeyboard)
-#End If
 	notification.Initialize
 	Dim bt As Bitmap = imgSuperorder.GetBitmap
 	imgSuperorder.SetBitmap(bt.Resize(imgSuperorder.Width, imgSuperorder.Height, True))
@@ -635,9 +570,7 @@ End Sub
 
 ' Process the Table number enter and check if valid t - then take appropriate action.
 Private Sub ProcessTableNumer(enteredTableNo As String)
-'	Dim tableNumber As Int = modEposApp.Val(enteredTableNo) 
 	Dim tableNumber As Int = modEposApp.CheckNumberRange(enteredTableNo, MAX_TABLE_NUMBER, MIN_TABLE_NUMBER, 0) ' = 0 if invalid table string.
-'	If (enteredTableNo <> "" And enteredTableNo <> 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 	If (tableNumber > 0) Or Not(Starter.CustomerOrderInfo.deliverToTable) Then
 		Starter.customerOrderInfo.tableNumber = tableNumber
 		ResumeOp
@@ -666,6 +599,63 @@ Private Sub QueryDisplayKeyboardAndButtons
 	QueryDisplayKeyboard
 	HandleMessageButton
 	HandleOrderButton
+End Sub
+
+' Query and implement payment operation
+' *** Very similar to code in hHome.QueryPayment().
+Private Sub QueryPayment(orderPayment As clsOrderPaymentRec)As ResumableSub
+	Dim msg As String 
+	pnlHideOrder.Visible = True
+	btnOrder.mBase.Visible = False 	'TODO Not sure why these buttons show thro panel?
+	btnMessage.mBase.Visible = False
+	Dim exitToTaskSelect As Boolean = False 'HACK to deal with problem with blank form.
+	If Starter.myData.centre.acceptCards Then ' Cards accepted
+		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
+		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
+#if B4A
+			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
+#else ' B4i - don't support CRLF in button text.
+			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
+#end if
+		Else ' ELSE no saved card available.
+#if B4A
+			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
+#else ' B4i - don't support CRLF in button text.
+			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
+#end if						
+		End If
+		Wait For MsgBox_Result(Result As Int)
+		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
+#if B4A
+			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
+#else ' b4i
+			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
+#end if
+		else if Result = xui.DialogResponse_Cancel Then ' Cash?
+			msg = "Please go to the counter to pay."
+			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
+			Wait For MsgBox_Result(Result2 As Int)
+			exitToTaskSelect = True 'HACK to deal with problem with blank form.
+		Else ' Another Card?
+#if B4A
+			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False)
+#else ' B4i
+			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+#end if
+		End If
+	Else ' Cards not accepted - must go to the counter
+		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
+		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
+		Wait For MsgBox_Result(Result3 As Int)
+	End If
+
+	pnlHideOrder.Visible = False
+	btnOrder.mBase.Visible = True 	'TODO Not sure why these buttons show thro panel?
+	btnMessage.mBase.Visible = True
+	If exitToTaskSelect Then 'HACK to deal with problem with blank form.
+		ExitToCentreHomePage
+	End If
+	Return True
 End Sub
 
 ' Updates views for Collect/Deliver operation.

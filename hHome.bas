@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 11
-	' Date......: 28/11/20
+	' Release...: 12
+	' Date......: 20/01/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -40,6 +40,14 @@ Version=10
 	'			Added: syncDbDatabase class.
 	'		   Public: HandleSyncDbReponse().
 	'			  Mod: InitializeLocals(), OnClose() supports syncDbDatabase.
+	'			
+	' Date......: 20/01/21
+	' Release...: 12
+	' Overview..: Maintenance release.
+	'			  Bugfix: #0583 - Payment query saved card option is now not shown when no saved card available.
+	' Amendee...: D Morris
+	' Details...: Mod: pHandleOrderInfo() header updated.
+	'			  Mod: QueryPayment() - removes Saved Card option when not available.		  
 	'			
 	' Date......: 
 	' Release...: 
@@ -191,7 +199,8 @@ End Sub
 
 #Region  Public Subroutines
 
-' Displays the details of the specified order using a message box.
+' Displays the details of the specified order using a message box and gives
+'  customer option to pay for it.
 Public Sub pHandleOrderInfo(orderInfoStr As String)
 	Dim totalCost As Float = 0
 	ProgressHide
@@ -252,7 +261,7 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 	End If
 End Sub
 
-' Handles the Order Start reponse from the Server by displaying a relevant messagebox and then starting the Show Order activity.
+' Handles the Order Start response from the Server by displaying a relevant messagebox and then starting the Show Order activity.
 Public Sub HandleOrderStart(orderStartStr As String)
 	ProgressHide ' Always hide the progress dialog
 #if B4A
@@ -582,13 +591,21 @@ Private Sub QueryPayment(orderPayment As clsOrderPaymentRec)As ResumableSub
 	Dim msg As String
 	If Starter.myData.centre.acceptCards Then ' Cards accepted
 		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
-	#if B4A
-		xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
-	#else ' B4i - don't support CRLF in button text.
-		xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
-	#end if
+		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
+#if B4A
+			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
+#else ' B4i - don't support CRLF in button text.
+			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
+#end if
+		Else ' ELSE no saved card available.
+#if B4A
+			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
+#else ' B4i - don't support CRLF in button text.
+			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
+#end if						
+		End If
 		Wait For MsgBox_Result(Result As Int)
-		If Result = xui.DialogResponse_Positive Then ' Default Card?
+		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
 #if B4A
 			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
 #else ' b4i

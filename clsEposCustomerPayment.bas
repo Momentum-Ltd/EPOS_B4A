@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsEposCustomerPayment.
-	' Release...: 5
-	' Date......: 31/05/20
+	' Release...: 6
+	' Date......: 20/01/21
 	'
 	' History
 	' Date......: 03/09/19
@@ -43,6 +43,14 @@ Version=9.3
     ' Amendee...: D Morris
     ' Details...: Added: orderId.
 	'				Mod: XmlDeserialize() and XmlSerialize() support for orderId.
+	'		
+	' Date......: 20/01/21
+	' Release...: 6
+	' Overview..: Bugfix: #0464 - Save card option now works correctly.
+	' Amendee...: D Morris.
+	' Details...: Added: publicCardInfo, billPayment, noSave and paymentId.
+    '               Mod: Constructors to support publicCardInfo.
+	'			    Mod: XmlDeserialize() and XmlSerialize() support for new elemnts.
 	'
 	' Date......: 
 	' Release...: 
@@ -55,6 +63,13 @@ Version=9.3
 #Region  Mandatory Subroutines & Data
 
 Sub Class_Globals
+
+	''' <summary>
+	''' Indicates if bill or order is to be paid
+	''' </summary>
+	''' <remarks> false indicates a Order is to be paid.</remarks>
+	Public billPayment As Boolean
+	
 	''' <summary>The centre identifier</summary>
 	Public centreId As Int
 
@@ -63,19 +78,36 @@ Sub Class_Globals
 	''' </summary>
 	Public customerId As Int
 
-	''' <summary>The order identifier.</summary>
+	''' <summary>Now obsolete - Remove ASAP - The order identifier.</summary>
 	''' <remarks>This is a option element - if applicable it is indicates the order this
 	''' payment relates to. If not required it should either be removed, negative or = 0.</remarks>
 	Public orderId As Int
 	
 	''' <summary>
-	''' The payment/operation accepted flag.
+	''' Don't save card.
+	''' </summary>
+	Public noSave As Boolean
+
+	''' <summary>
+	''' Payment identifier
+	''' </summary>
+	Public paymentId As Int
+	
+	''' <summary>
+	''' The public card information
+	''' </summary>
+	''' <remarks>Only valid if new card token provided.</remarks>
+	Public publicCardInfo As clsEposPublicCardInfo
+	
+	''' <summary>
+	''' The payment/operation (bidirectional) flag.
 	''' </summary>
 	Public status As Int
 	
 	''' <summary>
 	''' Container for Token information (Used to pass a new customer card token).
 	''' </summary>
+	''' <remarks>If token = "" use stored token otherwise a new token.</remarks>
 	Public token As String
 
 	''' <summary>
@@ -90,7 +122,7 @@ End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize
-
+	publicCardInfo.Initialize
 End Sub
 
 ' Returns an instance of this object containing the data contained in the specified XML string.
@@ -100,10 +132,18 @@ Public Sub XmlDeserialize(xmlString As String) As clsEposCustomerPayment
 	Dim parsedData As Map = xm.Parse(xmlString)
 	Dim customerPaymentResult As Map = parsedData.Get("clsEposCustomerPayment")
 	If customerPaymentResult.IsInitialized Then ' Protection against receiving the wrong class
+		localRetObject.billPayment = modConvert.ConvertStringToBoolean(customerPaymentResult.GetDefault("billPayment", False))
 		localRetObject.centreId = customerPaymentResult.GetDefault("centreId", 0)
 		localRetObject.customerId = customerPaymentResult.GetDefault("customerId", 0)
 		localRetObject.orderId = customerPaymentResult.GetDefault("orderId", 0)
 		localRetObject.Status = modConvert.ConvertPaymentStatusToInt(customerPaymentResult.GetDefault("status", ""))
+		localRetObject.noSave = modConvert.ConvertStringToBoolean(customerPaymentResult.GetDefault("noSave", ""))
+		localRetObject.paymentId = customerPaymentResult.GetDefault("paymentId", 0)
+		Dim cardInfoMap As Map = customerPaymentResult.Get("clsEposPublicCardInfo")
+		If cardInfoMap Is Map Then
+			localRetObject.publicCardInfo.expiryDate = cardInfoMap.GetDefault("expiryDate", "")
+			localRetObject.publicCardInfo.last4Digits = cardInfoMap.GetDefault("last4Digits", "")
+		End If		
 		localRetObject.Token = customerPaymentResult.GetDefault("token", "")
 		localRetObject.total = customerPaymentResult.GetDefault("total", 0)
 	End If
@@ -116,12 +156,18 @@ Public Sub XmlSerialize() As String
 	
 	x = x.create("clsEposCustomerPayment").attribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance") _
 			.attribute("xmlns:xsd", "http://www.w3.org/2001/XMLSchema")
-	x = x.element("status").text(modConvert.ConvertPaymentStatusIntToString(status)).up
+	x = x.element("billPayment").text(modConvert.ConvertBooleanToString(billPayment)).up
 	x = x.element("centreId").text(centreId).up
 	x = x.element("customerId").text(customerId).up
 	x = x.element("orderId").text(orderId).up
+	x = x.element("noSave").text(noSave).up
+	x = x.element("paymentId").text(paymentId).up
+	x = x.element("status").text(modConvert.ConvertPaymentStatusIntToString(status)).up	
 	x = x.element("token").text(token).up
 	x = x.element("total").text(total).up
+	x = x.element("publicCardInfo")
+	x = x.element("expiryDate").text(publicCardInfo.expiryDate).up. _
+					element("last4Digits").text(publicCardInfo.last4Digits).up.up		
 #if B4A	'TODO need to investigate why different code required for B4A and B4I  
 	Dim props As Map : props.Initialize ' TODO Not sure using 'Map' is necessary - investigate
 	props.Put("{http://xml.apache.org/xslt}indent-amount", "4")

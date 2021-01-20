@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: aCardEntry
-	' Release...: 8
-	' Date......: 08/08/20   
+	' Release...: 8-
+	' Date......: 10/01/21   
 	'
 	' History
 	' Date......: 13/10/19
@@ -62,6 +62,12 @@ Version=9.3
 	' Overview..: Support for new UI.
 	' Amendee...: D Morris
 	' Details...:  Mod: Activity_ActionBarHomeClick()
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: General maintenance.
+	' Amendee...: D Morris
+	' Details...:  Mod: CardEntryAndCharge() removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -131,11 +137,11 @@ Public Sub CardEntryAndOrderPayment(paymentInfo As clsOrderPaymentRec, defaultCa
 	Wait For (hc.CardEntryAndOrderPayment(paymentInfo, defaultCard)) complete(a As Boolean)
 End Sub
 
-'  Make a card payment for a specified amount.
-' Can be used to settle Bill or multiple orders.
-Public Sub CardEntryAndPayment(amount As Float, defaultCard As Boolean)
-	wait for (hc.CardEntryAndPayment(amount, defaultCard)) complete(a As Boolean)
-End Sub
+''  Make a card payment for a specified amount.
+'' Can be used to settle Bill or multiple orders.
+'Public Sub CardEntryAndPayment(amount As Float, defaultCard As Boolean)
+'	wait for (hc.CardEntryAndPayment(amount, defaultCard)) complete(a As Boolean)
+'End Sub
 
 ' Reports the result of a card transaction.
 Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)

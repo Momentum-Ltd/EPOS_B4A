@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 18
-	' Date......: 03/01/21
+	' Release...: 19
+	' Date......: 20/01/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -51,6 +51,16 @@ Version=9.5
 	' Details...: Mod: InitializeLocals() - Problem with iOS initialization of clsStripe case changed.
 	'			  Mod: LoadTestData() - Expiry date changed.
 	'             Mod: clsStripe - now uses latest parameters InitializeLocals() and SubmitCard().			  
+	'		
+	' Date......: 20/01/21
+	' Release...: 19
+	' Overview..: Bugfix: #0464 - Save card option now works correctly.
+	'			  Bugfix: #0578 - Payment message orderId is now included in the message.
+	' Amendee...: D Morris.
+	' Details...: Mod: chkSaveCard replaced with swSaveCard.
+	'			  Mod: SendCardTokenToServer() znc ReportPaymentStatus().
+	'			  Removed: CardEntryAndPayment(), SendPayment().
+	'			  Mod: ClearCard() now includes the swSaveCard set to fakse.
 	'
 	' Date......: 
 	' Release...: 
@@ -77,8 +87,9 @@ Sub Class_Globals
 	' Card Entry Panel
 	Private btnSubmit As SwiftButton			' Submit card details button.
 	Private btnTestData As SwiftButton			' Load test card data.
-	Private chkSaveCard As B4XView				' Save card option.
+'	Private chkSaveCard As B4XView				' Save card option.
 	Private pnlCardEntry As B4XView				' The Card entry panel enclosing these views.
+	Private swSaveCard As B4XSwitch				' Save Card 
 	Private txtCvc As B4XFloatTextField			' Card CVC.
 	Private txtLine1 As B4XFloatTextField		' First line of billing address.
 	Private txtName As B4XFloatTextField		' Name on card.
@@ -93,7 +104,6 @@ Sub Class_Globals
 	Private stripe As clsStripe					' Used for Stripe payments.	
 	Private total As Float 						' Amount to charge (if register card and take payment at the same time).
 	Private mOrderId As Int						' The order to pay (if n.a. then = 0)
-
 
 End Sub
 
@@ -142,11 +152,11 @@ Private Sub stripe_CardToken(success As Boolean, cardToken As String)
 	End If
 End Sub
 
-' Tab to next field
-' Code taken from https://www.b4x.com/android/forum/threads/tab-order-of-textedit-views.19489/
-Private Sub txtCardNumber_EnterPressed
-	' TabToNext(Sender)
-End Sub
+'' Tab to next field
+'' Code taken from https://www.b4x.com/android/forum/threads/tab-order-of-textedit-views.19489/
+'Private Sub txtCardNumber_EnterPressed
+'	' TabToNext(Sender)
+'End Sub
 
 ' Handle Card number changes.
 Private Sub txtCardNumber_TextChanged (old As String, new As String)
@@ -182,10 +192,10 @@ Private Sub txtCardNumber_TextChanged (old As String, new As String)
 	End If
 End Sub
 
-' Tab To next field
-Private Sub txtCvc_EnterPressed
-	'TabToNext(Sender)
-End Sub
+'' Tab To next field
+'Private Sub txtCvc_EnterPressed
+'	'TabToNext(Sender)
+'End Sub
 
 ' Handle card CVC code
 Private Sub txtCvc_TextChanged(old As String, new As String)
@@ -205,30 +215,30 @@ Private Sub txtCvc_TextChanged(old As String, new As String)
 	End If
 End Sub
 
-' Tab to next field
-private Sub txtExpiryDate_EnterPressed
-	'TabToNext(Sender)
-End Sub
+'' Tab to next field
+'private Sub txtExpiryDate_EnterPressed
+'	'TabToNext(Sender)
+'End Sub
 
 ' Handle expiry date changes.
 private Sub txtExpiryDate_TextChanged (Old As String, New As String)
 	processedDate.Handler_TextChanged_MMYY(txtExpiryDate, Old, New)
 End Sub
 
-' Tab to next field
-private Sub txtLine1_EnterPressed
-	'TabToNext(Sender)	
-End Sub
-
-' Tab to next field
-private Sub txtName_EnterPressed
-	'TabToNext(Sender)
-End Sub
-
-' Tab to next field
-Private Sub txtPostCode_EnterPressed
-'	TabToNext(Sender)
-End Sub
+'' Tab to next field
+'private Sub txtLine1_EnterPressed
+'	'TabToNext(Sender)
+'End Sub
+'
+'' Tab to next field
+'private Sub txtName_EnterPressed
+'	'TabToNext(Sender)
+'End Sub
+'
+'' Tab to next field
+'Private Sub txtPostCode_EnterPressed
+''	TabToNext(Sender)
+'End Sub
 
 #End Region  Event Handlers
 
@@ -248,7 +258,7 @@ Public Sub CardEntryAndOrderPayment(orderPayment As clsOrderPaymentRec, defaultC
 	ClearCard
 	total = orderPayment.amount	' Save for later.
 	mOrderId = orderPayment.orderId
-	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and not card details.
+	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and no card details.
 		pnlDefaultCard.Visible = True
 		pnlCardEntry.Visible = False
 		SendOrderPayment(orderPayment.orderId, orderPayment.amount)
@@ -261,25 +271,25 @@ Public Sub CardEntryAndOrderPayment(orderPayment As clsOrderPaymentRec, defaultC
 	Return True
 End Sub
 
-' Entry point for request card with payment.
-' charge - amount to charge card.
-' defaultCard - set if use the default card.
-Public Sub CardEntryAndPayment(amount As Float, defaultCard As Boolean) As ResumableSub
-	ClearCard
-	total = amount
-	mOrderId = 0 ' Order is n.a.
-	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and not card details.
-		pnlDefaultCard.Visible = True
-		pnlCardEntry.Visible = False
-		SendPayment(amount)
-	Else 
-		pnlDefaultCard.Visible = False
-		pnlCardEntry.Visible = True
-		Wait for btnSubmit_Click()	' Wait for card information to be entered.
-		SubmitCard
-	End If
-	Return True
-End Sub
+'' Entry point for request card with payment.
+'' charge - amount to charge card.
+'' defaultCard - set if use the default card.
+'Public Sub CardEntryAndPayment(amount As Float, defaultCard As Boolean) As ResumableSub
+'	ClearCard
+'	total = amount
+'	mOrderId = 0 ' Order is n.a.
+'	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and not card details.
+'		pnlDefaultCard.Visible = True
+'		pnlCardEntry.Visible = False
+'		SendPayment(amount)
+'	Else 
+'		pnlDefaultCard.Visible = False
+'		pnlCardEntry.Visible = True
+'		Wait for btnSubmit_Click()	' Wait for card information to be entered.
+'		SubmitCard
+'	End If
+'	Return True
+'End Sub
 
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
@@ -332,11 +342,13 @@ Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
 #end if
 		wait for Msgbox_Result(tempResult As Int)
 		If tempResult = xui.DialogResponse_Positive Then ' Another card?
+			Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
+			orderPayment.amount = paymentInfo.total
+			orderPayment.orderId = paymentInfo.orderId
 #if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndPayment", paymentInfo.total, False) 
+			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False) 
 #else 'B4I
-			' xCardEntry.CardEntryAndCharge(paymentInfo.total)
-			xCardEntry.CardEntryAndPayment(paymentInfo.total, False)
+			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
 #end if	
 		else if tempResult = xui.DialogResponse_Negative Then ' Cash?
 			Dim msg As String = "Please go to the counter to pay."
@@ -364,6 +376,7 @@ Private Sub ClearCard
 	txtExpiryDate.text = ""
 	txtName.Text = ""
 	txtLine1.Text = ""
+	swSaveCard.Value = False
 End Sub
 
 ' Handles exit to Centre Home page.
@@ -399,6 +412,14 @@ Private Sub FormatExpiryDate(expiryDate As String) As String
 	Return processedDate.FormatDateMMYY(expiryDate)
 End Sub
 
+' Gets the Public card information
+Private Sub GetPublicCardInfo() As clsEposPublicCardInfo
+	Dim publicCardInfo As clsEposPublicCardInfo : publicCardInfo.initialize
+	publicCardInfo.expiryDate = cardInfo.card.exp_month & "/" & cardInfo.card.exp_year
+	publicCardInfo.last4Digits =   cardInfo.card.number.SubString(12) ' Last 4 digits of card number - TODO Support other than 16 digit card numbers.
+	Return publicCardInfo
+End Sub
+
 ' Handles Stripe response to request a token
 private Sub HandleStripeResponse(success As Boolean, cardToken As String)
  	If success Then ' Card ok?
@@ -429,6 +450,7 @@ private Sub LoadTestData
 	txtCardNumber.Text = "4242 4242 4242 4242"
 	txtCvc.Text = "123"
 	txtExpiryDate.Text = "01/23" ' Set to a date in the future.
+	swSaveCard.Value = True
 End Sub
 
 ' Show the process box
@@ -447,8 +469,9 @@ Private Sub SendCardTokenToServer(cardToken As String, pTotal As Float)
 	
 	cardTokenObj.centreId = Starter.myData.centre.centreId
 	cardTokenObj.customerId = Starter.myData.customer.customerId
-	If chkSaveCard.Checked Then
+	If swSaveCard.Value  Then
 		cardTokenObj.status = modConvert.payStatusSaveCard
+		cardTokenObj.publicCardInfo = GetPublicCardInfo	' Get Card information.
 	Else
 		cardTokenObj.status = modConvert.statusUnknown
 	End If
@@ -473,21 +496,6 @@ Private Sub SendOrderPayment(orderId As Int, amount As Float)
 	payment.total = amount
 	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
 	ProgressShow("Processing payment, please wait...")
-	#if B4A
-	CallSub2(Starter, "pSendMessage",  msg)
-#else ' B4I
-	Main.SendMessage(msg)
-#End If
-End Sub
-
-' Send a payment message
-Private Sub SendPayment(amount As Float)
-	Dim payment As clsEposCustomerPayment : payment.initialize
-	payment.centreId = Starter.myData.centre.centreId
-	payment.customerId = Starter.myData.customer.customerId
-	payment.total = amount
-	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
-	ProgressShow("Processing payment, please wait...")
 #if B4A
 	CallSub2(Starter, "pSendMessage",  msg)
 #else ' B4I
@@ -495,10 +503,25 @@ Private Sub SendPayment(amount As Float)
 #End If
 End Sub
 
-' Setup the tab order (adjust as necessary).
+'' Send a payment message
+'Private Sub SendPayment(amount As Float)
+'	Dim payment As clsEposCustomerPayment : payment.initialize
+'	payment.centreId = Starter.myData.centre.centreId
+'	payment.customerId = Starter.myData.customer.customerId
+'	payment.total = amount
+'	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
+'	ProgressShow("Processing payment, please wait...")
+'#if B4A
+'	CallSub2(Starter, "pSendMessage",  msg)
+'#else ' B4I
+'	Main.SendMessage(msg)
+'#End If
+'End Sub
+
+' Setup the tab order (adjust as necessary - currently no tab operation and keyboard will hide when enter pressed).
+' IMPORTANT - Don't remove otherwise it will autotab to the next field and not hide the keyboard when Enter is pressed!
 Private Sub SetupTabOrder
-	' This shows the accept button and stops the tab to next field (found thro' experimentation).
-	txtCardNumber.NextField = txtCardNumber	
+	txtCardNumber.NextField = txtCardNumber ' This setting shows the accept button and stops the tab to next field (found thro' experimentation).
 	txtExpiryDate.NextField = txtExpiryDate
 	txtCvc.NextField = txtCvc
 	txtName.NextField = txtName

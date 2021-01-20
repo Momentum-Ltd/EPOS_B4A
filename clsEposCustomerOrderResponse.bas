@@ -10,8 +10,8 @@ Version=8.28
 #Region  Documentation
 	'
 	' Name......: clsEposCustomerOrderResponse
-	' Release...: 3
-	' Date......: 01/12/19
+	' Release...: 4
+	' Date......: 20/01/21
 	'
 	' History
 	' Date......: 10/09/18
@@ -30,6 +30,12 @@ Version=8.28
     ' Overview..: Supports centreId.
     ' Amendee...: D Morris
     ' Details...: Added: centreId - definition and DeserialiseXml().
+	'		
+	' Date......: 20/01/21
+	' Release...: 4
+	' Overview..: Bugfix: #0464 - Save card option now works correctly.
+	' Amendee...: D Morris.
+	' Details...: Added: publicCardInfo
 	'
 	' Date......: 
 	' Release...: 
@@ -44,12 +50,13 @@ Version=8.28
 Sub Class_Globals
 	
 	' Public variables
-	Public accept As Boolean
-	Public centreId As Int			' Centre identifier.
-	Public customerId As Int		' Customer identifier.
-	Public itemList As List
-	Public message As String
-	Public orderId As Int
+	Public accept As Boolean						' Indicates the order is accepted.
+	Public centreId As Int							' Centre identifier.
+	Public customerId As Int						' Customer identifier.
+	Public itemList As List							' (List of clsCustomerOrderItemList) Order's item list.
+	Public message As String						' Order message.
+	Public orderId As Int							' Order identity.
+	Public publicCardInfo As clsEposPublicCardInfo	' Public card information.
 End Sub
 
 #End Region  Mandatory Subroutines & Data

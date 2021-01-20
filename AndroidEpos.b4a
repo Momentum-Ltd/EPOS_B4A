@@ -74,6 +74,7 @@ Library9=mlwifi
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
 Module1=About
 Module10=clsCentreInfo
+Module100=ValidateDevice
 Module11=clsCentreInfoAndImgRec
 Module12=clsConfigSettings
 Module13=clsConnect
@@ -100,80 +101,81 @@ Module31=clsEposMessageRec
 Module32=clsEposOrderInfo
 Module33=clsEposOrderStatus
 Module34=clsEposOrderStatusList
-Module35=clsEposWebCentreLocationRec
-Module36=clsEposWebCommsMessageRec
-Module37=clsEposWebCustomerRec
-Module38=clsEposWebLocationCoordinates
-Module39=clsGoodsTableRec
+Module35=clsEposPublicCardInfo
+Module36=clsEposWebCentreLocationRec
+Module37=clsEposWebCommsMessageRec
+Module38=clsEposWebCustomerRec
+Module39=clsEposWebLocationCoordinates
 Module4=aPlaceOrder
-Module40=clsGroupCategoryTableRec
-Module41=clsLocation
-Module42=clsLocationCoordinates
-Module43=clsMainCategoryTableRec
-Module44=clsMyData
-Module45=clsNotifications
-Module46=clsOrderPaymentRec
-Module47=clsOrderStartResponse
-Module48=clsOrderStatusRec
-Module49=clsOrderSummary
+Module40=clsGoodsTableRec
+Module41=clsGroupCategoryTableRec
+Module42=clsLocation
+Module43=clsLocationCoordinates
+Module44=clsMainCategoryTableRec
+Module45=clsMyData
+Module46=clsNotifications
+Module47=clsOrderPaymentRec
+Module48=clsOrderStartResponse
+Module49=clsOrderStatusRec
 Module5=aSelectItem
-Module50=clsOrderSummaryRec
-Module51=clsOrderTableRec
-Module52=clsPreparationTableRec
-Module53=clsProgress
-Module54=clsProgressDialog
-Module55=clsProgressIndicator
-Module56=clsReportErrors
-Module57=clsServer
-Module58=clsSizeOptionTableRec
-Module59=clsSizePriceTableRec
+Module50=clsOrderSummary
+Module51=clsOrderSummaryRec
+Module52=clsOrderTableRec
+Module53=clsPayment
+Module54=clsPreparationTableRec
+Module55=clsProgress
+Module56=clsProgressDialog
+Module57=clsProgressIndicator
+Module58=clsReportErrors
+Module59=clsServer
 Module6=aSelectPlayCentre3
-Module60=clsStripe
-Module61=clsStripeCardRec
-Module62=clsStripeTokenRec
-Module63=clsSubCategoryTableRec
-Module64=clsSyncDatabase
-Module65=ConnectionHelper
-Module66=CreateAccount
-Module67=FirebaseMessaging
-Module68=hAbout
-Module69=hCardEntry
+Module60=clsSizeOptionTableRec
+Module61=clsSizePriceTableRec
+Module62=clsStripe
+Module63=clsStripeCardRec
+Module64=clsStripeTokenRec
+Module65=clsSubCategoryTableRec
+Module66=clsSyncDatabase
+Module67=ConnectionHelper
+Module68=CreateAccount
+Module69=FirebaseMessaging
 Module7=ChangeAccountInfo
-Module70=hChangeAccountInfo
-Module71=hChangeSettings2
-Module72=hCheckAccountStatus
-Module73=hCreateAccount
-Module74=hHome
-Module75=hPlaceOrder
-Module76=hQueryNewInstall
-Module77=hSelectItem
-Module78=hSelectPlayCentre3
-Module79=hValidateCentreSelection2
+Module70=hAbout
+Module71=hCardEntry
+Module72=hChangeAccountInfo
+Module73=hChangeSettings2
+Module74=hCheckAccountStatus
+Module75=hCreateAccount
+Module76=hHome
+Module77=hPlaceOrder
+Module78=hQueryNewInstall
+Module79=hSelectItem
 Module8=ChangeSettings
-Module80=hValidateDevice
-Module81=modConvert
-Module82=modEposApp
-Module83=modEposWeb
-Module84=NB6
-Module85=QueryNewInstall
-Module86=srvNotification
-Module87=srvPhoneTotal
-Module88=Starter
-Module89=svcTestSequence
+Module80=hSelectPlayCentre3
+Module81=hValidateCentreSelection2
+Module82=hValidateDevice
+Module83=modConvert
+Module84=modEposApp
+Module85=modEposWeb
+Module86=NB6
+Module87=QueryNewInstall
+Module88=srvNotification
+Module89=srvPhoneTotal
 Module9=CheckAccountStatus
-Module90=TemplateActivity
-Module91=TemplateClass
-Module92=TemplateCode
-Module93=TemplateService
-Module94=TemplateXactivity
-Module95=TemplateXhelper
-Module96=TestStartAt
-Module97=ValidateCentreSelection2
-Module98=ValidateDevice
+Module90=Starter
+Module91=svcTestSequence
+Module92=TemplateActivity
+Module93=TemplateClass
+Module94=TemplateCode
+Module95=TemplateService
+Module96=TemplateXactivity
+Module97=TemplateXhelper
+Module98=TestStartAt
+Module99=ValidateCentreSelection2
 NumberOfFiles=23
 NumberOfLibraries=24
-NumberOfModules=98
-Version=10.2
+NumberOfModules=100
+Version=10.5
 @EndOfDesignText@
 
 ' This is the Main form (currently unused for other than for startup procedures and for project documentation).
@@ -182,8 +184,8 @@ Version=10.2
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 190                                                                                                                                                                    
-	' Date......: 06/01/21
+	' Release...: 191                                                                                                                                                                    
+	' Date......: 20/01/21
 	'
 	' History
 	' For releases v1 - 24, see release v28.
@@ -201,81 +203,7 @@ Version=10.2
 	' for releases v152 - 162 see release v163
 	' for releases v163 - 173 see release v177.
 	' for releases v174 - 182 see release v183.
-	'		
-	' Date......: 04/11/20
-	' Release...: 183
-	' Overview..: Issue: #0415 Clear table number when new Centre is selected.
-	'             Issue: #0456 Ensure table number entered before order can be placed. 
-	'			  Bugfix: SuperOrder icon losted now re-inserted.
-	' Amendee...: D Morris.
-	' Details...: Mod: hValidateCentreSelection2_v6, hPlaceOrder_v20, aPlaceOrder_v9.
-	'
-	' Date......: 09/11/20
-	' Release...: 184
-	' Overview..: Issue: #0512 Change the blue hyberlink text to white.
-	'			  Issue: #0517 Centre validation now only shows first line of address. 
-	'		      Issue: #0541 Screen flashing when keyboard shown.
-	'			  Issue: 00542 Table number handling provided.
-	'		      Issue: #0544 Slow screen rebuild after refresh.
-	'			  Issue: #0530 (revisited) Mixed up centre images.
-	'			  Bugfix: #0547 Sticky table number.
-	' Amendee...: D Morris
-	' Details...:   New: clsCentreInfoAndImgRec_v1.
-	'				Mod: Starter_v87,  hPlaceOrder_v21, modEposApp_v27, clsEposCustomerOrder_v12, hHome_v7, hSelectPlayCentre3_v7,
-	'			    Mod: hValidateCentreSelection2_v7, clsProgress_v2.
-	'             forms: frmValidateCentreSelection3_v4, frmAbout_v2, frmASelectPlayCentre3_v3, frmChangeAccountInfo_v4, frmHome_v3,
-	'						frmValidateDevice_v6.
-	'		
-	' Date......: 14/11/20
-	' Release...: 185
-	' Overview..: Bugfix #0551 (Android tablets) Select centre screen unable to select the menu option.
-	'			  Bugfix #0552 (Android tablets) Select centre screen – Distance not in correct position.
-	'			  Issue #0554 (Android tablets) Select centre screen – panel height is small.
-	'			  Issue #0555 (Android tablets) Home screen progress circles overflow.
-	'             Bugfix: (Andriod - tablets) Create new account button off screen.
-	' 			  Mods: Progress circles moved to top of Create Account and Validate Device pages.
-	'             Bugfix: #0556 Flashing between Home and Place orders screen. 
-	' Amendee...: D Morris
-	' Details...: Mod: aSelectPlayCentre3_V4, hSelectPlayCentre3_v8.
-	'			  Forms: frmHome_v4, frmQueryNewInstall_v6, frmCheckAccountStatus_v6, frmCreateAccount_v6, frmValidateDevice_v7.
-	'			  Mod: aPlaceOrder_v10, hPlaceOrder_v22, Starter_v88
-	'		
-	' Date......: 16/11/20
-	' Release...: 186
-	' Overview..: Issue: #0557 iOS Place Order item list fills from bottom.
-	'             Issue: #0553 Android Tablet Home screen order list too small.
-	'			  Bugfix: #0535 Order information (Status and queue position incorrect). 
-	' Amendee...: D Morris
-	' Details...: Mod: hPlaceOrder_v23, hHome_v8, frmHome_v5.
-	'		
-	' Date......: 22/11/20
-	' Release...: 187
-	' Overview..: Issue: #0437 Enter card details difficult.
-	'             Issue: #0451 Replace "Default Card" with "Saved Card".
-	'             Issue: #0453 Expiry date format.
-	' 			  Issue: #0455 Place Order - show delivery option if allowed. 
-	'		      Issue: #0559 Improve "Account not activated" report.
-	'	          Added: Support for clsDataHandler class.
-	' Amendee...: D Morris
-	' Details...: Added: clsDateHandler_v1.
-	'				Mod: hCardEntry_v17,  hPlaceOrder_v24, hHome_v9, hCheckAccountStatus_v19.
-	'             Forms: frmCardEntry_v8, frmPlaceOrder_v4.
-	'			    Mod: hPlaceOrder_v25.
-	'		
-	' Date......: 26/11/20
-	' Release...: 188
-	' Overview..: Bugfix: #0466 Android phone restart after screen locked. 
-	'			   Issue: #0561(In-progress) About page only Viewing website information. 
-	'              Issue: #0563 Place order slider thumb colour now orange (also orange border around tablenumber).
-	'             Bugfix: (Android only) Select Centre - not scrolling to top list after refresh.
-	'			  Bugfix: #0565 Place order screen message and order buttons not enabled correctly.
-	'             Bugfix: #0566 Home screen not displaying size in order information.
-	'			     Mod: More pages support new Style UI (About, PlaceOrder and SelectItem screens).
-	' 	     	     Mod: Usage of null for strings and objects removed.
-	' Amendee...: D Morris
-	' Details...:   Mod: hAbout_v7, hValidateCentreSelection2_v8, hHome_v10, hSelectPlayCentre3_v8, About_v4, aPlaceOrder_v11,
-	'				       hPlaceOrder_v26, clsDataBaseTables_v11, ModEposApp_v28.
-	'			  Forms: frmAbout_v3. frmPlaceOrder_v5, frmSelectItem_v6.
+	' for releases v183 - 188 see release v189
 	'		
 	' Date......: 28/11/20
 	' Release...: 189
@@ -309,6 +237,17 @@ Version=10.2
 	'						hCreateAccount_v19, hChangeAccountInfo_v16, hValidateCentreSelection2_v11, hValidateDevice_v19, clsSyncDatabase_v2,
 	'						clsLocationCoordinates_v1, Starter_v90, clsLocation_v4, hCardEntry_v18, hChangeSettings2_v3.
 	'		
+	' Date......: 20/01/21
+	' Release...: 191
+	' Overview..: Bugfix: #0464 - Save card option now works correctly.
+	'			  Bugfix: #0578 - Payment message orderId is now included in the message.
+	'			  Bugfix: #0583 - Payment query saved card option is now not shown when no saved card available.
+	' Amendee...: D Morris.
+	' Details...: Added: clsEposPublicCardInfo_v1.
+	'			  FORMS: frmCardEntry_v9.
+	'			   Mods: clsEposCustomerOrderResponse_v4, clsEposCustomerPayment_v6, hCardEntry_v19, hHome_v12, hPlaceOrder_v29.
+	'			   Mods: aPlaceOrder_v12.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -322,8 +261,8 @@ Version=10.2
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 190
-	#VersionName: 1.0.0.190
+	#VersionCode: 191
+	#VersionName: 1.0.0.191
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
