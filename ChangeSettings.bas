@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: ChangeSettings
-	' Release...: 15
-	' Date......: 05/08/20   
+	' Release...: 15-
+	' Date......: 21/01/21   
 	'
 	' History
 	' Date......: 22/06/19
@@ -62,6 +62,12 @@ Version=9.01
 	' Overview..: Mod: Support for new Change Settings.
 	' Amendee...: D Morris
 	' Details...: ModL Uses new hChangeSettings2 helper.
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: CloseActivity() calls to CheckAccountStatus changed to aCheckAccountStatus.
 	'			    
 	' Date......: 
 	' Release...: 
@@ -145,7 +151,7 @@ End Sub
 
 ' Fully closes (kills) this activity, returning to the Check account status activity.
 public Sub CloseActivity
-	StartActivity(CheckAccountStatus)
+	StartActivity(aCheckAccountStatus)
 End Sub
 
 

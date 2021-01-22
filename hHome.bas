@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 12
-	' Date......: 20/01/21
+	' Release...: 13
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -47,7 +47,13 @@ Version=10
 	'			  Bugfix: #0583 - Payment query saved card option is now not shown when no saved card available.
 	' Amendee...: D Morris
 	' Details...: Mod: pHandleOrderInfo() header updated.
-	'			  Mod: QueryPayment() - removes Saved Card option when not available.		  
+	'			  Mod: QueryPayment() - removes Saved Card option when not available.	
+	'		
+	' Date......: 23/01/21
+	' Release...: 13
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: CheckConnection() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.	  
 	'			
 	' Date......: 
 	' Release...: 
@@ -493,9 +499,9 @@ private Sub CheckConnection(handleProgress As Boolean) As ResumableSub
 			xui.MsgboxAsync("This centre is closed or cannot take orders, ask a member of staff.", "Centre problem" )
 			Wait For Msgbox_Result (Result As Int)
 #if B4A 
-			StartActivity(CheckAccountStatus)
+			StartActivity(aCheckAccountStatus)
 #else ' B4I
-			frmCheckAccountStatus.Show(True)
+			xCheckAccountStatus.Show(True)
 #End If						
 		End If
 	Else

@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCreateAccount
-	' Release...: 19
-	' Date......: 03/01/21
+	' Release...: 20
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 02/05/20
@@ -35,6 +35,12 @@ Version=9.3
 	' Overview..: Bugfix: (Android) Hyperlinks no underlined, (iOS) Hyperlinks now correctly displayed.
 	' Amendee...: D Morris.
 	' Details...:  Mod: InitializeLocals() code fixed.
+	'		
+	' Date......: 23/01/21
+	' Release...: 20
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: btnSubmit_Click() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
 	'
 	' Date......: 
 	' Release...: 
@@ -98,9 +104,9 @@ Private Sub btnSubmit_Click
 	wait for (CreateNewAccount) complete (createdOk As Boolean)
 	If createdOk Then
 #if B4A
-		StartActivity(CheckAccountStatus)
+		StartActivity(aCheckAccountStatus)
 #Else
-		frmCheckAccountStatus.Show(False)
+		xCheckAccountStatus.Show(False)
 #End If
 	End If
 End Sub

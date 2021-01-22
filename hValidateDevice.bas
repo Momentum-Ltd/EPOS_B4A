@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hValidateDevice
-	' Release...: 19
-	' Date......: 03/01/21
+	' Release...: 20
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -37,6 +37,12 @@ Version=9.3
 	' Overview..: Added: Forgot password Hyperlink now underlined.
 	' Amendee...: D Morris.
 	' Details...:  Mod: InitializeLocals() code added.
+	'		
+	' Date......: 23/01/21
+	' Release...: 20
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: ShowCheckAccountStatus() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
 	'
 	' Date......: 
 	' Release...: 
@@ -286,9 +292,9 @@ End Sub
 ' Warning can't call this CheckAccountStatus in has problems with a module of the same name.
 private Sub ShowCheckAccountStatus
 #if B4A
-	StartActivity(CheckAccountStatus)
+	StartActivity(aCheckAccountStatus)
 #Else
-	frmCheckAccountStatus.Show(True)				
+	xCheckAccountStatus.Show(True)				
 #End If
 End Sub
 

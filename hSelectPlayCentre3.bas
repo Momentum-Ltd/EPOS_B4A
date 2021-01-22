@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 11
-	' Date......: 03/01/21
+	' Release...: 12
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -40,6 +40,12 @@ Version=10
 	' Overview..: Bugfix: iOS not restarted when account information is cleared.
 	' Amendee...: D Morris
 	' Details...: Mod: ClearAccount() Code fixed.
+	'		
+	' Date......: 23/01/21
+	' Release...: 12
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: ClearAccount() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
 	'
 	' Date......: 
 	' Release...: 
@@ -171,9 +177,9 @@ public Sub ClearAccount
 		Starter.customerInfoAvailable = False
 		Starter.settings.SaveDefaults				' Setting back to default
 #if B4A
-		StartActivity(CheckAccountStatus)
+		StartActivity(aCheckAccountStatus)
 #else ' B4I
-		frmCheckAccountStatus.show(False)
+		xCheckAccountStatus.show(False)
 #End If
 	End If
 End Sub

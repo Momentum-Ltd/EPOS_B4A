@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCheckAccountStatus
-	' Release...: 21
-	' Date......: 03/01/21
+	' Release...: 22
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -50,6 +50,13 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...: Mod: tmrRetryActivatedAccount_Tick() iOS code fixed.
 	'			  Mod: Now uses B4XDialog.
+	'		
+	' Date......: 23/01/21
+	' Release...: 22
+	' Overview..: Maintenance release - Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: RestartThisActivity() calls to CheckAccountStatus changed to aCheckAccountStatus.
+	'			  Mod: tmrRetryActivatedAccount_Tick() - toast message shortened.
 	'
 	' Date......: 
 	' Release...: 
@@ -106,7 +113,7 @@ Private Sub progressbox_Timeout()
 	RestartThisActivity
 End Sub
 
-' Timer to handle the minimum time this page shou be displayed 
+' Timer to handle the minimum time this page should be displayed 
 '  before another operation can take place.
 Private Sub tmrMinimumDisplayPeriod_tick
 	minDisplayElapsed = True
@@ -130,9 +137,9 @@ Private Sub tmrRetryActivatedAccount_Tick
 	wait for (apiHelper.CheckCustomerActivated(Starter.myData.customer.apiCustomerId)) complete(customerStatus As Int)
 	If customerStatus = 1 Then ' Customer's account now activated?
 #if B4A
-		ToastMessageShow("Auto retry has detect your account is now activated!", True)
+		ToastMessageShow("Account now activated!", True)
 #else ' B4i
-		Main.ToastMessageShow("Auto retry has detect your account is now activated!", True)
+		Main.ToastMessageShow("Account now activated!", True)
 #End If
 		dialog.Close(xui.DialogResponse_Cancel)  ' Important - need to close it.
 	Else ' Not activated = restart the timer.
@@ -264,6 +271,24 @@ private Sub DelayedSelectPlayCentre
 	End If
 End Sub
 
+' Exit to Query New Installation page.
+private Sub ExitToQueryNewInstall
+#if B4A
+	StartActivity(QueryNewInstall)
+#else
+	frmQueryNewInstall.Show
+#end if
+End Sub
+
+' Exit to Select Play Centre page.
+private Sub ExitToSelectPlayCentre
+#if B4A
+	StartActivity(aSelectPlayCentre3)
+#else ' B4i
+	frmXSelectPlayCentre3.Show
+#End If
+End Sub
+
 ' Initialize the locals etc.
 private Sub InitializeLocals
 	dialog.Initialize(parentActivity)
@@ -294,9 +319,9 @@ private Sub NonActivatedAccount()
 	If result = xui.DialogResponse_Positive Then	' Resend activation email
 		wait for (ResendActivationEmail(Starter.myData.customer.customerIdStr)) complete (successful As Boolean)
 		RestartThisActivity
-	Else if result = xui.DialogResponse_Negative Then
+	Else if result = xui.DialogResponse_Negative Then ' New account
 		ExitToQueryNewInstall
-	Else ' Default restart the checks.
+	Else ' Default restart the checks (Retry)
 		RestartThisActivity
 	End If
 End Sub
@@ -350,7 +375,7 @@ Private Sub ReportServerProblem
 	Wait for msgbox_result (result As Int)
 	If result = xui.DialogResponse_Positive Then	' Retry check for internet?
 		RestartThisActivity
-	Else if result = xui.DialogResponse_Negative Then	' Continue without internet
+	Else if result = xui.DialogResponse_Negative Then	' Switch Server?
 		Starter.server.ToggleServer
 		RestartThisActivity			' Retry to communicate via the internet
 	End If
@@ -381,28 +406,11 @@ End Sub
 Private Sub RestartThisActivity
 	OnClose
 #if B4A
-	CallSubDelayed(CheckAccountStatus,"RecreateActivity")
+	CallSubDelayed(aCheckAccountStatus,"RecreateActivity")
 #else ' B4I
 	StartCheckAccount
 #End If
 End Sub
 
-' Exit Query New Installation page.
-private Sub ExitToQueryNewInstall
-#if B4A
-	StartActivity(QueryNewInstall)
-#else
-	frmQueryNewInstall.Show
-#end if
-End Sub
-
-' Exit to Select Play Centre page.
-private Sub ExitToSelectPlayCentre
-#if B4A
-	StartActivity(aSelectPlayCentre3)
-#else ' B4i
-	frmXSelectPlayCentre3.Show
-#End If
-End Sub
 
 #End Region  Local Subroutines

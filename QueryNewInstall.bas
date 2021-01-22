@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: QueryNewInstall
-	' Release...: 7
-	' Date......: 22/07/20   
+	' Release...: 7-
+	' Date......: 22/01/21   
 	'
 	' History
 	' Date......: 22/06/19
@@ -57,6 +57,13 @@ Version=9.01
 	' Overview..: New UI startup.
 	' Amendee...: D Morris
 	' Details...: Mod: Title bar removed.
+	'		
+	' Date......: 
+	' Release...: 
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: Activity_ActionBarHomeClick() calls to CheckAccountStatus changed to aCheckAccountStatus.
+	'             Mod: Activity_ActionBarHomeClick() conditional compiler code removed (not appropriate).
 	'
 	' Date......: 
 	' Release...: 
@@ -84,11 +91,11 @@ End Sub
 
 'Back button pressed (in titlebar).
 private Sub Activity_ActionBarHomeClick
-#if B4A
-	StartActivity(CheckAccountStatus)
-#else
-	frmCheckAccountStatus.show(True)
-#End If
+'#if B4A
+	StartActivity(aCheckAccountStatus)
+'#else
+'	frmCheckAccountStatus.show(True)
+'#End If
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)

@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: ChangeAccountInfo
-	' Release...: 7
-	' Date......: 11/05/20   
+	' Release...: 8
+	' Date......: 23/05/20   
 	'
 	' History
 	' Date......: 22/06/19
@@ -54,6 +54,12 @@ Version=9.01
 	' Overview..: Bugfix: #0406 - Code added to ensure timers are disabled when Activity is paused. 
 	' Amendee...: D Morris.
 	' Details...:  Mods: Activity_Pause().
+	'		
+	' Date......: 23/01/21
+	' Release...: 8
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: Calls to CheckAccountStatus changed to aCheckAccountStatus.
 	'
 	' Date......: 
 	' Release...: 
@@ -82,11 +88,11 @@ End Sub
 'Back button pressed (in titlebar).
 private Sub Activity_ActionBarHomeClick
 	frm.ReportNoChanges
-#if B4A
-	StartActivity(CheckAccountStatus)
-#else
-	frmCheckAccountStatus.show(True)
-#End If
+'#if B4A
+	StartActivity(aCheckAccountStatus)
+'#else
+'	frmCheckAccountStatus.show(True)
+'#End If
 End Sub
 
 private Sub Activity_Create(FirstTime As Boolean)

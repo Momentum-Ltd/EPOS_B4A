@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
 	android:versionCode="191"
-	android:versionName="1.0.0.191"
+	android:versionName="1.0.0.191-"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>
@@ -157,13 +157,6 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
-			android:name=".aplaceorder"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
 			android:name=".about"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
@@ -178,7 +171,21 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
+			android:name=".acheckaccountstatus"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
 			android:name=".ahome"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".aplaceorder"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -207,13 +214,6 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".changesettings"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".checkaccountstatus"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>

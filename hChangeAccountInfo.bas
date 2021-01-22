@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 16
-	' Date......: 03/01/21
+	' Release...: 17
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -38,6 +38,12 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...:  Mod (issue): Support for web view.
 	'			   Mod (bugfix): InitializeLocals() code fixed.
+	'		
+	' Date......: 23/01/21
+	' Release...: 17
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: SubmitPassword() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
 	'					
 	' Date......: 
 	' Release...: 
@@ -332,9 +338,9 @@ private Sub SubmitPassword
 	pnlEnterDetails.Visible = True
 	If submitOk Then
 #if B4A
-		StartActivity(CheckAccountStatus)
+		StartActivity(aCheckAccountStatus)
 #else
-		frmCheckAccountStatus.show(True)
+		xCheckAccountStatus.show(True)
 #End If
 	End If
 End Sub

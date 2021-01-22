@@ -95,7 +95,7 @@ Module26=clsEposCustomerInfo
 Module27=clsEposCustomerOrder
 Module28=clsEposCustomerOrderResponse
 Module29=clsEposCustomerPayment
-Module3=aHome
+Module3=aCheckAccountStatus
 Module30=clsEposLocationRec
 Module31=clsEposMessageRec
 Module32=clsEposOrderInfo
@@ -106,7 +106,7 @@ Module36=clsEposWebCentreLocationRec
 Module37=clsEposWebCommsMessageRec
 Module38=clsEposWebCustomerRec
 Module39=clsEposWebLocationCoordinates
-Module4=aPlaceOrder
+Module4=aHome
 Module40=clsGoodsTableRec
 Module41=clsGroupCategoryTableRec
 Module42=clsLocation
@@ -117,7 +117,7 @@ Module46=clsNotifications
 Module47=clsOrderPaymentRec
 Module48=clsOrderStartResponse
 Module49=clsOrderStatusRec
-Module5=aSelectItem
+Module5=aPlaceOrder
 Module50=clsOrderSummary
 Module51=clsOrderSummaryRec
 Module52=clsOrderTableRec
@@ -128,7 +128,7 @@ Module56=clsProgressDialog
 Module57=clsProgressIndicator
 Module58=clsReportErrors
 Module59=clsServer
-Module6=aSelectPlayCentre3
+Module6=aSelectItem
 Module60=clsSizeOptionTableRec
 Module61=clsSizePriceTableRec
 Module62=clsStripe
@@ -139,7 +139,7 @@ Module66=clsSyncDatabase
 Module67=ConnectionHelper
 Module68=CreateAccount
 Module69=FirebaseMessaging
-Module7=ChangeAccountInfo
+Module7=aSelectPlayCentre3
 Module70=hAbout
 Module71=hCardEntry
 Module72=hChangeAccountInfo
@@ -150,7 +150,7 @@ Module76=hHome
 Module77=hPlaceOrder
 Module78=hQueryNewInstall
 Module79=hSelectItem
-Module8=ChangeSettings
+Module8=ChangeAccountInfo
 Module80=hSelectPlayCentre3
 Module81=hValidateCentreSelection2
 Module82=hValidateDevice
@@ -161,7 +161,7 @@ Module86=NB6
 Module87=QueryNewInstall
 Module88=srvNotification
 Module89=srvPhoneTotal
-Module9=CheckAccountStatus
+Module9=ChangeSettings
 Module90=Starter
 Module91=svcTestSequence
 Module92=TemplateActivity
@@ -184,21 +184,11 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 191                                                                                                                                                                    
-	' Date......: 20/01/21
+	' Release...: 192                                                                                                                                                                   
+	' Date......: 23/01/21
 	'
 	' History
-	' For releases v1 - 24, see release v28.
-	' For releases v25 - 45, see release v48.
-	' For releases v46 - 62, see release v67. 
-	' For releases v63 - 77, see release v77.
-	' For releases v78 - 87, see release v87.
-	' For releases v88 - 97  see release v97.
-	' For releases v98 - 109 see release v110
-	' For releases v110 - 120 see release v122.
-	' For releases v121 - 129 see release v130
-	' For releases v130 - 138 see release v139.
-	' For releases v139 - 144 see release v145.
+	' For releases v1   - 144 see release v145.
 	' For releases v145 - 151 see release v153
 	' for releases v152 - 162 see release v163
 	' for releases v163 - 173 see release v177.
@@ -248,6 +238,16 @@ Version=10.5
 	'			   Mods: clsEposCustomerOrderResponse_v4, clsEposCustomerPayment_v6, hCardEntry_v19, hHome_v12, hPlaceOrder_v29.
 	'			   Mods: aPlaceOrder_v12.
 	'		
+	' Date......: 23/01/21
+	' Release...: 192
+	' Overview..: Maintenance release (internal only) - Update to latest standards CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...:  Mod: Activity_Create() now calls aCheckAccountStatus().
+	'				  New: xCheckAccountStatus_v1.
+	'             Removed: CheckAccountStatus.
+	'			      Mod: ChangeAccountInfo_V8, hChangeAccountInfo_v17, hCheckAccountStatus_v23, hCreateAccount_V20,
+	'							hHome_V13, hQueryNewInstall_v7, hSelectPlayCentre3_v12, hValidateDevice_v20.
+	'		
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -261,8 +261,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 191
-	#VersionName: 1.0.0.191
+	#VersionCode: 192
+	#VersionName: 1.0.0.192
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
@@ -295,7 +295,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	StartService(svcTestSequence)
 	StartService(srvPhoneTotal)
 	StartService(srvNotification)
-	StartActivity(CheckAccountStatus)	' New web startup (preferred operation)
+	StartActivity(aCheckAccountStatus)	' New web startup (preferred operation)
 End Sub
 
 Sub Activity_Resume

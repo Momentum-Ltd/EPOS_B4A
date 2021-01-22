@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hQueryNewInstall
-	' Release...: 6
-	' Date......: 22/07/20
+	' Release...: 7
+	' Date......: 23/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -49,6 +49,12 @@ Version=9.3
 	' Overview..: New UI startup.
 	' Amendee...: D Morris
 	' Details...: Mod: Support for new screen.
+	'		
+	' Date......: 23/01/21
+	' Release...: 7
+	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
+	' Amendee...: D Morris
+	' Details...: Mod: RestartThisActivity() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
 	'
 	' Date......: 
 	' Release...: 
@@ -125,9 +131,9 @@ End Sub
 Private Sub RestartThisActivity
 	OnClose
 #if B4A
-	StartActivity(CheckAccountStatus)
+	StartActivity(aCheckAccountStatus)
 #Else
-	frmCheckAccountStatus.Show(False)
+	xCheckAccountStatus.Show(False)
 #End If
 End Sub
 #End Region  Local Subroutines
