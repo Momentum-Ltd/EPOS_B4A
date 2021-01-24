@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: aHome
-	' Release...: 3
-	' Date......: 28/11/20
+	' Release...: 4
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -30,6 +30,14 @@ Version=10
 	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
 	' Amendee...: D Morris
 	' Details...: Added: Public HandleSyncDbReponse(). 
+	'		
+	' Date......: 24/01/21
+	' Release...: 4
+	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
+	' Amendee...: D Morris
+	' Details...:  Added: ReportPaymentStatus(). 
+	'			     Mod: All 'p' and 'l' Prefixes dropped.
+	'		     Removed: pSendRequestForOrderStatusList().
 	'
 	' Date......: 
 	' Release...: 
@@ -69,7 +77,7 @@ private Sub Activity_Keypress(KeyCode As Int) As Boolean
 End Sub
 
 Sub Activity_Pause (UserClosed As Boolean)
-	hc.OnClose	' Calling this ensures the timer in progress timeout is stopped.
+	hc.OnClose	' Calling this ensures the timer to progress timeout is stopped.
 	If Starter.DisconnectedCloseActivities Then
 		Activity.Finish
 	End If
@@ -87,23 +95,23 @@ End Sub
 #Region  Public Subroutines
 
 ' Displays the details of the specified order using a message box.
-Public Sub pHandleOrderInfo(orderInfoStr As String)
-	hc.pHandleOrderInfo(orderInfoStr)
+Public Sub HandleOrderInfo(orderInfoStr As String)
+	hc.HandleOrderInfo(orderInfoStr)
 End Sub
 
 ' Handles the Order Start repsonse from the Server by displaying a relevant messagebox and then starting the Show Order activity.
-Public Sub pHandleOrderStart(orderStartStr As String)
+Public Sub HandleOrderStart(orderStartStr As String)
 	hc.HandleOrderStart(orderStartStr)
 End Sub
 
-' Sends to the Server the message which requests the customer's order status list.
-Public Sub pSendRequestForOrderStatusList
-	hc.pSendRequestForOrderStatusList
-End Sub
+'' Sends to the Server the message which requests the customer's order status list.
+'Public Sub pSendRequestForOrderStatusList
+'	hc.SendRequestForOrderStatusList
+'End Sub
 
-' Populates the listview with each of the orders and their statuses in the specified XML string.
-Public Sub pHandleOrderStatusList(orderStatusStr As String)
-	hc.pHandleOrderStatusList(orderStatusStr)
+' Displays a list of orders statuses.
+Public Sub HandleOrderStatusList(orderStatusStr As String)
+	hc.HandleOrderStatusList(orderStatusStr)
 End Sub
 
 ' Handles the response from the Server to the Sync Database command.
@@ -111,22 +119,24 @@ Public Sub HandleSyncDbResponse(syncDbResponseStr As String)
 	hc.HandleSyncDbReponse(syncDbResponseStr)
 End Sub
 
-' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
+' Reports the result of a card transaction.
+Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
+	hc.ReportPaymentStatus(paymentInfo)
+End Sub
+
+' Displays a messagebox the latest Message To Customer text.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
-	'Log("aShowOrderStatusList.ShowMessageNotificationMsgBox")
 	hc.ShowMessageNotificationMsgBox(soundAndVibrate)
 End Sub
 
-' Displays a messagebox containing the most recent Order Status text, and makes the notification sound/vibration if specified.
+' Displays a messagebox containing the latest Order Status text.
 Public Sub ShowStatusNotificationMsgBox(soundAndVibrate As Boolean)
-	'Log("aShowOrderStatusList.ShowStatusNotificationMsgBox")
 	hc.ShowStatusNotificationMsgBox(soundAndVibrate)
 End Sub
 
-' Causes the listview to be repopulated so that the specified order's information is updated.
-Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
-	'Log("aShowOrderStatusList.pUpdateOrderStatus")
-	hc.pUpdateOrderStatus(statusObj)
+' Update an order in the displayed order list. 
+Public Sub UpdateOrderStatus(statusObj As clsEposOrderStatus)
+	hc.UpdateOrderStatus(statusObj)
 End Sub
 
 #End Region  Public Subroutines

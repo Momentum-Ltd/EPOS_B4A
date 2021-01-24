@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: aPlaceOrder
-	' Release...: 12
-	' Date......: 20/01/21
+	' Release...: 13
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -46,6 +46,12 @@ Version=9.5
 	' Amendee...: D Morris
 	' Details...: Removed: QueryPaymentAndReturn().
 	'			     Mod: Old commented out
+	'		
+	' Date......: 24/01/21
+	' Release...: 13
+	' Overview..: General maintenance. 
+	' Amendee...: D Morris
+	' Details...:   Mod: All 'p' and 'l' Prefixes dropped.
 	'
 	' Date......: 
 	' Release...: 
@@ -105,12 +111,12 @@ End Sub
 #Region  Public Subroutines
 
 ' Handles the Order Acknowledgement response from the Server and takes appropriate action.
-Public Sub pHandleOrderAcknResponse(orderAcknResponseStr As String)
+Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 	hc.HandleOrderAcknResponse(orderAcknResponseStr)
 End Sub
 
 ' Handles the response from the Server to the Order message.
-Public Sub pHandleOrderResponse(orderResponseStr As String)
+Public Sub HandleOrderResponse(orderResponseStr As String)
 	hc.HandleOrderResponse(orderResponseStr)
 End Sub
 
@@ -120,12 +126,12 @@ End Sub
 '	Activity.Finish		' This makes it return to caller.
 'End Sub
 
-' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
+' Displays a messagebox the latest Message To Customer text.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
 	hc.ShowMessageNotificationMsgBox(soundAndVibrate)
 End Sub
 
-' Displays a messagebox containing the most recent Order Status text, and makes the notification sound/vibration if specified.
+' Displays a messagebox containing the latest Order Status text.
 Public Sub ShowStatusNotificationMsgBox(soundAndVibrate As Boolean)
 	hc.ShowStatusNotificationMsgBox(soundAndVibrate)
 End Sub

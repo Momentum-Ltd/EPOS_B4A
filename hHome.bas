@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 13
-	' Date......: 23/01/21
+	' Release...: 14
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -54,6 +54,15 @@ Version=10
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: CheckConnection() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.	  
+	'		
+	' Date......: 24/01/21
+	' Release...: 14
+	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
+	' Amendee...: D Morris
+	' Details...: Mod: General changes to use clsPayment class for card payment.
+	'			  Mod: All 'p' and 'l' Prefixes dropped.
+	'		      Mod: Old commented code removed
+	'			  Mod: btnLeaveCentre_Click() uses LeaveCentre().
 	'			
 	' Date......: 
 	' Release...: 
@@ -94,8 +103,10 @@ Sub Class_Globals
 	Private pnlRefreshTouch As B4XView					' Clickabke region around the refrest order list button.
 	
 	' Misc objects
-	Private notification As clsNotifications			' Handles notifications	
+	Private notification As clsNotifications			' Handles notifications
+	Private payment As clsPayment						' Handles payments.	
 	Private progressbox As clsProgress					' Progress indicator and box
+	Private progressDialog As clsProgressDialog			' Progress Dialog box.
 	Private syncDb As clsSyncDatabase					' Handles synchronization of database.	
 #if B4I
 	Private tmrUpdateOrderStatus As Timer				' Timer to handle updating the order status.
@@ -119,29 +130,23 @@ End Sub
 ' Handles the Leave Centre button.
 Private Sub btnLeaveCentre_Click
 	If enableViews = True Then
-		xui.Msgbox2Async("Are you sure?", "Leaving this centre", "Yes", "", "No", Null)
-		Wait For msgbox_result(result As Int)
-		If result = xui.DialogResponse_Positive Then
-			ExitToSelectPlayCentre
-		End If
+'		xui.Msgbox2Async("Are you sure?", "Leaving this centre", "Yes", "", "No", Null)
+'		Wait For msgbox_result(result As Int)
+'		If result = xui.DialogResponse_Positive Then
+'			ExitToSelectPlayCentre
+'		End If
+		LeaveCentre
 	End If
 End Sub
 
 ' Handles the Click event of the Place Order button.
 Private Sub btnPlaceOrder_Click
 	If enableViews = True Then
-		' Clear old order data (in case e.g. the Make Order form's 'Back' nav-button was previously used, avoiding the order being cleared)
 		Starter.customerOrderInfo.orderList.Clear
 		Starter.customerOrderInfo.orderMessage = ""
-		lStartPlaceOrder	
+		StartPlaceOrder	
 	End If
 End Sub
-
-' Handles the Snyc database complete
-'private Sub syncDb_SyncComplete(ok As Boolean)
-'	Dim i As Int
-'	i = i +1
-'End Sub
 
 ' Handle back button
 private Sub lblBackButton_Click
@@ -178,7 +183,7 @@ End Sub
 ' Touch area for the refesh operation
 Private Sub pnlRefreshTouch_Click
 	If enableViews = True Then
-		pSendRequestForOrderStatusList
+		SendRequestForOrderStatusList
 	End If
 End Sub
 
@@ -193,10 +198,11 @@ Private Sub progressbox_Timeout()
 End Sub
 
 #if B4I
+' Timer to handle the periodic update of the order status list.
 Private Sub tmrUpdateOrderStatus_Tick()
 	tmrUpdateOrderStatus.Enabled = False
 	If IsVisible Then
-		pSendRequestForOrderStatusList		
+		SendRequestForOrderStatusList		
 	End If
 End Sub
 #End If
@@ -207,7 +213,7 @@ End Sub
 
 ' Displays the details of the specified order using a message box and gives
 '  customer option to pay for it.
-Public Sub pHandleOrderInfo(orderInfoStr As String)
+Public Sub HandleOrderInfo(orderInfoStr As String)
 	Dim totalCost As Float = 0
 	ProgressHide
 #if B4A
@@ -260,10 +266,12 @@ Public Sub pHandleOrderInfo(orderInfoStr As String)
 	xui.Msgbox2Async(msg, title, "OK", payPrompt, "", Null ) ' necessary so Wait for is correct.
 	Wait For MsgBox_Result(Result As Int)
 	If Result = xui.DialogResponse_Cancel Then
-		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
-		orderPayment.amount = totalCost
-		orderPayment.orderId = orderInfoObj.orderId
-		QueryPayment(orderPayment)
+		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize(orderInfoObj.orderId, totalCost)
+'		orderPayment.amount = totalCost
+'		orderPayment.orderId = orderInfoObj.orderId
+		wait for (payment.QueryPaymentMethod(orderPayment)) complete(queryResult As Boolean)
+'		Dim test As Boolean
+'		test = True
 	End If
 End Sub
 
@@ -296,33 +304,35 @@ Public Sub HandleOrderStart(orderStartStr As String)
 End Sub
 
 ' Populates the listview with each of the orders and their status in the specified XML string.
-Public Sub pHandleOrderStatusList(orderStatusStr As String)
-#if B4A
-	Dim xmlStr As String = orderStatusStr.SubString(modEposApp.EPOS_ORDERSTATUSLIST.Length) ' TODO - check if the XML string is valid?
-#else ' B4I
-	Dim xmlStr As String = Main.TrimToXmlOnly(orderStatusStr) ' TODO - check if the XML string is valid?
-#End If
-	Dim orderListObj As clsEposOrderStatusList : orderListObj.Initialize
-	orderListObj = orderListObj.XmlDeserialize(xmlStr) ' TODO - need to get the deserializer working?
+Public Sub HandleOrderStatusList(orderStatusStr As String)
 	If Not(displayUpdateInProgress) Then
-		displayUpdateInProgress = True
-		Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
-		invalidItem.status = modConvert.statusUnknown
-
-		lvwOrderSummary.Clear
+		displayUpdateInProgress = True	
+#if B4A
+		Dim xmlStr As String = orderStatusStr.SubString(modEposApp.EPOS_ORDERSTATUSLIST.Length) ' TODO - check if the XML string is valid?
+#else ' B4I
+		Dim xmlStr As String = Main.TrimToXmlOnly(orderStatusStr) ' TODO - check if the XML string is valid?
+#End If
+		Dim orderListObj As clsEposOrderStatusList : orderListObj.Initialize
+		orderListObj = orderListObj.XmlDeserialize(xmlStr) ' TODO - need to get the deserializer working?
 		If orderListObj.customerId <> 0 Then ' XML string was deserialised OK
-			If orderListObj.order.Size > 0 Then ' List contains orders
-				For Each order As clsEposOrderStatus In orderListObj.order
-					lAddOrderEntryToListview(order)
-				Next
-				If orderListObj.overflowFlag Then ' Order list overflowed?
-					lvwOrderSummary.AddTextItem("More orders....", invalidItem)
-				End If
-			Else ' No orders found in order list
-				lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
-			End If
-		Else ' XML failed to deserialise properly
-			lvwOrderSummary.AddTextItem("Error reading order list" & CRLF & "Please retry", invalidItem)
+			DisplayOrderList(orderListObj.order, orderListObj.overflowFlag)
+	'		Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Record used to mark of end of list or invalid item.
+	'		invalidItem.status = modConvert.statusUnknown
+	'		lvwOrderSummary.Clear
+	'		If orderListObj.customerId <> 0 Then ' XML string was deserialised OK
+	'			If orderListObj.order.Size > 0 Then ' List contains orders
+	'				For Each order As clsEposOrderStatus In orderListObj.order
+	'					AddOrderEntryToListview(order)
+	'				Next
+	'				If orderListObj.overflowFlag Then ' Order list overflowed?
+	'					lvwOrderSummary.AddTextItem("More orders....", invalidItem)
+	'				End If
+	'			Else ' No orders found in order list
+	'				lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
+	'			End If
+	'		Else ' XML failed to deserialise properly
+	'			lvwOrderSummary.AddTextItem("Error reading order list" & CRLF & "Please retry", invalidItem)
+	'		End If
 		End If
 		displayUpdateInProgress = False
 	End If
@@ -364,20 +374,18 @@ End Sub
 '  This method should be called each time a new centre is select.
 ' Note: When user clicks on Notification message (when the phone is locked) this sub is called
 ' 	via aHome.Activity_Resume() - it will check if valid centre information vailable and continue 
-Public Sub RefreshPage()
 '  	or return to the select play centre as appropriate (See Bugfix #0466). 
+Public Sub RefreshPage()
 	If Starter.myData.centre.centreId <> 0 Then ' Valid centre information?
 		Dim bt As Bitmap = Starter.myData.centre.pictureBitMap
 		imgCentrePicture.SetBitmap(bt.Resize(imgCentrePicture.Width, imgCentrePicture.Height, True))
 		lblCentreName.Text = Starter.myData.centre.name		
 		If Starter.menuRevision <> 0 Then
-			pSendRequestForOrderStatusList		
+			SendRequestForOrderStatusList		
 		Else
-'			syncDb.InvokeDatabaseSync ' This allows the Wait for in identify the Sender.
-'			Wait for syncDb_SyncComplete(ok As Boolean)
-			Wait for (syncDb.AsyncSyncDatabase) complete(ok As Boolean) ' uses the Async version
+			Wait for (syncDb.AsyncSyncDatabase) complete(ok As Boolean) 
 			If ok Then
-				pSendRequestForOrderStatusList
+				SendRequestForOrderStatusList
 			Else ' Problem with Sync Database.
 				xui.Msgbox2Async("No response to request menu!, what would you like to do?", "Timeout Error", "Retry", "Try another Centre", "", Null)
 				Wait for msgbox_result (result As Int)
@@ -390,13 +398,21 @@ Public Sub RefreshPage()
 				End If						
 			End If
 		End If
-	Else ' Not valid centre information.
+	Else ' Invalid centre information.
 		ExitToSelectPlayCentre	
 	End If
 End Sub
 
+' Reports the result of a card transaction.
+Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
+	wait for (payment.ReportPaymentResult(paymentInfo)) complete(cardAccepted As Boolean)
+	If cardAccepted Then
+		RefreshPage		
+	End If
+End Sub
+
 ' Sends a request to Server for the customer's order status list.
-public Sub pSendRequestForOrderStatusList
+public Sub SendRequestForOrderStatusList
 	ProgressShow("Getting your order status, please wait...")
 	Dim msg As String = modEposApp.EPOS_ORDERSTATUSLIST & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
 #if B4A
@@ -408,31 +424,29 @@ End Sub
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
-	pSendRequestForOrderStatusList ' Update displayed status list - just in case it changes.
+	SendRequestForOrderStatusList ' Update displayed status list - just in case it changes.
 	notification.ShowMessageNotificationMsgBox(soundAndVibrate)
 End Sub
 
 ' Displays a messagebox containing the most recent Order Status text, and makes the notification sound/vibration if specified.
 Public Sub ShowStatusNotificationMsgBox(soundAndVibrate As Boolean)
-	pSendRequestForOrderStatusList ' Update displayed status list - just in case it changes.
+	SendRequestForOrderStatusList ' Update displayed status list - just in case it changes.
 	notification.ShowStatusNotificationMsgBox(soundAndVibrate)
 End Sub
 
-' Causes the listview to be repopulated so that the specified order's information is updated.
-Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
+' Update an individual order displayed order list (this could include adding that order to the list).
+Public Sub UpdateOrderStatus(statusObj As clsEposOrderStatus)
 	Dim currentItems As List : currentItems.Initialize
 	If Not(displayUpdateInProgress) Then
 		displayUpdateInProgress = True
-		' Assemble a list containing all of the items' info, and detect if the whole list needs to be refreshed
+		' Build a list of order and update/add an individual order as necessary info.
 		For itemIndex = 0 To (lvwOrderSummary.Size - 1)
-			' Detect multiple orders in the list which have the 'waiting' status.
 			Dim listviewStatus As  clsEposOrderStatus = lvwOrderSummary.GetValue(itemIndex)
-			' Update and add the item to the list as necessary
 			If listviewStatus.orderId = statusObj.orderId Then
 				listviewStatus = statusObj
 			End If
 			If listviewStatus.status <> modConvert.statusCollected _
-			And listviewStatus.status <> modConvert.statusUnknown Then ' Don't add to the list if completed or unknown.
+					And listviewStatus.status <> modConvert.statusUnknown Then ' Don't add to the list if completed or unknown.
 				currentItems.Add(listviewStatus)
 			End If
 		Next
@@ -441,15 +455,16 @@ Public Sub pUpdateOrderStatus(statusObj As clsEposOrderStatus)
 			currentItems.Add(statusObj)
 		End If
 		lvwOrderSummary.Clear
-		If currentItems.Size > 0 Then
-			For Each listStatus As clsEposOrderStatus In currentItems
-				lAddOrderEntryToListview(listStatus )
-			Next
-		Else ' No orders left in order list
-			Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
-			invalidItem.status = modConvert.statusUnknown
-			lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
-		End If
+'		If currentItems.Size > 0 Then
+'			For Each listStatus As clsEposOrderStatus In currentItems
+'				AddOrderEntryToListview(listStatus )
+'			Next
+'		Else ' No orders left in order list
+'			Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
+'			invalidItem.status = modConvert.statusUnknown
+'			lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
+'		End If
+		DisplayOrderList(currentItems, False)
 		displayUpdateInProgress = False
 	End If
 #if B4i
@@ -463,7 +478,7 @@ End Sub
 #Region  Local Subroutines
 
 ' Adds a order item to the listview.
-Private Sub lAddOrderEntryToListview(statusObj As clsEposOrderStatus)
+Private Sub AddOrderEntryToListview(statusObj As clsEposOrderStatus)
 	Dim topStr As String = "Order #" & statusObj.orderId
 	Dim statusStr As String = modConvert.ConvertStatusToUserString(statusObj.status, statusObj.deliverToTable)
 	If statusObj.amount < 0 Then
@@ -513,6 +528,29 @@ private Sub CheckConnection(handleProgress As Boolean) As ResumableSub
 	Return centreConnectedOk
 End Sub
 
+' Display a list of orders.
+' orderList is (List of clsEposOrderStatus)
+' overFlowFlag Order list has overflowed.
+Private Sub DisplayOrderList(orderList As List, overFlowFlag As Boolean)
+	Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Record used to mark of end of list or invalid item.
+	invalidItem.status = modConvert.statusUnknown
+	lvwOrderSummary.Clear
+'	If orderListObj.customerId <> 0 Then ' XML string was deserialised OK
+	If orderList.Size > 0 Then ' List contains orders
+		For Each order As clsEposOrderStatus In orderList
+			AddOrderEntryToListview(order)
+		Next
+		If overFlowFlag Then ' Order list overflowed?
+			lvwOrderSummary.AddTextItem("More orders....", invalidItem)
+		End If
+	Else ' No orders found in order list
+		lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
+	End If
+'	Else ' XML failed to deserialise properly
+'		lvwOrderSummary.AddTextItem("Error reading order list" & CRLF & "Please retry", invalidItem)
+'	End If
+End Sub
+
 ' Exit to Select Play Centre screen.
 Private Sub ExitToSelectPlayCentre
 	Starter.myData.centre.signedOn = False ' log off centre.
@@ -534,7 +572,9 @@ End Sub
 private Sub InitializeLocals
 	indLoading.mBase.Visible = False
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
+	progressDialog. Initialize(Me, "progressDialog", modEposApp.DFT_PROGRESS_TIMEOUT)
 	notification.Initialize
+	payment.Initialize(progressDialog)
 #if B4I
 	tmrUpdateOrderStatus.Initialize("tmrUpdateOrderStatus", DFT_UPDATE_ORDERSTATUS)
 	tmrUpdateOrderStatus.Enabled = True
@@ -593,48 +633,48 @@ End Sub
 
 ' Query and implement payment operation
 ' *** Very similar to code in hPlaceOrder.QueryPayment().
-Private Sub QueryPayment(orderPayment As clsOrderPaymentRec)As ResumableSub
-	Dim msg As String
-	If Starter.myData.centre.acceptCards Then ' Cards accepted
-		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
-		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
-#if B4A
-			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
-#else ' B4i - don't support CRLF in button text.
-			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
-#end if
-		Else ' ELSE no saved card available.
-#if B4A
-			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
-#else ' B4i - don't support CRLF in button text.
-			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
-#end if						
-		End If
-		Wait For MsgBox_Result(Result As Int)
-		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
-#else ' b4i
-			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
-#end if
-		else if Result = xui.DialogResponse_Cancel Then ' Cash?
-			msg = "Please go to the counter to pay."
-			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
-			Wait For MsgBox_Result(Result2 As Int)
-		Else ' Another Card?
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False)
-#else ' B4i
-			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
-#end if
-		End If
-	Else ' Cards not accepted - must go to the counter
-		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
-		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
-		Wait For MsgBox_Result(Result3 As Int)
-	End If
-	Return True
-End Sub
+'Private Sub QueryPayment(orderPayment As clsOrderPaymentRec) 
+'	Dim msg As String
+'	If Starter.myData.centre.acceptCards Then ' Cards accepted
+'		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
+'		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
+'#if B4A
+'			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
+'#else ' B4i - don't support CRLF in button text.
+'			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
+'#end if
+'		Else ' ELSE no saved card available.
+'#if B4A
+'			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
+'#else ' B4i - don't support CRLF in button text.
+'			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
+'#end if						
+'		End If
+'		Wait For MsgBox_Result(Result As Int)
+'		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
+'#if B4A
+'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
+'#else ' b4i
+'			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
+'#end if
+'		else if Result = xui.DialogResponse_Cancel Then ' Cash?
+'			msg = "Please go to the counter to pay."
+'			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
+'			Wait For MsgBox_Result(Result2 As Int)
+'		Else ' Another Card?
+'#if B4A
+'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False)
+'#else ' B4i
+'			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+'#end if
+'		End If
+'	Else ' Cards not accepted - must go to the counter
+'		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
+'		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
+'		Wait For MsgBox_Result(Result3 As Int)
+'	End If
+'	Return True
+'End Sub
 
 ' Report no internet detected.
 Private Sub ReportNoInternet
@@ -642,7 +682,7 @@ Private Sub ReportNoInternet
 End Sub
 
 ' Starts the order placing procedure. .
-Private Sub lStartPlaceOrder()
+Private Sub StartPlaceOrder()
 	ProgressShow("Starting your order, please wait...") 
 	Wait For (CheckConnection(False)) complete(centreConnectionOk As Boolean)
 	If centreConnectionOk Then

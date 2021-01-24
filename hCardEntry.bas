@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 19
-	' Date......: 20/01/21
+	' Release...: 20
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -60,7 +60,14 @@ Version=9.5
 	' Details...: Mod: chkSaveCard replaced with swSaveCard.
 	'			  Mod: SendCardTokenToServer() znc ReportPaymentStatus().
 	'			  Removed: CardEntryAndPayment(), SendPayment().
-	'			  Mod: ClearCard() now includes the swSaveCard set to fakse.
+	'			  Mod: ClearCard() now includes the swSaveCard set to false.
+	'		
+	' Date......: 24/01/21
+	' Release...: 20
+	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
+	' Amendee...: D Morris
+	' Details...: Mod: General changes to use clsPayment class for card payment.
+	'			  Mod: CardEntryAndOrderPayment() defaultCard parameter removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -83,6 +90,8 @@ Sub Class_Globals
 #if B4A
 	Private kk As IME							' Used for hidding the keybaord.
 #End If
+	Private payment As clsPayment				' Class to handle payments.
+	
 	' View declarations
 	' Card Entry Panel
 	Private btnSubmit As SwiftButton			' Submit card details button.
@@ -253,21 +262,20 @@ End Sub
 
 ' Make a card payment against an order.
 ' orderPayment information about amount and order to pay.
-' defaultCard - set if use the default card.
-Public Sub CardEntryAndOrderPayment(orderPayment As clsOrderPaymentRec, defaultCard As Boolean)As ResumableSub
+Public Sub CardEntryAndOrderPayment(orderPayment As clsOrderPaymentRec)As ResumableSub
 	ClearCard
 	total = orderPayment.amount	' Save for later.
 	mOrderId = orderPayment.orderId
-	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and no card details.
-		pnlDefaultCard.Visible = True
-		pnlCardEntry.Visible = False
-		SendOrderPayment(orderPayment.orderId, orderPayment.amount)
-	Else
+'	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and no card details.
+'		pnlDefaultCard.Visible = True
+'		pnlCardEntry.Visible = False
+'		SendOrderPayment(orderPayment.orderId, orderPayment.amount)
+'	Else
 		pnlDefaultCard.Visible = False
 		pnlCardEntry.Visible = True
 		Wait for btnSubmit_Click()	' Wait for card information to be entered.
 		SubmitCard
-	End If
+'	End If
 	Return True
 End Sub
 
@@ -305,64 +313,64 @@ Public Sub ResumeOp
 End Sub
 
 ' Reports the result of a card transaction.
-Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
-	ClearCard
-	Log("Payment status:" & modConvert.ConvertPaymentStatusIntToString(paymentInfo.status))
-	Dim cardAccepted As Boolean  = False
-	Dim confirmMsg As String
-	ProgressHide
-	Select paymentInfo.status
-		Case modConvert.payStatusCreateCardAccProblem
-			confirmMsg = "Card not accepted"
-		Case modConvert.payStatusSaveCard
-			cardAccepted = True
-			confirmMsg = "Card saved"
-		Case modConvert.payStatusSucceeded
-			cardAccepted = True
-			confirmMsg = "Payment accepted"
-		Case modConvert.payrequestRetry
-			confirmMsg = " Operation failed - please retry"
-		Case modConvert.payStatusPending
-			cardAccepted = True
-			confirmMsg = "Payment pending"
-		Case modConvert.payStatusFailed
-			confirmMsg = "Payment failed"
-		Case Else
-			confirmMsg = "Failed"
-	End Select
-	If cardAccepted = True Then
-		xui.MsgboxAsync(confirmMsg,"Card transaction report")
-		wait for MsgBox_result(tempResult As Int)
-		ExitToCentreHomePage
-	Else ' Card rejected give the customer some options
-#if B4A
-		xui.Msgbox2Async(confirmMsg,"Card declined", "Another" & CRLF & "  Card", "Cancel", "Cash" , Null)
-#else ' B4i - CRLF removed!
-		xui.Msgbox2Async(confirmMsg,"Card declined", "Another Card", "Cancel", "Cash" , Null)
-#end if
-		wait for Msgbox_Result(tempResult As Int)
-		If tempResult = xui.DialogResponse_Positive Then ' Another card?
-			Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
-			orderPayment.amount = paymentInfo.total
-			orderPayment.orderId = paymentInfo.orderId
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False) 
-#else 'B4I
-			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
-#end if	
-		else if tempResult = xui.DialogResponse_Negative Then ' Cash?
-			Dim msg As String = "Please go to the counter to pay."
-			xui.Msgbox2Async(msg, "Payment Instruction", "OK", "", "", Null)
-			Wait For MsgBox_Result(Result As Int)
-			ExitToCentreHomePage
-		Else ' Cancel
-			Dim msg As String = "Payment is required before your order can be processed."
-			xui.Msgbox2Async(msg, "Operation Cancelled", "OK", "", "", Null)
-			Wait For MsgBox_Result(Result As Int)
-			ExitToCentreHomePage
-		End If
-	End If
-End Sub
+'Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
+'	ClearCard
+'	Log("Payment status:" & modConvert.ConvertPaymentStatusIntToString(paymentInfo.status))
+'	Dim cardAccepted As Boolean  = False
+'	Dim confirmMsg As String
+'	ProgressHide
+'	Select paymentInfo.status
+'		Case modConvert.payStatusCreateCardAccProblem
+'			confirmMsg = "Card not accepted"
+'		Case modConvert.payStatusSaveCard
+'			cardAccepted = True
+'			confirmMsg = "Card saved"
+'		Case modConvert.payStatusSucceeded
+'			cardAccepted = True
+'			confirmMsg = "Payment accepted"
+'		Case modConvert.payrequestRetry
+'			confirmMsg = " Operation failed - please retry"
+'		Case modConvert.payStatusPending
+'			cardAccepted = True
+'			confirmMsg = "Payment pending"
+'		Case modConvert.payStatusFailed
+'			confirmMsg = "Payment failed"
+'		Case Else
+'			confirmMsg = "Failed"
+'	End Select
+'	If cardAccepted = True Then
+'		xui.MsgboxAsync(confirmMsg,"Card transaction report")
+'		wait for MsgBox_result(tempResult As Int)
+'		ExitToCentreHomePage
+'	Else ' Card rejected give the customer some options
+'#if B4A
+'		xui.Msgbox2Async(confirmMsg,"Card declined", "Another" & CRLF & "  Card", "Cancel", "Cash" , Null)
+'#else ' B4i - CRLF removed!
+'		xui.Msgbox2Async(confirmMsg,"Card declined", "Another Card", "Cancel", "Cash" , Null)
+'#end if
+'		wait for Msgbox_Result(tempResult As Int)
+'		If tempResult = xui.DialogResponse_Positive Then ' Another card?
+'			Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
+'			orderPayment.amount = paymentInfo.total
+'			orderPayment.orderId = paymentInfo.orderId
+'#if B4A
+'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False) 
+'#else 'B4I
+'			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+'#end if	
+'		else if tempResult = xui.DialogResponse_Negative Then ' Cash?
+'			Dim msg As String = "Please go to the counter to pay."
+'			xui.Msgbox2Async(msg, "Payment Instruction", "OK", "", "", Null)
+'			Wait For MsgBox_Result(Result As Int)
+'			ExitToCentreHomePage
+'		Else ' Cancel
+'			Dim msg As String = "Payment is required before your order can be processed."
+'			xui.Msgbox2Async(msg, "Operation Cancelled", "OK", "", "", Null)
+'			Wait For MsgBox_Result(Result As Int)
+'			ExitToCentreHomePage
+'		End If
+'	End If
+'End Sub
 
 
 #End Region  Public Subroutines
@@ -438,6 +446,7 @@ private Sub InitializeLocals
 #End If
 	processedDate.Initialize
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
+	payment.Initialize(progressbox)
 	cardInfo.Initialize
 '	stripe.Initialize(Me, "sk_test_4eC39HqLyjWDarjtT1zdp7dc","Stripe")
 	stripe.Initialize(Me, "stripe") ' 
@@ -485,23 +494,24 @@ Private Sub SendCardTokenToServer(cardToken As String, pTotal As Float)
 #else ' B4A
 	Main.SendMessage(msg)
 #end if
+	ClearCard
 End Sub
 
-' Send a payment message for a specified order.
-Private Sub SendOrderPayment(orderId As Int, amount As Float)
-	Dim payment As clsEposCustomerPayment : payment.initialize
-	payment.centreId = Starter.myData.centre.centreId
-	payment.customerId = Starter.myData.customer.customerId
-	payment.orderId = orderId
-	payment.total = amount
-	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
-	ProgressShow("Processing payment, please wait...")
-#if B4A
-	CallSub2(Starter, "pSendMessage",  msg)
-#else ' B4I
-	Main.SendMessage(msg)
-#End If
-End Sub
+'' Send a payment message for a specified order.
+'Private Sub SendOrderPayment(orderId As Int, amount As Float)
+'	Dim payment As clsEposCustomerPayment : payment.initialize
+'	payment.centreId = Starter.myData.centre.centreId
+'	payment.customerId = Starter.myData.customer.customerId
+'	payment.orderId = orderId
+'	payment.total = amount
+'	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
+'	ProgressShow("Processing payment, please wait...")
+'#if B4A
+'	CallSub2(Starter, "pSendMessage",  msg)
+'#else ' B4I
+'	Main.SendMessage(msg)
+'#End If
+'End Sub
 
 '' Send a payment message
 'Private Sub SendPayment(amount As Float)

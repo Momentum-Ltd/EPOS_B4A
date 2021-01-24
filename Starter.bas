@@ -11,8 +11,8 @@ Version=7.3
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 90
-	' Date......: 003/01/21
+	' Release...: 91
+	' Date......: 24/01/21
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -43,6 +43,13 @@ Version=7.3
 	' Details...: Mod: currentLocation removed.
 	'			  New: latestLocation.
 	'			  Mod: Service_Create(), HandleGetLocationRequest().
+	'		
+	' Date......: 24/01/21
+	' Release...: 91
+	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
+	' Amendee...: D Morris
+	' Details...: Mod: lHandlePaymentResponse() calls aHome to handle payment.
+	'			  Mod: All 'p' and 'l' Prefixes dropped for calls to aHome and aPlaceOrder activities.
 	' 			  			    
 	' Date......: 
 	' Release...: 
@@ -332,18 +339,18 @@ public Sub pProcessInputStrg(inputCommsStrg As String)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_SYNC_DATA) Then
 			lHandleSyncDataResponse(inputCommsStrg)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_ACKN) Then
-			CallSubDelayed2(aPlaceOrder, "pHandleOrderAcknResponse", inputCommsStrg) ' Calls an Activity
+			CallSubDelayed2(aPlaceOrder, "HandleOrderAcknResponse", inputCommsStrg) ' Calls an Activity
 		Else If inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_QUERY) Then
-			CallSubDelayed2(aHome, "pHandleOrderInfo", inputCommsStrg) ' Calls an Activity
+			CallSubDelayed2(aHome, "HandleOrderInfo", inputCommsStrg) ' Calls an Activity
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_SEND) Then
-			CallSubDelayed2(aPlaceOrder, "pHandleOrderResponse", inputCommsStrg) ' Calls an Activity
+			CallSubDelayed2(aPlaceOrder, "HandleOrderResponse", inputCommsStrg) ' Calls an Activity
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDERSTATUSLIST) Then
 			Log("Starter.pProcessInputStrg call lHandleStatusListMsg()")
 			lHandleStatusListMsg(inputCommsStrg)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDERSTATUS) Then
 			lNotifyStatus(inputCommsStrg)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_ORDER_START) Then
-			CallSubDelayed2(aHome, "pHandleOrderStart", inputCommsStrg) ' Calls an Activity
+			CallSubDelayed2(aHome, "HandleOrderStart", inputCommsStrg) ' Calls an Activity
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_PING) Then
 			lPingHandle(inputCommsStrg)
 		Else if inputCommsStrg.StartsWith(modEposApp.EPOS_MESSAGE) Then
@@ -580,12 +587,18 @@ private Sub	lHandlePaymentResponse(paymentResponse As String)
 #end if
 	Dim paymentInfo As clsEposCustomerPayment : paymentInfo.Initialize
 	paymentInfo = paymentInfo.XmlDeserialize(xmlStr)
-	#if B4A
-	CallSubDelayed2( aCardEntry, "ReportPaymentStatus", paymentInfo) ' Calls an Activity
+'#if B4A
+'	CallSubDelayed2( aCardEntry, "ReportPaymentStatus", paymentInfo) ' Calls an Activity
+'#else ' B4I
+'	xCardEntry.ReportPaymentStatus(paymentInfo)
+'#end if
+
+#if B4A
+	CallSubDelayed2( aHome, "ReportPaymentStatus", paymentInfo) 
 #else ' B4I
-'	xShowBill.ReportPaymentStatus(paymentInfo)
-	xCardEntry.ReportPaymentStatus(paymentInfo)
+	xHome.ReportPaymentStatus(paymentInfo)
 #end if
+
 End Sub
 
 ' Handles the Server's response to the Get Status List command.
@@ -594,7 +607,7 @@ Private Sub lHandleStatusListMsg(statusListMsg As String)
 		CallSub(svcTestSequence, "pReceivedResponse")
 	Else 
 		If Not(IsPaused(aHome)) Then ' Only show Status list if Home is visible.
-			CallSubDelayed2(aHome, "pHandleOrderStatusList", statusListMsg) ' Calls an Activity			
+			CallSubDelayed2(aHome, "HandleOrderStatusList", statusListMsg) ' Calls an Activity			
 		End If
 	End If
 End Sub
@@ -636,7 +649,6 @@ End Sub
 ' Deserialises the specified Message To Customer XML string, and if the user needs to be notified, it will be displayed either
 ' on the Task Select form or as a notification. Otherwise, the order status form will be updated (if it is active).
 Private Sub lNotifyStatus(inStrg As String)
-	' Deserialise the XML string argument
 	Dim xmlStr As String = inStrg.SubString(modEposApp.EPOS_ORDERSTATUS.Length) ' TODO - check if the XML string is valid?
 	Dim responseObj As clsEposOrderStatus :	responseObj.Initialize
 	responseObj = responseObj.XmlDeserialize(xmlStr)
@@ -655,8 +667,8 @@ Private Sub lNotifyStatus(inStrg As String)
 			PrevStatusRec = responseObj
 			PrevStatus = tempStatus ' Always overwrite status storage with the most recent status
 			ShowStatusNotification
-		Else if IsPaused(aHome) = False Then ' Other status change and Home screen shown?
-			CallSubDelayed2(aHome, "pUpdateOrderStatus", responseObj) ' Calls an Activity
+		Else if IsPaused(aHome) = False Then ' Other - Only change status if Home screen shown?
+			CallSubDelayed2(aHome, "UpdateOrderStatus", responseObj) ' Calls an Activity
 		End If
 	Else ' XML deserialisation failed (or contains Unknown status, which is just as bad)
 		LogFile.LogReport(ERROR_LIST_FILENAME, "Received bad status message:" & CRLF & inStrg) ' Log the error

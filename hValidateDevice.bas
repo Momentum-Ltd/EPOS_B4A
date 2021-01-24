@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hValidateDevice
-	' Release...: 20
-	' Date......: 23/01/21
+	' Release...: 21
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -43,6 +43,12 @@ Version=9.3
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: ShowCheckAccountStatus() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
+	'
+	' Date......: 24/01/21
+	' Release...: 21
+	' Overview..: Bugfix (should have been done in v19) - Underline "Forgot password" hyperlink.
+	' Amendee...: D Morris.
+	' Details...: Mod: InitializeLocals().
 	'
 	' Date......: 
 	' Release...: 
@@ -257,6 +263,10 @@ private Sub InitializeLocals
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT,indLoading)
 	txtEmailAddress.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
 	txtPassword.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+	Private cs As CSBuilder
+	cs.Initialize.Underline.Color(Colors.White).Append("Forgot password").PopAll
+	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
+	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblForgotPassword, cs)
 #if B4I
 	' B4I code for close keyboard button.
 	pnlEnterDetailsOrgTop = pnlEnterDetails.Top ' Save the original enter panel top postion.

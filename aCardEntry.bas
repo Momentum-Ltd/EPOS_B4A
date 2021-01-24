@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: aCardEntry
-	' Release...: 8-
-	' Date......: 10/01/21   
+	' Release...: 9
+	' Date......: 24/01/21   
 	'
 	' History
 	' Date......: 13/10/19
@@ -63,11 +63,12 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...:  Mod: Activity_ActionBarHomeClick()
 	'
-	' Date......: 
-	' Release...: 
+	' Date......: 21/01/21
+	' Release...: 9
 	' Overview..: General maintenance.
 	' Amendee...: D Morris
-	' Details...:  Mod: CardEntryAndCharge() removed.
+	' Details...:  Mod: CardEntryAndCharge() and ReportPaymentStatus() removed.
+	'			   Mod: CardEntryAndOrderPayment() - defaultCard parameter removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -133,8 +134,8 @@ End Sub
 
 ' Make a card payment against an order.
 ' The ensure the payment is only made against a specified order.
-Public Sub CardEntryAndOrderPayment(paymentInfo As clsOrderPaymentRec, defaultCard As Boolean)
-	Wait For (hc.CardEntryAndOrderPayment(paymentInfo, defaultCard)) complete(a As Boolean)
+Public Sub CardEntryAndOrderPayment(paymentInfo As clsOrderPaymentRec)
+	Wait For (hc.CardEntryAndOrderPayment(paymentInfo)) complete(a As Boolean)
 End Sub
 
 ''  Make a card payment for a specified amount.
@@ -143,10 +144,10 @@ End Sub
 '	wait for (hc.CardEntryAndPayment(amount, defaultCard)) complete(a As Boolean)
 'End Sub
 
-' Reports the result of a card transaction.
-Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
-	hc.ReportPaymentStatus(paymentInfo)
-End Sub
+'' Reports the result of a card transaction.
+'Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
+'	hc.ReportPaymentStatus(paymentInfo)
+'End Sub
 
 #End Region  Public Subroutines
 

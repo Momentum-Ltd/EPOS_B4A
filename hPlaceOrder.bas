@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 29
-	' Date......: 20/01/21
+	' Release...: 30
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -59,6 +59,14 @@ Version=9.5
 	'			  Mod: QueryPayment() - removes Saved Card option when not available.
 	'			  Mod: HandleOrderAcknResponse() now handles new QueryPayment() parameters.
 	' 			  
+	' Date......: 24/01/21
+	' Release...: 30
+	' Overview..: Now uses clsPayment class to handle payments.
+	' Amendee...: D Morris
+	' Details...: Mod: lblBackButton_Click() - now calls CancelOrder().
+	'			  Mod: CancelOrder() now queries the cancel operation.
+	'			  Mod: OnClose() now calls ClearOrder().
+	' 			  
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -98,8 +106,9 @@ Sub Class_Globals
 #End If
 
 	' Misc objects
-	Private notification As clsNotifications	' Handles notifications	
-	Private progressbox As clsProgressDialog	' Progress box
+	Private notification As clsNotifications	' Handles notifications.
+	Private payment As clsPayment				' Handles payments.	
+	Private progressbox As clsProgressDialog	' Progress box.
 #if B4A
 	Private kk As IME							' Used for showing/hiding the keybaord.
 #End If
@@ -206,15 +215,16 @@ End Sub
 
 ' Handle back button
 Private Sub lblBackButton_Click
-	If lvwOrderItems.Size > 1 Then ' Items in order - check if OK to clear the order.
-		xui.Msgbox2Async("This will clear your order - do you want to continue?", "Back button operation", "Yes", "No", "" , Null)
-		Wait For Msgbox_Result (result As Int) 
-		If result = xui.DialogResponse_Positive Then
-			ExitToCentreHomePage		
-		End If		
-	Else ' No items in order - just exit
-		ExitToCentreHomePage
-	End If
+	CancelOrder
+'	If lvwOrderItems.Size > 1 Then ' Items in order - check if OK to clear the order.
+'		xui.Msgbox2Async("This will clear your order - do you want to continue?", "Back button operation", "Yes", "No", "" , Null)
+'		Wait For Msgbox_Result (result As Int) 
+'		If result = xui.DialogResponse_Positive Then
+'			ExitToCentreHomePage		
+'		End If		
+'	Else ' No items in order - just exit
+'		ExitToCentreHomePage
+'	End If
 End Sub
 
 ' Handles click off txtTableNumber view to hide the keyboard.
@@ -322,8 +332,17 @@ End Sub
 
 ' Handles the Cancel Order operation (i.e. back button).
 Public Sub CancelOrder
-	ClearOrder ' Clear the database's order information
-	ExitToCentreHomePage
+	If lvwOrderItems.Size > 1 Then ' Items in order - check if OK to clear the order.
+		xui.Msgbox2Async("This will clear your order - do you want to continue?", "Back button operation", "Yes", "No", "" , Null)
+		Wait For Msgbox_Result (result As Int)
+		If result = xui.DialogResponse_Positive Then
+			ClearOrder ' Clear order information
+			ExitToCentreHomePage
+		End If
+	Else ' No items in order - just exit
+		ClearOrder ' Clear order information
+		ExitToCentreHomePage
+	End If
 End Sub
 
 ' Handles the Order Acknowledgement response from the Server and takes appropriate action.
@@ -347,9 +366,9 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 		Wait For MsgBox_Result(Result As Int)
 		ExitToCentreHomePage
 	Else If responseObj.status = modConvert.statusWaitingForPayment Then ' Payment required before order is processed
-		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
-		orderPayment.amount = responseObj.amount
-		orderPayment.orderId = responseObj.orderId
+		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize (responseObj.orderId, responseObj.amount)
+'		orderPayment.amount = responseObj.amount
+'		orderPayment.orderId = responseObj.orderId
 		wait for (QueryPayment(orderPayment)) complete(Result1 As Boolean)
 	End If
 End Sub
@@ -423,6 +442,7 @@ End Sub
 
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
+	ClearOrder
 	Starter.CustomerOrderInfo.tableNumber = modEposApp.Val( txtTableNumber.Text.trim) ' Ensures last entered table number is stored.
 	If progressbox.IsInitialized = True Then	' Ensures the progress timer is stopped.
 		progressbox.Hide
@@ -541,6 +561,7 @@ private Sub InitializeLocals
 	kk.Initialize("")	
 #End If
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
+	payment.Initialize(progressbox)
 	notification.Initialize
 	Dim bt As Bitmap = imgSuperorder.GetBitmap
 	imgSuperorder.SetBitmap(bt.Resize(imgSuperorder.Width, imgSuperorder.Height, True))
@@ -604,57 +625,60 @@ End Sub
 ' Query and implement payment operation
 ' *** Very similar to code in hHome.QueryPayment().
 Private Sub QueryPayment(orderPayment As clsOrderPaymentRec)As ResumableSub
-	Dim msg As String 
+'	Dim msg As String 
 	pnlHideOrder.Visible = True
 	btnOrder.mBase.Visible = False 	'TODO Not sure why these buttons show thro panel?
 	btnMessage.mBase.Visible = False
-	Dim exitToTaskSelect As Boolean = False 'HACK to deal with problem with blank form.
-	If Starter.myData.centre.acceptCards Then ' Cards accepted
-		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
-		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
-#if B4A
-			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
-#else ' B4i - don't support CRLF in button text.
-			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
-#end if
-		Else ' ELSE no saved card available.
-#if B4A
-			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
-#else ' B4i - don't support CRLF in button text.
-			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
-#end if						
-		End If
-		Wait For MsgBox_Result(Result As Int)
-		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
-#else ' b4i
-			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
-#end if
-		else if Result = xui.DialogResponse_Cancel Then ' Cash?
-			msg = "Please go to the counter to pay."
-			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
-			Wait For MsgBox_Result(Result2 As Int)
-			exitToTaskSelect = True 'HACK to deal with problem with blank form.
-		Else ' Another Card?
-#if B4A
-			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False)
-#else ' B4i
-			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
-#end if
-		End If
-	Else ' Cards not accepted - must go to the counter
-		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
-		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
-		Wait For MsgBox_Result(Result3 As Int)
-	End If
+'	Dim exitToTaskSelect As Boolean = False 'HACK to deal with problem with blank form.
+
+'	If Starter.myData.centre.acceptCards Then ' Cards accepted
+'		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
+'		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
+'#if B4A
+'			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
+'#else ' B4i - don't support CRLF in button text.
+'			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
+'#end if
+'		Else ' ELSE no saved card available.
+'#if B4A
+'			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
+'#else ' B4i - don't support CRLF in button text.
+'			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
+'#end if						
+'		End If
+'		Wait For MsgBox_Result(Result As Int)
+'		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
+'#if B4A
+'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
+'#else ' b4i
+'			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
+'#end if
+'		else if Result = xui.DialogResponse_Cancel Then ' Cash?
+'			msg = "Please go to the counter to pay."
+'			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
+'			Wait For MsgBox_Result(Result2 As Int)
+'			exitToTaskSelect = True 'HACK to deal with problem with blank form.
+'		Else ' Another Card?
+'#if B4A
+'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False)
+'#else ' B4i
+'			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+'#end if
+'		End If
+'	Else ' Cards not accepted - must go to the counter
+'		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
+'		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
+'		Wait For MsgBox_Result(Result3 As Int)
+'	End If
+
+	wait for (payment.QueryPaymentMethod(orderPayment)) complete (queryResult As Boolean)
 
 	pnlHideOrder.Visible = False
 	btnOrder.mBase.Visible = True 	'TODO Not sure why these buttons show thro panel?
 	btnMessage.mBase.Visible = True
-	If exitToTaskSelect Then 'HACK to deal with problem with blank form.
-		ExitToCentreHomePage
-	End If
+'	If exitToTaskSelect Then 'HACK to deal with problem with blank form.
+'		ExitToCentreHomePage
+'	End If
 	Return True
 End Sub
 

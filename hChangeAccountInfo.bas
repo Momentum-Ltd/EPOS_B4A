@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 17
-	' Date......: 23/01/21
+	' Release...: 18
+	' Date......: 24/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -44,6 +44,12 @@ Version=9.3
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: SubmitPassword() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
+	'
+	' Date......: 24/01/21
+	' Release...: 18
+	' Overview..: Bugfix: #0582 - Underline "Forgot password" hyperlink.
+	' Amendee...: D Morris.
+	' Details...: Mod: InitializeLocals().
 	'					
 	' Date......: 
 	' Release...: 
@@ -68,6 +74,7 @@ Sub Class_Globals
 #else 'B4i
 	Private chkAuthShowPw As Switch				' Show authorisation password
 #end if
+	Private lblAuthForgotPw As B4XView			' Forgot password hyperlink.
 	Private pnlAuthorisation As B4XView			' Password authorisation panel
 #if B4A 
 	Private txtAuthorisePw As EditText			' Password (entered by user).
@@ -209,11 +216,13 @@ private Sub InitializeLocals
 	If progressbox.IsInitialized = False Then
 		progressbox.Initialize(Me, "progressbox",modEposApp.DFT_PROGRESS_TIMEOUT) 		
 	End If
-	Private cs As CSBuilder
+	Private cs As CSBuilder	
 	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
-'	lblPrivacyPolicy.Text = cs
 	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
 	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblPrivacyPolicy, cs)
+	Private newCs As CSBuilder
+	newCs.Initialize.Underline.Color(Colors.White).Append("Forgot password").PopAll
+	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblAuthForgotPw, newCs)
 End Sub
 
 ' Checks if information entered on the form can be accepted.
