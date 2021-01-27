@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 18
-	' Date......: 24/01/21
+	' Release...: 19
+	' Date......: 27/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -50,6 +50,12 @@ Version=9.3
 	' Overview..: Bugfix: #0582 - Underline "Forgot password" hyperlink.
 	' Amendee...: D Morris.
 	' Details...: Mod: InitializeLocals().
+	'
+	' Date......: 27/01/21
+	' Release...: 19
+	' Overview..: new uses clsKeyboardHelper for keyboard handling.
+	' Amendee...: D Morris
+	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'					
 	' Date......: 
 	' Release...: 
@@ -69,37 +75,38 @@ Sub Class_Globals
 	
 	' View declarations (consists of 2 panels)
 	' Authorisation Panel
-#if B4A
-	Private chkAuthShowPw As CheckBox			' Show authorisation password.
-#else 'B4i
-	Private chkAuthShowPw As Switch				' Show authorisation password
-#end if
+'#if B4A
+'	Private chkAuthShowPw As CheckBox			' Show authorisation password.
+'#else 'B4i
+'	Private chkAuthShowPw As Switch				' Show authorisation password
+'#end if
 	Private lblAuthForgotPw As B4XView			' Forgot password hyperlink.
 	Private pnlAuthorisation As B4XView			' Password authorisation panel
-#if B4A 
-	Private txtAuthorisePw As EditText			' Password (entered by user).
-#else ' B4i
-	Private txtAuthorisePw As TextField
-#end if
+'#if B4A 
+	Private txtAuthorisePw As B4XFloatTextField	' Password (entered by user).
+'#else ' B4i
+'	Private txtAuthorisePw As TextField
+'#end if
 '	Private txtAuthorisePw As B4XView
 	' Enter details panel
 	Private btnClear As SwiftButton				' Clear displayed information button
 	Private btnSubmit As SwiftButton			' Submit information button
 	Private btnWebClose As SwiftButton			' close web view button.
 	Private lblPrivacyPolicy As B4XView			' Link to Privacy Policy.
-	Private pnlEnterDetails As B4XView			' Enter details panel
+	Private pnlEnterDetails As Panel			' Enter details panel
 	Private pnlWeb As B4XView					' Web view panel
-	Private txtAddress As B4XView				' Customer's address
-	Private txtName As B4XView					' Customer's name
-	Private txtPostCode As B4XView				' Customer's postcode	
-	Private txtTelephone As B4XView				' Customer's telephone number
+	Private txtAddress As B4XFloatTextField		' Customer's address
+	Private txtName As B4XFloatTextField		' Customer's name
+	Private txtPostCode As B4XFloatTextField	' Customer's postcode
+	Private txtTelephone As B4XFloatTextField	' Customer's telephone number
 	Private web As WebView						' Web view
 	
 	' Misc objects	
+	Private kbHelper As clsKeyboardHelper		' Keyboard handler
 #if B4I
 	Private mHudObj As HUD 						' The HUD object used to display progress dialogs and toast messages.
 #End If
-	Private progressbox As clsProgressDialog			' Progress box
+	Private progressbox As clsProgressDialog	' Progress box
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -113,7 +120,7 @@ End Sub
 #Region  Event Handlers
 
 ' Handle clear information button.
-Sub btnClear_Click
+Private Sub btnClear_Click
 	If pnlEnterDetails.Visible = True Then ' Only works if edit details panel shown.
 		txtAddress.Text = ""
 		txtName.Text = ""
@@ -123,7 +130,7 @@ Sub btnClear_Click
 End Sub
 
 ' Handle submit information button on the Enter details panel.
-Sub btnSubmit_Click
+Private Sub btnSubmit_Click
 	If pnlEnterDetails.Visible = True Then ' Only works if edit details panel shown.
 		wait for (lCheckEnteredInformation) complete (infoOk As Boolean)
 		If infoOk Then
@@ -138,24 +145,31 @@ Sub btnSubmit_Click
 End Sub
 
 ' Close web view.
-Sub btnWebClose_Click
+Private Sub btnWebClose_Click
 	pnlWeb.Visible = False
 End Sub
 
-#if B4A
-' Handle show password checkbox.
-Sub chkAuthShowPw_CheckedChange(Checked As Boolean)
-	RevealPassword(Checked)
-End Sub
-#else ' B4i
-' Handle show password switch.
-Sub chkAuthShowPw_ValueChanged (Value As Boolean)
-	RevealPassword(Value)
+'#if B4A
+'' Handle show password checkbox.
+'Private Sub chkAuthShowPw_CheckedChange(Checked As Boolean)
+'	RevealPassword(Checked)
+'End Sub
+'#else ' B4i
+'' Handle show password switch.
+'Private Sub chkAuthShowPw_ValueChanged (Value As Boolean)
+'	RevealPassword(Value)
+'End Sub
+'#End If
+
+#if B4i
+' Handle hide keyboard required from keyboard helper class.
+Private Sub kbHelper_HideKeyboard
+	frmChangeAccountInfo.HideKeyboard
 End Sub
 #End If
 
 ' Handle forgot password request
-Sub lblAuthForgotPw_Click
+Private Sub lblAuthForgotPw_Click
 	Dim apiHelper As clsEposApiHelper
 	apiHelper.Initialize
 	Wait for (apiHelper.ForgotPasswordIdKnown(Starter.myData.customer.customerIdStr)) complete (customerId As Int)
@@ -190,6 +204,14 @@ Public Sub DisplayInfo
 	End If
 End Sub
 
+#if B4i
+' This method moves a text entry field so it does not get covered by the keyboard.
+' B4XFloatTextField is taken from here: https://www.b4x.com/android/forum/threads/b4xfloattextfield-keyboard-hiding-views.118242/#post-740784
+Public Sub MoveUpEnterDetailsPanel(height As Float)
+	kbHelper.MoveUpEnterDetailsPanel(height)
+End Sub
+#End If
+
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
 	If progressbox.IsInitialized = True Then	' Ensures the progress timer is stopped.
@@ -205,8 +227,14 @@ Public Sub ReportNoChanges
 #Else
 	mHudObj.ToastMessageShow("Back button pressed" & CRLF & "No changes made.", True)
 #End If
-
 End Sub
+
+#if B4i
+' Handle resize event
+Public Sub Resize
+	kbHelper.Resize
+End Sub
+#End If
 
 #End Region  Public Subroutines
 
@@ -223,7 +251,17 @@ private Sub InitializeLocals
 	Private newCs As CSBuilder
 	newCs.Initialize.Underline.Color(Colors.White).Append("Forgot password").PopAll
 	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblAuthForgotPw, newCs)
+
+	kbHelper.Initialize(Me, "kbHelper", pnlEnterDetails)
+	'TODO Check this could be a problem as txtAuthorisePw is on a different panel.
+	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(txtAddress, txtName, txtPostCode, txtTelephone, txtAuthorisePw)
+#if B4i		
+	kbHelper.AddViewToKeyboard2(enterPanelTextField)
+#End If
+	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
+	kbHelper.RemovedTabOrder(enterPanelTextField)
 End Sub
+
 
 ' Checks if information entered on the form can be accepted.
 ' Returns True of information is ok.
@@ -329,15 +367,15 @@ End Sub
 Private Sub ProgressShow(message As String)
 	progressbox.Show(message)
 End Sub
-
-' Handles reveal/hide password operation
-private Sub RevealPassword(showPassword As Boolean)
-	If showPassword = True Then
-		txtAuthorisePw.PasswordMode = False
-	Else
-		txtAuthorisePw.PasswordMode = True
-	End If
-End Sub
+'
+'' Handles reveal/hide password operation
+'private Sub RevealPassword(showPassword As Boolean)
+'	If showPassword = True Then
+'		txtAuthorisePw.PasswordMode = False
+'	Else
+'		txtAuthorisePw.PasswordMode = True
+'	End If
+'End Sub
 
 ' Handles submit password operation.
 private Sub SubmitPassword

@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 12
-	' Date......: 23/01/21
+	' Release...: 13
+	' Date......: 27/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -46,6 +46,12 @@ Version=10
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: ClearAccount() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
+	'
+	' Date......: 27/01/21 
+	' Release...: 13
+	' Overview..: Mod: Progress indicated added to select centre operation.
+	' Amendee...: D Morris
+	' Details...: Mod: clvCentres_ItemClick().
 	'
 	' Date......: 
 	' Release...: 
@@ -114,6 +120,7 @@ Private Sub clvCentres_ItemClick (Position As Int, Value As Object)
 		Starter.myData.centre.centreId = centreDetails.id
 		Starter.ServerIP = centreDetails.lanIpAddress
 		Starter.selectedCentreLocationRec = centreDetails
+		progressbox.Show("Getting selected centre please wait...")
 		ShowValidateCentreSelectionPage(centreDetails)
 	Else
 		RefreshCentreList

@@ -572,7 +572,7 @@ End Sub
 private Sub InitializeLocals
 	indLoading.mBase.Visible = False
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
-	progressDialog. Initialize(Me, "progressDialog", modEposApp.DFT_PROGRESS_TIMEOUT)
+	progressDialog.Initialize(Me, "progressDialog", modEposApp.DFT_PROGRESS_TIMEOUT)
 	notification.Initialize
 	payment.Initialize(progressDialog)
 #if B4I

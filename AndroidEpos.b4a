@@ -74,7 +74,8 @@ Library9=mlwifi
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
 Module1=About
 Module10=clsCentreInfo
-Module100=ValidateDevice
+Module100=ValidateCentreSelection2
+Module101=ValidateDevice
 Module11=clsCentreInfoAndImgRec
 Module12=clsConfigSettings
 Module13=clsConnect
@@ -109,72 +110,72 @@ Module39=clsEposWebLocationCoordinates
 Module4=aHome
 Module40=clsGoodsTableRec
 Module41=clsGroupCategoryTableRec
-Module42=clsLocation
-Module43=clsLocationCoordinates
-Module44=clsMainCategoryTableRec
-Module45=clsMyData
-Module46=clsNotifications
-Module47=clsOrderPaymentRec
-Module48=clsOrderStartResponse
-Module49=clsOrderStatusRec
+Module42=clsKeyboardHelper
+Module43=clsLocation
+Module44=clsLocationCoordinates
+Module45=clsMainCategoryTableRec
+Module46=clsMyData
+Module47=clsNotifications
+Module48=clsOrderPaymentRec
+Module49=clsOrderStartResponse
 Module5=aPlaceOrder
-Module50=clsOrderSummary
-Module51=clsOrderSummaryRec
-Module52=clsOrderTableRec
-Module53=clsPayment
-Module54=clsPreparationTableRec
-Module55=clsProgress
-Module56=clsProgressDialog
-Module57=clsProgressIndicator
-Module58=clsReportErrors
-Module59=clsServer
+Module50=clsOrderStatusRec
+Module51=clsOrderSummary
+Module52=clsOrderSummaryRec
+Module53=clsOrderTableRec
+Module54=clsPayment
+Module55=clsPreparationTableRec
+Module56=clsProgress
+Module57=clsProgressDialog
+Module58=clsProgressIndicator
+Module59=clsReportErrors
 Module6=aSelectItem
-Module60=clsSizeOptionTableRec
-Module61=clsSizePriceTableRec
-Module62=clsStripe
-Module63=clsStripeCardRec
-Module64=clsStripeTokenRec
-Module65=clsSubCategoryTableRec
-Module66=clsSyncDatabase
-Module67=ConnectionHelper
-Module68=CreateAccount
-Module69=FirebaseMessaging
+Module60=clsServer
+Module61=clsSizeOptionTableRec
+Module62=clsSizePriceTableRec
+Module63=clsStripe
+Module64=clsStripeCardRec
+Module65=clsStripeTokenRec
+Module66=clsSubCategoryTableRec
+Module67=clsSyncDatabase
+Module68=ConnectionHelper
+Module69=CreateAccount
 Module7=aSelectPlayCentre3
-Module70=hAbout
-Module71=hCardEntry
-Module72=hChangeAccountInfo
-Module73=hChangeSettings2
-Module74=hCheckAccountStatus
-Module75=hCreateAccount
-Module76=hHome
-Module77=hPlaceOrder
-Module78=hQueryNewInstall
-Module79=hSelectItem
+Module70=FirebaseMessaging
+Module71=hAbout
+Module72=hCardEntry
+Module73=hChangeAccountInfo
+Module74=hChangeSettings2
+Module75=hCheckAccountStatus
+Module76=hCreateAccount
+Module77=hHome
+Module78=hPlaceOrder
+Module79=hQueryNewInstall
 Module8=ChangeAccountInfo
-Module80=hSelectPlayCentre3
-Module81=hValidateCentreSelection2
-Module82=hValidateDevice
-Module83=modConvert
-Module84=modEposApp
-Module85=modEposWeb
-Module86=NB6
-Module87=QueryNewInstall
-Module88=srvNotification
-Module89=srvPhoneTotal
+Module80=hSelectItem
+Module81=hSelectPlayCentre3
+Module82=hValidateCentreSelection2
+Module83=hValidateDevice
+Module84=modConvert
+Module85=modEposApp
+Module86=modEposWeb
+Module87=NB6
+Module88=QueryNewInstall
+Module89=srvNotification
 Module9=ChangeSettings
-Module90=Starter
-Module91=svcTestSequence
-Module92=TemplateActivity
-Module93=TemplateClass
-Module94=TemplateCode
-Module95=TemplateService
-Module96=TemplateXactivity
-Module97=TemplateXhelper
-Module98=TestStartAt
-Module99=ValidateCentreSelection2
+Module90=srvPhoneTotal
+Module91=Starter
+Module92=svcTestSequence
+Module93=TemplateActivity
+Module94=TemplateClass
+Module95=TemplateCode
+Module96=TemplateService
+Module97=TemplateXactivity
+Module98=TemplateXhelper
+Module99=TestStartAt
 NumberOfFiles=23
 NumberOfLibraries=24
-NumberOfModules=100
+NumberOfModules=101
 Version=10.5
 @EndOfDesignText@
 
@@ -184,8 +185,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 193                                                                                                                                                                  
-	' Date......: 24/01/21
+	' Release...: 194                                                                                                                                                                  
+	' Date......: 27/01/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -258,6 +259,18 @@ Version=10.5
 	'			    Mod: hHome_v14, aHome_v4, Starter_v91, hCardEntry_v20, hPlaceOrder_v30, aPlaceOrder_v13.
 	'						aCardEntry_v9, clsOrderPaymentRec_v2, hValidateDevice_v21, hChangeAccountInfo_v18.
 	'		
+	' Date......: 27/01/21
+	' Release...: 194
+	' Overview..: Bugfix: #0586 Order only contains last entered item.
+	'			  Maintenance: New keyboard helper class To reduce code and improve keyboard handling.
+	'             Mod: Select Centre now show the Progress indication whilst select centre. 
+	'			  
+	' Amendee...: D Morris
+	' Details...: New: clsKeyboardHelper_v1.
+	'			  Mod: hValidateDevice_v22, hCardEntry_v21, hChangeAccountInfo_v19, hCreateAccount_v21,
+	'						hPlaceOrder_v31, hSelectPlayCentre3_v13, clsLocation_v5, clsPayment_v2, hChangeSettings2_v4
+	'			  FORMS: frmChangeAccountInfo_v6, frmChangeSettings2_v3, frmValidateDevice_v8, frmCreateAccount_v8, frmCardEntry_v10,
+	'						frmPlaceOrder_v6.
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -271,8 +284,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 193
-	#VersionName: 1.0.0.193
+	#VersionCode: 194
+	#VersionName: 1.0.0.194
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

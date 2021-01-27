@@ -11,7 +11,7 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: ChangeSettings
-	' Release...: 15-
+	' Release...: 16
 	' Date......: 21/01/21   
 	'
 	' History
@@ -63,8 +63,8 @@ Version=9.01
 	' Amendee...: D Morris
 	' Details...: ModL Uses new hChangeSettings2 helper.
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 21/01/21
+	' Release...: 16
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: CloseActivity() calls to CheckAccountStatus changed to aCheckAccountStatus.

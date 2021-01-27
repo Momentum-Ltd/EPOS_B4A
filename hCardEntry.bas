@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 20
-	' Date......: 24/01/21
+	' Release...: 21
+	' Date......: 27/01/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -69,6 +69,13 @@ Version=9.5
 	' Details...: Mod: General changes to use clsPayment class for card payment.
 	'			  Mod: CardEntryAndOrderPayment() defaultCard parameter removed.
 	'
+	' Date......: 27/01/21
+	' Release...: 21
+	' Overview..: new uses clsKeyboardHelper for keyboard handling.
+	' Amendee...: D Morris
+	' Details...: Mod: General changes to support clsKeyboardHelper.
+	'			  Removed: kk as IME removed no longer necessary.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -84,12 +91,12 @@ Sub Class_Globals
 	Private xui As XUI							'ignore (to remove warning).
 	
 	' Misc objects
-	Private processedDate As clsDateHandler		' Handles processing date.
+	Private processedDate As clsDatehandler		' Handles processing date.
 	Private progressbox As clsProgressDialog	' Progress box.
 	Private cardInfo As clsStripeTokenRec		' Strip relating objects.
-#if B4A
-	Private kk As IME							' Used for hidding the keybaord.
-#End If
+'#if B4A
+'	Private kk As IME							' Used for hidding the keybaord.
+'#End If
 	Private payment As clsPayment				' Class to handle payments.
 	
 	' View declarations
@@ -107,12 +114,14 @@ Sub Class_Globals
 	Private txtExpiryDate As B4XFloatTextField 	' Expiry date.
 
 	' Default card entry panel
-	Private pnlDefaultCard As B4XView 			' The default card panel.
+'	Private pnlDefaultCard As B4XView 			' The default card panel.
 	
 	' Local variables
+	Private kbHelper As clsKeyboardHelper		' Keyboard handler
+	Private mOrderId As Int						' The order to pay (if n.a. then = 0)	
 	Private stripe As clsStripe					' Used for Stripe payments.	
 	Private total As Float 						' Amount to charge (if register card and take payment at the same time).
-	Private mOrderId As Int						' The order to pay (if n.a. then = 0)
+
 
 End Sub
 
@@ -136,17 +145,23 @@ Private Sub btnTestData_Click
 	LoadTestData
 End Sub
 
+' Handle hide keyboard required from keyboard helper class.
+Private Sub kbHelper_HideKeyboard
+	HideKeyboard
+End Sub
+
 ' Hide keyboard (click outside the text fields).
 Private Sub pnlCardEntry_Click
-#if b4A
-	kk.HideKeyboard
-#Else
-	xCardEntry.HideKeyboard
-#End If
+'#if b4A
+'	kk.HideKeyboard
+'#Else
+'	xCardEntry.HideKeyboard
+'#End If
+	HideKeyboard
 End Sub
 
 ' Progress dialog has timed out
-Sub progressbox_Timeout()
+Private Sub progressbox_Timeout()
 	xui.Msgbox2Async("Payment request failed.", "Timeout Error", "OK", "", "", Null)
 	Wait for msgbox_result (Result As Int)
 	ExitToCentreHomePage
@@ -271,7 +286,7 @@ Public Sub CardEntryAndOrderPayment(orderPayment As clsOrderPaymentRec)As Resuma
 '		pnlCardEntry.Visible = False
 '		SendOrderPayment(orderPayment.orderId, orderPayment.amount)
 '	Else
-		pnlDefaultCard.Visible = False
+'		pnlDefaultCard.Visible = False
 		pnlCardEntry.Visible = True
 		Wait for btnSubmit_Click()	' Wait for card information to be entered.
 		SubmitCard
@@ -299,12 +314,26 @@ End Sub
 '	Return True
 'End Sub
 
+#if B4i
+' Moves up the panel when necessary.
+Public Sub MoveUpEnterPanel(oskHeight As Float)
+	kbHelper.MoveUpEnterDetailsPanel(oskHeight)
+End Sub
+#End If
+
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
 	If progressbox.IsInitialized = True Then	' Ensures the progress timer is stopped.
 		progressbox.Hide
 	End If
 End Sub
+
+#if B4i
+' Handle resize event
+Public Sub Resize
+	kbHelper.Resize
+End Sub
+#End If
 
 ' Handles activity resume operation.
 Public Sub ResumeOp
@@ -438,12 +467,22 @@ private Sub HandleStripeResponse(success As Boolean, cardToken As String)
 		wait for msgbox_result(tempResult As Int)	
 	End If	
 End Sub
+
+
+' Hide Keyboard
+Private Sub HideKeyboard
+#if b4A
+'	kk.HideKeyboard
+#Else
+	xCardEntry.HideKeyboard
+#End If
+End Sub
 	
 ' Initialize the locals etc.
 private Sub InitializeLocals
-#if B4A
-	kk.Initialize("")
-#End If
+'#if B4A
+'	kk.Initialize("")
+'#End If
 	processedDate.Initialize
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 	payment.Initialize(progressbox)
@@ -452,6 +491,34 @@ private Sub InitializeLocals
 	stripe.Initialize(Me, "stripe") ' 
 	btnTestData.mBase.Visible = Starter.settings.testMode ' Short cut for setting Test Card button.
 	SetupTabOrder
+	' Necessary to set the background and border colour.
+'	txtCvc.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+'	txtLine1.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+'	txtName.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+'	txtPostCode.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+'	txtCardNumber.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+'	txtExpiryDate.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+
+	kbHelper.Initialize(Me, "kbHelper", pnlCardEntry)
+	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(txtCardNumber, txtExpiryDate, txtCvc, txtName, txtLine1, txtPostCode)
+#if B4i		
+'	kbHelper.AddViewToKeyboard(txtCvc)
+'	kbHelper.AddViewToKeyboard(txtLine1)
+'	kbHelper.AddViewToKeyboard(txtName)
+'	kbHelper.AddViewToKeyboard(txtPostCode)
+'	kbHelper.AddViewToKeyboard(txtCardNumber)
+'	kbHelper.AddViewToKeyboard(txtExpiryDate)
+	kbHelper.AddViewToKeyboard2(enterPanelTextField)
+#End If
+'	kbHelper.SetupBackcolourAndBorder(txtCvc)
+'	kbHelper.SetupBackcolourAndBorder(txtLine1)
+'	kbHelper.SetupBackcolourAndBorder(txtName)
+'	kbHelper.SetupBackcolourAndBorder(txtPostCode)
+'	kbHelper.SetupBackcolourAndBorder(txtCvc)
+'	kbHelper.SetupBackcolourAndBorder(txtCardNumber)
+'	kbHelper.SetupBackcolourAndBorder(txtExpiryDate)
+	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
+	kbHelper.RemovedTabOrder(enterPanelTextField)
 End Sub
 
 ' Load test data.
@@ -526,6 +593,11 @@ End Sub
 '#else ' B4I
 '	Main.SendMessage(msg)
 '#End If
+'End Sub
+
+'' Will setup the back colour to white and the border to orange
+'Private Sub SetupBackcolourAndBorder( txtObj As B4XFloatTextField)
+'	txtObj.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
 'End Sub
 
 ' Setup the tab order (adjust as necessary - currently no tab operation and keyboard will hide when enter pressed).

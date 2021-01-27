@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCreateAccount
-	' Release...: 20
-	' Date......: 23/01/21
+	' Release...: 21
+	' Date......: 27/01/21
 	'
 	' History
 	' Date......: 02/05/20
@@ -41,6 +41,12 @@ Version=9.3
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: btnSubmit_Click() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
+	'
+	' Date......: 27/01/21
+	' Release...: 21
+	' Overview..: new uses clsKeyboardHelper for keyboard handling.
+	' Amendee...: D Morris
+	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'
 	' Date......: 
 	' Release...: 
@@ -79,13 +85,13 @@ Sub Class_Globals
 
 	' Used to handle keyboard operation.
 #if B4I 
-	Dim gWidth As Int								' Saved screen width.
-	Dim gPnl_Hide As Panel							' Panel added above keyboard the hide keyboard button.
-	Dim gIm_Hide As ImageView						' Hide keyboard button.
-	
-	Private pnlEnterDetailsOrgTop As Int 			' Original top of the Text entry panel (used for moving it above keyboard).
+'	Dim gWidth As Int								' Saved screen width.
+'	Dim gPnl_Hide As Panel							' Panel added above keyboard the hide keyboard button.
+'	Dim gIm_Hide As ImageView						' Hide keyboard button.
+'	
+'	Private pnlEnterDetailsOrgTop As Int 			' Original top of the Text entry panel (used for moving it above keyboard).
 #End If
-
+	Private kbHelper As clsKeyboardHelper			' Keyboard handler
 End Sub
 
 ' This is the Main entry point.
@@ -116,9 +122,14 @@ Sub btnWebClose_Click
 	pnlWeb.Visible = False
 End Sub
 
+'#if B4i
+'' User clicks on hide keyboard
+'Sub Im_Hide_Click
+'	HideKeyboard
+'End Sub
+'#End If
 #if B4i
-' User clicks on hide keyboard
-Sub Im_Hide_Click
+Private Sub kbHelper_HideKeyboard
 	HideKeyboard
 End Sub
 #End If
@@ -159,24 +170,25 @@ End Sub
 ' This method moves a text entry field so it does not get covered by the keyboard.
 ' B4XFloatTextField is taken from here: https://www.b4x.com/android/forum/threads/b4xfloattextfield-keyboard-hiding-views.118242/#post-740784
 Public Sub MoveUpEnterDetailsPanel(height As Float)
-	If height = 0 Then ' Keyboard has been hidden
-		pnlEnterDetails.top = pnlEnterDetailsOrgTop
-	Else ' Keyboard has been shown
-		pnlEnterDetails.top = pnlEnterDetailsOrgTop
-		Sleep(0)
-		For Each v As B4XView In pnlEnterDetails.GetAllViewsRecursive
-			If v.Tag Is B4XFloatTextField Then
-				Dim f As B4XFloatTextField = v.Tag
-				If f.Focused Then
-					Dim base As Panel = f.mBase
-					Dim d As Double = base.CalcRelativeKeyboardHeight(height)
-					If d < base.Height Then
-						pnlEnterDetails.Top = pnlEnterDetailsOrgTop -(base.Height - d)
-					End If
-				End If
-			End If
-		Next
-	End If
+'	If height = 0 Then ' Keyboard has been hidden
+'		pnlEnterDetails.top = pnlEnterDetailsOrgTop
+'	Else ' Keyboard has been shown
+'		pnlEnterDetails.top = pnlEnterDetailsOrgTop
+'		Sleep(0)
+'		For Each v As B4XView In pnlEnterDetails.GetAllViewsRecursive
+'			If v.Tag Is B4XFloatTextField Then
+'				Dim f As B4XFloatTextField = v.Tag
+'				If f.Focused Then
+'					Dim base As Panel = f.mBase
+'					Dim d As Double = base.CalcRelativeKeyboardHeight(height)
+'					If d < base.Height Then
+'						pnlEnterDetails.Top = pnlEnterDetailsOrgTop -(base.Height - d)
+'					End If
+'				End If
+'			End If
+'		Next
+'	End If
+	kbHelper.MoveUpEnterDetailsPanel(height)
 End Sub
 #End If
 
@@ -196,9 +208,10 @@ End Sub
 #if B4i
 ' Handle resize event
 Public Sub Resize
-	gWidth = GetPanelWidth
-	gPnl_Hide.RemoveAllViews
-	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)
+'	gWidth = GetPanelWidth
+'	gPnl_Hide.RemoveAllViews
+'	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)
+	kbHelper.Resize
 End Sub
 #End If
 
@@ -207,14 +220,14 @@ End Sub
 
 #Region  Local Subroutines
 
-#If B4I
-'TODO Duplicated code.
-' Add hide keyboard button.
-Private Sub AddViewToKeyboard (xx As Object, view As Object)
-	Dim no As NativeObject = xx
-	no.SetField("inputAccessoryView", view)
-End Sub
-#End If
+'#If B4I
+''TODO Duplicated code.
+'' Add hide keyboard button.
+'Private Sub AddViewToKeyboard (xx As Object, view As Object)
+'	Dim no As NativeObject = xx
+'	no.SetField("inputAccessoryView", view)
+'End Sub
+'#End If
 
 ' Enable/disable user interaction
 '  Status = true all controls on screen enabled.
@@ -303,12 +316,12 @@ private Sub EmailAlreadyExist(email As String) As ResumableSub
 	Return emailExists
 End Sub
 
-#if B4i
-' Get the screen width 
-Private Sub GetPanelWidth As Int
-	Return  pnlEnterDetails.Width
-End Sub
-#End If
+'#if B4i
+'' Get the screen width 
+'Private Sub GetPanelWidth As Int
+'	Return  pnlEnterDetails.Width
+'End Sub
+'#End If
 
 ' Will show or hide privacy policy
 Private Sub HandlePrivacyPolicy(show As Boolean)
@@ -332,26 +345,42 @@ private Sub InitializeLocals
 	txtEmailAddress.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
 	txtPassword.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
 	txtVerifyPassword.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
+	
+	
+	
 #if B4I
 	' B4I code for close keyboard button.
-		pnlEnterDetailsOrgTop = pnlEnterDetails.Top ' Save the original enter panel top postion.
-	gIm_Hide.Initialize("Im_Hide")
-	gIm_Hide.Bitmap = LoadBitmap(File.DirAssets, "hide_keyboard.png")
-	gIm_Hide.Color = xui.Color_Gray
-	gIm_Hide.Height = 50
-	gIm_Hide.Width = 40
-	gWidth = GetPanelWidth
-	gPnl_Hide.Initialize ("")
-	gPnl_Hide.Color = Colors.Transparent
-	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)	
-	gPnl_Hide.Height = 40
-	
-	AddViewToKeyboard(txtName.TextField, gPnl_Hide)
-	AddViewToKeyboard(txtEmailAddress.TextField, gPnl_Hide)
-	AddViewToKeyboard(txtPassword.TextField, gPnl_Hide)
-	AddViewToKeyboard(txtVerifyPassword.TextField, gPnl_Hide)
-
+'	pnlEnterDetailsOrgTop = pnlEnterDetails.Top ' Save the original enter panel top postion.
+'	gIm_Hide.Initialize("Im_Hide")
+'	gIm_Hide.Bitmap = LoadBitmap(File.DirAssets, "hide_keyboard.png")
+'	gIm_Hide.Color = xui.Color_Gray
+'	gIm_Hide.Height = 50
+'	gIm_Hide.Width = 40
+'	gWidth = GetPanelWidth
+'	gPnl_Hide.Initialize ("")
+'	gPnl_Hide.Color = Colors.Transparent
+'	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)	
+'	gPnl_Hide.Height = 40
+'	
+'	AddViewToKeyboard(txtName.TextField, gPnl_Hide)
+'	AddViewToKeyboard(txtEmailAddress.TextField, gPnl_Hide)
+'	AddViewToKeyboard(txtPassword.TextField, gPnl_Hide)
+'	AddViewToKeyboard(txtVerifyPassword.TextField, gPnl_Hide)
 #End If
+
+	kbHelper.Initialize(Me, "kbHelper", pnlEnterDetails)
+	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(txtName, txtEmailAddress, txtPassword, txtVerifyPassword)
+	' All text so no need to attach hide keyboard button
+'	kbHelper.SetupBackcolourAndBorder(txtName)
+'	kbHelper.SetupBackcolourAndBorder(txtEmailAddress)
+'	kbHelper.SetupBackcolourAndBorder(txtPassword)
+'	kbHelper.SetupBackcolourAndBorder(txtVerifyPassword)
+
+#if B4i
+	kbHelper.AddViewToKeyboard2(enterPanelTextField)
+#End If
+	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
+	kbHelper.RemovedTabOrder(enterPanelTextField)
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
 '	lblPrivacyPolicy.Text = cs

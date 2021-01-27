@@ -11,11 +11,11 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: hChangeSettings2
-	' Release...: 3
-	' Date......: 03/01/21
+	' Release...: 4
+	' Date......: 25/01/21
 	'
 	' History
-	' Date......: 05/10/20
+	' Date......: 26/01/20
 	' Release...: 1
 	' Created by: D Morris 
 	' Details...: Based on hChangeSettings_v15.
@@ -33,6 +33,12 @@ Version=10.2
 	' Amendee...: D Morris.
 	' Details...: Mod: UpdateDisplay().
 	'			  Mod: Old commented out code removed.
+	'
+	' Date......: 27/01/21
+	' Release...: 4
+	' Overview..: Bugfix: #0576 - Setting screen not hiding keyboard when return pressed.
+	' Amendee...: D Morris
+	' Details...:   Mod: uses clsKeyboardHelper to handle keyboard. 
 	'
 	' Date......: 
 	' Release...: 
@@ -59,8 +65,10 @@ Sub Class_Globals
 	' Activity view declarations
 	Private btnDefault As SwiftButton			' Load default settings button.
 	
-	Private edtMaxCentres As B4XView			' Maximum centres displayed in searches.
-	Private edtRadus As B4XView					' Search radius setting.
+	Private edtMaxCentres As B4XFloatTextField	' Maximum centres displayed in searches.
+	Private edtRadius As B4XFloatTextField		' Search radius setting.
+	
+	Private pnlEnterDetails As Panel			' Panel for entering details.	
 		
 	Private swAllFcmNotifications As B4XSwitch	' Switch to raise a notify for all FCM messages.
 	Private swShowTestCentres As B4XSwitch		' Switch to enable show test centres.	
@@ -71,9 +79,16 @@ Sub Class_Globals
 	
 	' Misc objects	
 	Public dialog As B4XDialog					' Dialog enter number for permission to change settings (public so it can be accessed by the parent form).
+	Private kbHelper As clsKeyboardHelper		' Keyboard helper	
+#if B4i	
+
+'	Private mParentPage As Page					' Storage for reference to parent
+#End If
+	
 #if B4A	
 	Private saveParent As Activity				' Storage for the parent activity.
 #end if
+
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -84,6 +99,12 @@ Public Sub Initialize (parent As Activity)
  public Sub Initialize(parent As B4XView)
 #End If
 	parent.LoadLayout("frmChangeSettings2")
+
+
+'#if B4i
+'	mParentPage  = parent
+'#End If
+
 	dialog.Initialize(parent)
 	dialog.Title = "Input Code to change settings"
 	InitializeLocals
@@ -107,20 +128,29 @@ Private Sub edtMaxCentres_EnterPressed
 End Sub
 '
 ' Handle Max Centres enter button.
-Private Sub edtRadus_EnterPressed
+Private Sub edtRadius_EnterPressed
 	Log("Max Centres Return")
-	Starter.settings.searchRadius = ProcessSearchRadius(edtRadus.Text)
-	edtRadus.text = GetRadiusText ' Ensure screen text updated with latest value
+	Starter.settings.searchRadius = ProcessSearchRadius(edtRadius.Text)
+	edtRadius.text = GetRadiusText ' Ensure screen text updated with latest value
 End Sub
+
+#if b4i 
+' Hide the keyboard
+Public Sub kbHelper_HideKeyboard
+	frmChangeSettings.HideKeyboard
+End Sub
+#End If
 
 ' Handle units switch
 Private Sub swUnitsKm_ValueChanged (Value As Boolean)
 	Starter.settings.unitKm = Value
 End Sub
 
+
 #End Region  Event Handlers
 
 #Region  Public Subroutines
+
 
 ' Displays the current app settings on the activity's views.
 public Sub DisplayCurrentSettings
@@ -141,9 +171,17 @@ public Sub DisplayCurrentSettings
 	Else
 		frmChangeSettings.ShowBackbutton
 #End If
-
 	End If
 End Sub
+
+
+#if B4i
+' Moves up the panel when necessary.
+Public Sub MoveUpEnterPanel(oskHeight As Float)
+	kbHelper.MoveUpEnterDetailsPanel(oskHeight)
+End Sub
+#End If
+
 
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
@@ -151,10 +189,18 @@ public Sub OnClose
 	dialog.Close(xui.DialogResponse_Cancel)  ' Important - need to close it.
 End Sub
 
+#if B4i
+' Handle resize event
+Public Sub Resize
+	kbHelper.Resize
+End Sub
+#End If
+
+
 ' Saves all the values displayed by the views, and then saves the settings to disk.
 Public Sub SaveAllSettings
 	Starter.settings.maxCentres = modEposApp.CheckNumberRange(edtMaxCentres.Text, MAX_CENTRES, MIN_CENTRES, modEposApp.DFT_MAX_CENTRES) 
-	Starter.settings.searchRadius = ProcessSearchRadius(edtRadus.Text)
+	Starter.settings.searchRadius = ProcessSearchRadius(edtRadius.Text)
 	Starter.settings.allFcmNotification = swAllFcmNotifications.Value
 	Starter.settings.showTestCentres = swShowTestCentres.value
 	Starter.settings.testMode = swTestMode.value
@@ -214,7 +260,20 @@ End Sub
 
 ' Initialize the locals etc.
 private Sub InitializeLocals
-	' Currently no action.
+	kbHelper.Initialize(Me, "kbHelper", pnlEnterDetails)
+#if b4i	
+	kbHelper.AddViewToKeyboard(edtMaxCentres)
+	kbHelper.AddViewToKeyboard(edtRadius)
+#End If
+	kbHelper.SetupBackcolourAndBorder(edtMaxCentres)
+	kbHelper.SetupBackcolourAndBorder(edtRadius)
+	
+	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(edtMaxCentres, edtRadius)
+#if B4i		
+	kbHelper.AddViewToKeyboard2(enterPanelTextField)
+#End If
+	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
+	kbHelper.RemovedTabOrder(enterPanelTextField)
 End Sub
 
 ' Process the Search radius setting.
@@ -235,7 +294,7 @@ Private Sub UpdateDisplay()
 	swShowTestCentres.Value = Starter.settings.showTestCentres
 	swTestMode.Value = Starter.settings.testMode
 	swUnitsKm.Value = Starter.settings.unitKm
-	edtRadus.text = GetRadiusText
+	edtRadius.text = GetRadiusText
 	If Starter.server.GetServerNumber = 2 Then
 		swServer2.Value = True
 	Else

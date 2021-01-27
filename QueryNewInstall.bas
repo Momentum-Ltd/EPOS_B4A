@@ -58,8 +58,8 @@ Version=9.01
 	' Amendee...: D Morris
 	' Details...: Mod: Title bar removed.
 	'		
-	' Date......: 
-	' Release...: 
+	' Date......: 22/01/21
+	' Release...: 8
 	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
 	' Amendee...: D Morris
 	' Details...: Mod: Activity_ActionBarHomeClick() calls to CheckAccountStatus changed to aCheckAccountStatus.

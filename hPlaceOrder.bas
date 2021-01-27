@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 30
-	' Date......: 24/01/21
+	' Release...: 31
+	' Date......: 27/01/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -66,6 +66,15 @@ Version=9.5
 	' Details...: Mod: lblBackButton_Click() - now calls CancelOrder().
 	'			  Mod: CancelOrder() now queries the cancel operation.
 	'			  Mod: OnClose() now calls ClearOrder().
+	'
+	' Date......: 27/01/21
+	' Release...: 31
+	' Overview..: Bugfix: #0586 Order only contains last entered item.
+	'				 New: uses clsKeyboardHelper for keyboard handling.
+	' Amendee...: D Morris
+	' Details...: Mod: General changes to support clsKeyboardHelper.
+	'			  Bugfix: OnClose() removed ClearOrder() (introduced in v30).
+	'			  Removed: kk as IME removed no longer necessary.
 	' 			  
 	' Date......: 
 	' Release...: 
@@ -90,15 +99,17 @@ Sub Class_Globals
 	' Activity view declarations
 	Private btnMessage As SwiftButton	 		' Button which allows the user to add/edit the order message.
 	Private btnOrder As SwiftButton		 		' Button which submits the order to the Server.
+	Private imgSuperorder As B4XView 			' SuperOrder header icon.	
+	Private lblBackButton As B4XView			' Back button.
 	Private lblCollectCaption As B4XView		' Label used as a caption for the 'Collect from counter' delivery option.
 	Private lblCollectionOnly As B4XView		' Label indicating Centre only allows collection.	
 	Private lblDeliverCaption As B4XView		' Label used as a caption for the 'Deliver to table' delivery option.		
 	Private lblOrderTotal As B4XView 			' Label which displays the total price of the order.
-	Private imgSuperorder As B4XView 			' SuperOrder header icon.
 	Private lvwOrderItems As CustomListView		' listview which contains all the items current on the order.	
+'	Private pnlBackground As B4XView			' Back ground panel
 	Private pnlHeader As B4XView				' Header panel.
 	Private pnlHideOrder As B4XView				' Panel to hide order details.
-	Private pnlTableNumber As B4XView			' White back panel for txtTableNumber 
+'	Private pnlTableNumber As B4XView			' White back panel for txtTableNumber 
 	Private swcCollectDeliver As B4XSwitch 		' Swtich used to control whether the order will be collected or delivered.
 	Private txtTableNumber As B4XFloatTextField ' Text field used to enter the customer's table number.
 #if B4I
@@ -106,12 +117,13 @@ Sub Class_Globals
 #End If
 
 	' Misc objects
+'#if B4A
+'	Private kk As IME							' Used for showing/hiding the keybaord.
+'#End If	
+	Private kbHelper As clsKeyboardHelper		' Keyboard handler
 	Private notification As clsNotifications	' Handles notifications.
 	Private payment As clsPayment				' Handles payments.	
 	Private progressbox As clsProgressDialog	' Progress box.
-#if B4A
-	Private kk As IME							' Used for showing/hiding the keybaord.
-#End If
 
 	' Local variables
 	Private mLocalOrderTotal As Float 			' The total price of the order.
@@ -210,6 +222,12 @@ End Sub
 ' Handles done button (used for submitting customer messages).
 Private Sub btnTextboxDone_Click
 	txtMessage.ResignFocus ' Hide the keyboard
+End Sub
+#End If
+
+#if B4i
+Private Sub kbHelper_HideKeyboard
+	HideKeyboard
 End Sub
 #End If
 
@@ -439,10 +457,17 @@ Public Sub HandleOrderResponse(orderResponseStr As String)
 		xui.Msgbox2Async(msgStr, "Unable to Submit Order", "OK", "", "", Null)
 	End If
 End Sub
+#if B4i
+' This method moves a text entry field so it does not get covered by the keyboard.
+' B4XFloatTextField is taken from here: https://www.b4x.com/android/forum/threads/b4xfloattextfield-keyboard-hiding-views.118242/#post-740784
+Public Sub MoveUpEnterDetailsPanel(height As Float)
+	kbHelper.MoveUpEnterDetailsPanel(height)
+End Sub
+#End If
 
 ' Will perform any cleanup operation when the form is closed (disappears).
 public Sub OnClose
-	ClearOrder
+	' Warning don't be tempted to call ClearOrder() closed to call SelectItem.
 	Starter.CustomerOrderInfo.tableNumber = modEposApp.Val( txtTableNumber.Text.trim) ' Ensures last entered table number is stored.
 	If progressbox.IsInitialized = True Then	' Ensures the progress timer is stopped.
 		progressbox.Hide
@@ -457,6 +482,13 @@ public Sub ResumeOp
 	SetupCollectDeliverViews
 	QueryDisplayKeyboard
 End Sub
+
+#if B4i
+' Handle resize event
+Public Sub Resize
+	kbHelper.Resize
+End Sub
+#End If
 
 ' Displays a messagebox containing the most recent Message To Customer text, and makes the notification sound/vibration if specified.
 Public Sub ShowMessageNotificationMsgBox(soundAndVibrate As Boolean)
@@ -549,7 +581,7 @@ End Sub
 ' Hide the keyboard
 Private Sub HideKeyboard
 #if B4A
-	kk.HideKeyboard
+'	kk.HideKeyboard
 #else ' B4i
 	xPlaceOrder.HideKeyboard
 #End If
@@ -558,7 +590,7 @@ End Sub
 ' Initialize the locals etc.
 private Sub InitializeLocals
 #if B4A
-	kk.Initialize("")	
+'	kk.Initialize("")	
 #End If
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 	payment.Initialize(progressbox)
@@ -566,6 +598,13 @@ private Sub InitializeLocals
 	Dim bt As Bitmap = imgSuperorder.GetBitmap
 	imgSuperorder.SetBitmap(bt.Resize(imgSuperorder.Width, imgSuperorder.Height, True))
 	imgSuperorder.Top = (pnlHeader.Height - imgSuperorder.Height) / 2   ' Centre SuperOrder vertically.
+
+	kbHelper.Initialize(Me, "kbHelper", pnlHeader)
+#if B4i	
+	kbHelper.AddViewToKeyboard(txtTableNumber)
+#End If	
+	kbHelper.SetupBackcolourAndBorder(txtTableNumber)	
+'	txtTableNumber.NextField = txtTableNumber		' This line will ensure there keyboard closes if enter button pressed.
 End Sub
 
 ' Checks if a table number is valid
@@ -701,7 +740,7 @@ Private Sub SetupCollectDeliverViews
 		swcCollectDeliver.Value = Starter.CustomerOrderInfo.deliverToTable
 		If swcCollectDeliver.Value = True Then ' Deliver?
 			txtTableNumber.mBase.Visible = True
-			pnlTableNumber.Visible = True
+'			pnlTableNumber.Visible = True
 			lblCollectCaption.TextColor = Colors.LightGray
 			lblCollectCaption.Font = xui.CreateDefaultFont(lblCollectCaption.Font.Size)
 			lblDeliverCaption.Text = "Deliver to"
@@ -709,7 +748,7 @@ Private Sub SetupCollectDeliverViews
 			lblDeliverCaption.Font = xui.CreateDefaultBoldFont(lblDeliverCaption.Font.Size)
 		Else ' Collect
 			txtTableNumber.mBase.Visible = False
-			pnlTableNumber.Visible = False
+'			pnlTableNumber.Visible = False
 			lblCollectCaption.TextColor = Colors.White
 			lblCollectCaption.Font = xui.CreateDefaultBoldFont(lblCollectCaption.Font.Size)
 			lblDeliverCaption.Text = "Deliver"
@@ -723,7 +762,7 @@ Private Sub SetupCollectDeliverViews
 		lblDeliverCaption.Visible = False
 		txtTableNumber.mBase.Visible = False
 '#if B4A
-		pnlTableNumber.Visible = False
+'		pnlTableNumber.Visible = False
 '#End If
 	End If
 

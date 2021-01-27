@@ -11,8 +11,8 @@ Version=9.9
 #Region  Documentation
 	'
 	' Name......: clsLocation
-	' Release...: 4
-	' Date......: 03/01/21
+	' Release...: 5
+	' Date......: 27/01/21
 	'
 	' History
 	' Date......: 12/07/20
@@ -38,6 +38,12 @@ Version=9.9
 	' Amendee...: D Morris.
 	' Details...: Mod: flp_LocationChanged() and locManager_LocationChanged().
 	'
+	' Date......: 27/01/21
+	' Release...: 5
+	' Overview..: Maintenance - removed some warnings.
+	' Amendee...: D Morris
+	' Details...: Removed: RemoveLocationUpdates() and RequestLocationUpdates() unused.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -56,7 +62,7 @@ Sub Class_Globals
 #else ' B4i
 	Private locManager As LocationManager
 	Private locationAvailable As Boolean
-	Private centresDisplayed As Boolean
+'	Private centresDisplayed As Boolean
 '	Private tmrAutoStartDisplayCentres As Timer
 #End If
 	' Required for event handling
@@ -216,16 +222,16 @@ Private Sub CreateLocationRequest(interval As Int, displacement As Int) As Locat
 	Return lr
 End Sub
 
-' Remove location updates.
-Private Sub RemoveLocationUpdates
-	flp.RemoveLocationUpdates
-End Sub
+'' Remove location updates.
+'Private Sub RemoveLocationUpdates
+'	flp.RemoveLocationUpdates
+'End Sub
 
-' Request location updates
-' interval - time interval in mSecs, displacement is smallest displacement in meters.
-Private Sub RequestLocationUpdates(interval As Int, displacement As Int)
-	flp.RequestLocationUpdates(CreateLocationRequest(interval, displacement))
-End Sub
+'' Request location updates
+'' interval - time interval in mSecs, displacement is smallest displacement in meters.
+'Private Sub RequestLocationUpdates(interval As Int, displacement As Int)
+'	flp.RequestLocationUpdates(CreateLocationRequest(interval, displacement))
+'End Sub
 #End If
 
 ' Start the locations updates
