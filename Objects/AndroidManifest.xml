@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="194"
-	android:versionName="1.0.0.194"
+	android:versionCode="195"
+	android:versionName="1.0.0.195"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>
@@ -178,6 +178,13 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
+			android:name=".acreateaccount"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
 			android:name=".ahome"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
@@ -186,6 +193,13 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".aplaceorder"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".aquerynewinstall"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -206,6 +220,13 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
+			android:name=".avalidatedevice"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
 			android:name=".changeaccountinfo"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
@@ -217,24 +238,10 @@
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".createaccount"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
 		<service android:name=".firebasemessaging">
 		</service>
 		<receiver android:name=".firebasemessaging$firebasemessaging_BR">
 		</receiver>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".querynewinstall"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
 		<service android:name=".srvnotification">
 		</service>
 		<receiver android:name=".srvnotification$srvnotification_BR">
@@ -277,13 +284,6 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".validatecentreselection2"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".validatedevice"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>

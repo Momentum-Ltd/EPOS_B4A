@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hQueryNewInstall
-	' Release...: 7
-	' Date......: 23/01/21
+	' Release...: 7-
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -58,6 +58,12 @@ Version=9.3
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..: Support for renamed CreateAccount.
+	' Amendee...: D Morris.
+	' Details...: Mod: btnCreateNewAccount_Click().
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..:
 	' Amendee...: 
 	' Details...: 
@@ -88,18 +94,18 @@ End Sub
 ' Button to create new account
 Private Sub btnCreateNewAccount_Click
 #if B4A
-	StartActivity(CreateAccount)
+	StartActivity(aCreateAccount)
 #else ' B4I
-	frmCreateAccount.Show
+	xCreateAccount.Show
 #end if
 End Sub
 
 ' Button to move account to this device 
 Private Sub btnMoveAccount_Click
 #if B4A
-	StartActivity(ValidateDevice)
+	StartActivity(aValidateDevice)
 #else ' B4I
-	frmValidateDevice.Show
+	xValidateDevice.Show
 #End If
 End Sub
 

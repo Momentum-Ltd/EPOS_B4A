@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsCustomerInfo
-	' Release...: 9
-	' Date......: 16/05/20
+	' Release...: 10
+	' Date......: 28/01/21
 	'
 	' History
 	' StartDate.: 06/08/19
@@ -74,6 +74,12 @@ Version=9.3
 	' Overview..: Load() now will only returns true if valid customer information available.
 	' Amendee...: D Morris
 	' Details...: Mod: Load() - code modified.
+	'
+	' Date......: 28/01/21
+	' Release...: 10
+	' Overview..: Update feature added. 
+	' Amendee...: D Morris
+	' Details...: Added: UpdateStoredCustomerInfo().
 	'
 	' Date......: 
 	' Release...: 
@@ -208,6 +214,32 @@ Public Sub Save As Boolean
 	File.WriteMap(File.DirLibrary, CUSTOMER_FILENAME, mapCustomerInfo)
 #end if
 	Return True 'TODO Needs to check if Save operation worked and return the correct value
+End Sub
+
+' Update the customer info and save it to file.
+Public Sub Update(pApiCustomerId As Int, customerInfoRec As clsEposWebCustomerRec) As Boolean
+'	Starter.myData.customer.apiCustomerId = apiCustomerId
+'	Starter.myData.customer.address = customerInfoRec.address
+'	Starter.myData.customer.customerId = customerInfoRec.ID
+'	Starter.myData.customer.customerIdStr = modEposWeb.ConvertToString(apiCustomerId)
+'	Starter.myData.customer.email = customerInfoRec.email
+'	Starter.myData.customer.name = customerInfoRec.name
+'	Starter.myData.customer.phoneNumber = customerInfoRec.telephone
+'	Starter.myData.customer.postCode = customerInfoRec.postCode
+'	Starter.myData.customer.rev = customerInfoRec.rev
+'	Starter.myData.Save
+'	Starter.customerInfoAvailable = True ' necessary to signal valid information available.
+	
+	apiCustomerId = pApiCustomerId
+	address = customerInfoRec.address
+	customerId = customerInfoRec.ID
+	customerIdStr = modEposWeb.ConvertToString(pApiCustomerId)
+	email = customerInfoRec.email
+	name = customerInfoRec.name
+	phoneNumber = customerInfoRec.telephone
+	postCode = customerInfoRec.postCode
+	rev = customerInfoRec.rev
+	Return Save
 End Sub
 
 #End Region  Public Subroutines

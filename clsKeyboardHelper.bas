@@ -10,14 +10,20 @@ Version=10.5
 #Region  Documentation
 	'
 	' Name......: clsKeyboardHelper
-	' Release...: 1
-	' Date......: 27/01/21
+	' Release...: 2
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 27/01/21
 	' Release...: 1
 	' Created by: D Morris
-	' Details...: First release to support version tracking
+	' Details...: First release to support version tracking.
+	'
+	' Date......: 28/01/21
+	' Release...: 2
+	' Overview..: Enhancement to setup operation.
+	' Amendee...: D Morris
+	' Details...: Added: SetupTextAndKeyboard()
 	'
 	' Date......: 
 	' Release...: 
@@ -157,7 +163,14 @@ Public Sub SetupBackcolourAndBorder2(txtObj() As B4XFloatTextField)
 	Next
 End Sub
 
-' 
+' Setup bot the text box and keyboard.
+Public Sub SetupTextAndKeyboard(txtObj() As B4XFloatTextField)
+ #if B4i		
+	AddViewToKeyboard2(txtObj)
+#End If
+	SetupBackcolourAndBorder2(txtObj)
+	RemovedTabOrder(txtObj)
+End Sub
 
 
 #End Region  Public Subroutines

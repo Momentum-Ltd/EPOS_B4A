@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hValidateDevice
-	' Release...: 22
-	' Date......: 27/01/21
+	' Release...: 23
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -56,6 +56,18 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'
+	' Date......: 28/01/21
+	' Release...: 23
+	' Overview..: Maintenance release - QueryNewInstall updated.
+	' Amendee...: D Morris
+	' Details...: Mod: lblBackbutton_Click().
+	'		      Mod: Old commented out code removed.
+	'             Mod: clsEposApiHelper is now global.
+	'			  Mod: UpdateCustomerInfo(), lblForgotPassword_Click(), GetCustomerInfo(), lncCustomerRev() calls the API helper.
+	'			  Mod: UpdateStoredCustomerInfo() - used cls.
+	'			  Mod: InitializeLocals() now calls clsKeyboardHelper.SetupTextAndKeyboard() and clsEposApiHelper.initialize().
+	'			  Mod: ShowCheckAccountStatus() renamed to ExitToCheckAccountStatus().
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -69,11 +81,8 @@ Version=9.3
 
 
 Sub Class_Globals
-	' X-platform related.
-	Private xui As XUI								'ignore
-
-	' Misc objects
-	Private progressbox As clsProgressIndicator		' Progress box
+	
+	Private xui As XUI								'ignore X-platform related.
 
 	' Activity view declarations
 	Private btnSubmit As SwiftButton				' Button to submit the account information.
@@ -85,16 +94,10 @@ Sub Class_Globals
 	Private txtEmailAddress As B4XFloatTextField	' Entry field for user's email.
 	Private txtPassword As B4XFloatTextField		' Entry field fpr password.
 	
-	' Used to handle keyboard operation.
-#if B4I 
-'	Dim gWidth As Int								' Saved screen width.
-'	Dim gPnl_Hide As Panel							' Panel added above keyboard the hide keyboard button.
-'	Dim gIm_Hide As ImageView						' Hide keyboard button.
-' 	private pnlEnterDetailsOrgTop As Int 			' Original top of the Text entry panel (used for moving it above keyboard).
-#End If	
+	' Misc objects
+	Private apiHelper As clsEposApiHelper			' API helper.
 	Private kbHelper As clsKeyboardHelper			' Keyboard handler
-
-
+	Private progressbox As clsProgressIndicator		' Progress box
  End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -112,19 +115,12 @@ Private Sub btnSubmit_Click
 	ValidateTheDevice
 End Sub
 
-'#if B4i
-'' User clicks on hide keyboard
-'Sub Im_Hide_Click
-'	HideKeyboard
-'End Sub
-'#End If
-
 ' Handle Back button in title bar
 private Sub lblBackbutton_Click
 #if B4A
-	StartActivity(QueryNewInstall)
+	StartActivity(aQueryNewInstall)
 #else
-	frmQueryNewInstall.show()
+	xQueryNewInstall.show()
 #End If
 End Sub
 
@@ -133,8 +129,8 @@ Private Sub lblForgotPassword_Click
 	Dim emailAddress As String = modEposWeb.FilterEmailInput(txtEmailAddress.Text) ' Filter email text.
 	txtEmailAddress.Text = emailAddress ' Write it back
 	If modEposApp.CheckEmailFormat(emailAddress) Then
-		Dim apiHelper As clsEposApiHelper
-		apiHelper.Initialize
+'		Dim apiHelper As clsEposApiHelper
+'		apiHelper.Initialize
 		Wait for (apiHelper.ForgotPasswordEmailKnown(emailAddress)) complete (customerId As Int)
 	Else
 		xui.MsgboxAsync("Email not entered correctly" , "Email problem")
@@ -161,34 +157,14 @@ Private Sub kbHelper_HideKeyboard
 End Sub
 #End If
 
-
 #End Region  Event Handlers
 
 #Region  Public Subroutines
 
 #if B4i
-'TODO This is duplicated code!
 ' This method moves a text entry field so it does not get covered by the keyboard.
 ' B4XFloatTextField is taken from here: https://www.b4x.com/android/forum/threads/b4xfloattextfield-keyboard-hiding-views.118242/#post-740784
 Public Sub MoveUpEnterDetailsPanel(height As Float)
-'	If height = 0 Then ' Keyboard has been hidden
-'		pnlEnterDetails.top = pnlEnterDetailsOrgTop
-'	Else ' Keyboard has been shown
-'		pnlEnterDetails.top = pnlEnterDetailsOrgTop
-'		Sleep(0)
-'		For Each v As B4XView In pnlEnterDetails.GetAllViewsRecursive
-'			If v.Tag Is B4XFloatTextField Then
-'				Dim f As B4XFloatTextField = v.Tag
-'				If f.Focused Then
-'					Dim base As Panel = f.mBase
-'					Dim d As Double = base.CalcRelativeKeyboardHeight(height)
-'					If d < base.Height Then
-'						pnlEnterDetails.Top = pnlEnterDetailsOrgTop -(base.Height - d)
-'					End If
-'				End If
-'			End If
-'		Next
-'	End If
 	kbHelper.MoveUpEnterDetailsPanel(height)
 End Sub
 #End If
@@ -205,13 +181,9 @@ End Sub
 #if B4i
 ' Handle resize event
 Public Sub Resize
-'	gWidth = GetPanelWidth
-'	gPnl_Hide.RemoveAllViews
-'	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)
 	kbHelper.Resize
 End Sub
 #End If
-
 
 ' Performs the resume operation.
 Public Sub Resume
@@ -222,14 +194,6 @@ End Sub
 
 
 #Region  Local Subroutines
-'#If B4I
-''TODO Duplicated code.
-'' Add hide keyboard button.
-'Private Sub AddViewToKeyboard (xx As Object, view As Object)
-'	Dim no As NativeObject = xx
-'	no.SetField("inputAccessoryView", view)
-'End Sub
-'#End If
 
 ' Enable/disable user interaction
 '  Status = true all controls on screen enabled.
@@ -243,34 +207,37 @@ Private Sub ControlUserInteraction(status As Boolean)
 #End If	
 End Sub
 
+' Exit to check account status page
+' Warning can't call this CheckAccountStatus in has problems with a module of the same name.
+private Sub ExitToCheckAccountStatus
+#if B4A
+	StartActivity(aCheckAccountStatus)
+#Else
+	xCheckAccountStatus.Show(True)				
+#End If
+End Sub
+
 ' Get the Customer information from the Web Server (using the apiCustomerId)
 ' Returns clsEposWebCustomerRec (if error the clsEposWebCustomerRec it not initialised)
 Private Sub GetCustomerInfo(apiCustomerId As Int) As ResumableSub
-	Dim apiHelper As clsEposApiHelper
-	apiHelper.Initialize
+'	Dim apiHelper As clsEposApiHelper
+'	apiHelper.Initialize
 	Wait for (apiHelper.GetCustomerInfo(apiCustomerId)) complete (customerInfoRec As clsEposWebCustomerRec)
 	Return customerInfoRec
 End Sub
 
-'#if B4i
-'' Get the screen width 
-'Private Sub GetPanelWidth As Int
-'	Return  pnlEnterDetails.Width
-'End Sub
-'#End If
-
 #if B4i
 ' Hide the keyboard.
 Private Sub HideKeyboard
-	frmValidateDevice.HideKeyboard
+	xValidateDevice.HideKeyboard
 End Sub
 #End If
 
 ' Increments a customer's revision number.
 ' returns new customerId (with embedded rev) if email and password are ok (else -1 error).
 Private Sub lncCustomerRev(email As String, password As String) As ResumableSub
-	Dim apiHelper As clsEposApiHelper
-	apiHelper.Initialize
+'	Dim apiHelper As clsEposApiHelper
+'	apiHelper.Initialize
 	Wait for (apiHelper.IncrementCustomerIdRevision(email, password)) complete (customerId As Int)
 	Return customerId
 End Sub
@@ -279,38 +246,19 @@ End Sub
 private Sub InitializeLocals
 	ControlUserInteraction(True)
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT,indLoading)
-'	txtEmailAddress.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'	txtPassword.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
+	apiHelper.Initialize
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("Forgot password").PopAll
 	' See https://www.b4x.com/android/forum/threads/b4x-set-csbuilder-or-text-to-a-label.102118/
 	XUIViewsUtils.SetTextOrCSBuilderToLabel(lblForgotPassword, cs)
-#if B4I
-'	' B4I code for close keyboard button.
-'	pnlEnterDetailsOrgTop = pnlEnterDetails.Top ' Save the original enter panel top postion.
-'	gIm_Hide.Initialize("Im_Hide")
-'	gIm_Hide.Bitmap = LoadBitmap(File.DirAssets, "hide_keyboard.png")
-'	gIm_Hide.Color = xui.Color_Gray
-'	gIm_Hide.Height = 50
-'	gIm_Hide.Width = 40
-'	gWidth = GetPanelWidth
-'	gPnl_Hide.Initialize ("")
-'	gPnl_Hide.Color = Colors.Transparent
-'	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)
-'	gPnl_Hide.Height = 40
-'	
-'	AddViewToKeyboard(txtEmailAddress.TextField, gPnl_Hide)
-'	AddViewToKeyboard(txtPassword.TextField, gPnl_Hide)
-#End If
 	kbHelper.Initialize(Me, "kbHelper", pnlEnterDetails)
-	' All text so no need to attach hide keyboard button
-'	kbHelper.AddViewToKeyboard(txtEmailAddress)
-'	kbHelper.AddViewToKeyboard(txtPassword)
-	kbHelper.SetupBackcolourAndBorder(txtEmailAddress)
-	kbHelper.SetupBackcolourAndBorder(txtPassword)
-
-
-
+	Dim enterPanelTextFields() As B4XFloatTextField = Array As B4XFloatTextField(txtEmailAddress, txtPassword)
+'#if B4i
+'	kbHelper.AddViewToKeyboard2(enterPanelTextFields)
+'#End If
+'	kbHelper.SetupBackcolourAndBorder2(enterPanelTextFields)
+'	kbHelper.RemovedTabOrder(enterPanelTextFields)
+	kbHelper.SetupTextAndKeyboard(enterPanelTextFields)
 End Sub
 
 ' Show the process box
@@ -323,45 +271,50 @@ Private Sub ProgressShow()
 	progressbox.Show()
 End Sub
 
-' Goes to check account status page
-' Warning can't call this CheckAccountStatus in has problems with a module of the same name.
-private Sub ShowCheckAccountStatus
-#if B4A
-	StartActivity(aCheckAccountStatus)
-#Else
-	xCheckAccountStatus.Show(True)				
-#End If
-End Sub
+'' Exit to check account status page
+'' Warning can't call this CheckAccountStatus in has problems with a module of the same name.
+'private Sub ExitToCheckAccountStatus
+'#if B4A
+'	StartActivity(aCheckAccountStatus)
+'#Else
+'	xCheckAccountStatus.Show(True)				
+'#End If
+'End Sub
 
-' Updates the customer info on the Web Server (using the apiCustomerId) 
+' Updates the customer info on the Web Server.
 Private Sub UpdateCustomerInfo(apiCustomerId As Int, customerInfoRec As clsEposWebCustomerRec) As ResumableSub
-	Dim updateOk As Boolean = False
-	Dim jsonToSend As String = customerInfoRec.GetJson
-	Dim job As HttpJob : job.Initialize("NewCustomer", Me)
-	job.PutString(Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0,0,False) , jsonToSend)
-	job.GetRequest.SetContentType("application/json;charset=UTF-8")
-	Wait For (job) JobDone(job As HttpJob)
-	If job.Success And job.Response.StatusCode = 200 Then
-		updateOk = True
-	End If
-	job.Release
+'	Dim updateOk As Boolean = False
+'	Dim jsonToSend As String = customerInfoRec.GetJson
+'	Dim job As HttpJob : job.Initialize("UpdateCustomer", Me)
+'	job.PutString(Starter.server.URL_CUSTOMER_API & "/" & NumberFormat2(apiCustomerId, 3, 0,0,False) , jsonToSend)
+'	job.GetRequest.SetContentType("application/json;charset=UTF-8")
+'	Wait For (job) JobDone(job As HttpJob)
+'	If job.Success And job.Response.StatusCode = 200 Then
+'		updateOk = True
+'	End If
+'	job.Release
+'	Return updateOk
+	Wait For (apiHelper.UpdateCustomerInfo(apiCustomerId, customerInfoRec)) complete (updateOk As Boolean)
+	Starter.customerInfoAvailable = True ' necessary to signal valid information available.
 	Return updateOk
 End Sub
 
-' Update and store the stored customer info.
-' TODO Move to starter service (duplicated with code in hCreateAccount).
+' Update and stored customer info.
 private Sub UpdateStoredCustomerInfo(apiCustomerId As Int, customerInfoRec As clsEposWebCustomerRec)
-	Starter.myData.customer.apiCustomerId = apiCustomerId
-	Starter.myData.customer.address = customerInfoRec.address
-	Starter.myData.customer.customerId = customerInfoRec.ID
-	Starter.myData.customer.customerIdStr = modEposWeb.ConvertToString(apiCustomerId)	
-	Starter.myData.customer.email = customerInfoRec.email
-	Starter.myData.customer.name = customerInfoRec.name
-	Starter.myData.customer.phoneNumber = customerInfoRec.telephone
-	Starter.myData.customer.postCode = customerInfoRec.postCode
-	Starter.myData.customer.rev = customerInfoRec.rev
-	Starter.myData.Save
+'	Starter.myData.customer.apiCustomerId = apiCustomerId
+'	Starter.myData.customer.address = customerInfoRec.address
+'	Starter.myData.customer.customerId = customerInfoRec.ID
+'	Starter.myData.customer.customerIdStr = modEposWeb.ConvertToString(apiCustomerId)	
+'	Starter.myData.customer.email = customerInfoRec.email
+'	Starter.myData.customer.name = customerInfoRec.name
+'	Starter.myData.customer.phoneNumber = customerInfoRec.telephone
+'	Starter.myData.customer.postCode = customerInfoRec.postCode
+'	Starter.myData.customer.rev = customerInfoRec.rev
+'	Starter.myData.Save
+'	Starter.customerInfoAvailable = True ' necessary to signal valid information available.
+	Starter.myData.customer.Update(apiCustomerId, customerInfoRec)
 	Starter.customerInfoAvailable = True ' necessary to signal valid information available.
+	Starter.myData.Save()
 End Sub
 
 ' Validate the device
@@ -389,14 +342,14 @@ Private Sub ValidateTheDevice
 					customerInfoRec.fcmToken = fcmToken
 					wait for (UpdateCustomerInfo(apiCustomerId, customerInfoRec)) complete (result As Boolean)
 					If result Then
-						UpdateStoredCustomerInfo(apiCustomerId , customerInfoRec)	' Updates the stored info with the new customerId with revision.
+						UpdateStoredCustomerInfo(apiCustomerId , customerInfoRec)	' Updates the stored info with the new customerId and revision.
 						ProgressHide
 						xui.MsgboxAsync("Open the activation email" & CRLF & _
 						"Sent to: " & customerInfoRec.email & CRLF & _ 
 						"Then click on the link To activate your account." & CRLF & _
 						"(IF NOT FOUND PLEASE CHECK IN YOUR JUNK FOLDER)" , "Activation Email sent")
 						wait for Msgbox_Result(tempResult As Int)
-						ShowCheckAccountStatus	' Exit to Check Account status.
+						ExitToCheckAccountStatus	' Exit to Check Account status.
 					Else ' Update customer info on Web failed.
 						errorMsg = "Problem with Web Server updating information, please try again."
 					End If
@@ -408,8 +361,7 @@ Private Sub ValidateTheDevice
 			End If
 		Else ' Problems with password format.
 			errorMsg = "The entered email address is not in a valid format."
-		End If
-		
+		End If		
 	Else ' One of the fields isn't filled in
 		errorMsg = "One of more of the fields has not been filled in."
 	End If

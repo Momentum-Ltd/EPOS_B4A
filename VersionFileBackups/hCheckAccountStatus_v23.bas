@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCheckAccountStatus
-	' Release...: 22
-	' Date......: 23/01/21
+	' Release...: 23
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -57,6 +57,12 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...: Mod: RestartThisActivity() calls to CheckAccountStatus changed to aCheckAccountStatus.
 	'			  Mod: tmrRetryActivatedAccount_Tick() - toast message shortened.
+	'
+	' Date......: 28/01/21
+	' Release...: 23
+	' Overview..: Maintenance release - QueryNewInstall updated.
+	' Amendee...: D Morris
+	' Details...: Mod: ExitToQueryNewInstall().
 	'
 	' Date......: 
 	' Release...: 
@@ -274,9 +280,9 @@ End Sub
 ' Exit to Query New Installation page.
 private Sub ExitToQueryNewInstall
 #if B4A
-	StartActivity(QueryNewInstall)
+	StartActivity(aQueryNewInstall)
 #else
-	frmQueryNewInstall.Show
+	xQueryNewInstall.Show
 #end if
 End Sub
 

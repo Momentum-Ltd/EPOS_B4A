@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: clsEposApiHelper
-	' Release...: 10
-	' Date......: 15/12/20
+	' Release...: 11
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 01/07/19
@@ -37,6 +37,15 @@ Version=9.01
 	' Details...: Mod: Old commented out code removed.
 	'			  Added: IsCustomerActivated(), CustomerMustActivate(), IsInternetAvailable() and CheckWebServerStatus().
 	'			  Added: GetCustomerEmail().
+	'
+	' Date......: 28/01/21
+	' Release...: 11
+	' Overview..: Maintenance release.
+	'			  Bugfix: A release is missing, 
+	' Amendee...: D Morris.
+	' Details...: Added: AddCustomer()
+	'			  Bugfix: UpdateCustomerInfo() - release added.
+	'			  Mod: GetCustomerInfo() redundant code removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -66,6 +75,26 @@ Public Sub Initialize
 End Sub
 
 #End Region  Public Subroutines
+' Add a new Customer
+' Returns >0 new apiCustomerId (customerId with revision number).
+Public Sub AddCustomer(customerObj As clsEposWebCustomerRec) As ResumableSub
+	Dim apiCustomerId As Int = 0
+	
+	Dim jsonToSend As String = customerObj.GetJson
+	Dim job As HttpJob : job.Initialize("NewCustomer", Me)
+	Dim msg As String = Starter.server.URL_CUSTOMER_API
+	job.PostString(msg, jsonToSend)
+	job.GetRequest.SetContentType("application/json;charset=UTF-8")
+	Wait For (job) JobDone(job As HttpJob)
+	If job.Success And job.Response.StatusCode = 200 Then
+		Dim rxCustomerIDStr As String = job.GetString
+		If rxCustomerIDStr <> "" Then
+			apiCustomerId = rxCustomerIDStr
+		End If
+	End If
+	job.Release
+	Return apiCustomerId
+End Sub
 
 ' Checks if valid email and password
 ' returns >0 email and password correct, =0 email ok but error in password, -1 both wrong.
@@ -247,11 +276,12 @@ public Sub GetCustomerInfo(apiCustomerId As Int) As ResumableSub
 	If job.Success And job.Response.StatusCode = 200 Then
 		customerInfoRec.Initialize
 		jsonCustomerInfoStrg = job.GetString		' Need to get string before releasing job.
-		job.Release ' Must always be called after the job is complete, to free its resources
+'		job.Release ' Must always be called after the job is complete, to free its resources
 		customerInfoRec.pJsonDeserialize(jsonCustomerInfoStrg)
-	Else
-		job.Release
+'	Else
+'		job.Release
 	End If
+	job.Release
 	Return customerInfoRec
 End Sub
 
@@ -372,6 +402,7 @@ Public Sub UpdateCustomerInfo(apiCustomerId As Int, customerInfoRec As clsEposWe
 	If job.Success And job.Response.StatusCode = 200 Then
 		updateOk = True
 	End If
+	job.Release
 	Return updateOk
 End Sub
 

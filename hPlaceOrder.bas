@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 31
-	' Date......: 27/01/21
+	' Release...: 32
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -75,6 +75,12 @@ Version=9.5
 	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'			  Bugfix: OnClose() removed ClearOrder() (introduced in v30).
 	'			  Removed: kk as IME removed no longer necessary.
+	' 			  
+	' Date......: 28/01/21
+	' Release...: 32
+	' Overview..: Bugfix: #0587 - Not return to Home screen after paying order in cash. 
+	' Amendee...: D Morris
+	' Details...:  Mod: HandleOrderAcknResponse() - code fixed.
 	' 			  
 	' Date......: 
 	' Release...: 
@@ -382,13 +388,14 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 		msg = "Your order is being processed, and is" & queueStr & " in the queue."
 		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
 		Wait For MsgBox_Result(Result As Int)
-		ExitToCentreHomePage
+	'	ExitToCentreHomePage
 	Else If responseObj.status = modConvert.statusWaitingForPayment Then ' Payment required before order is processed
 		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize (responseObj.orderId, responseObj.amount)
 '		orderPayment.amount = responseObj.amount
 '		orderPayment.orderId = responseObj.orderId
 		wait for (QueryPayment(orderPayment)) complete(Result1 As Boolean)
 	End If
+	ExitToCentreHomePage
 End Sub
 
 ' Handles the response from the Server to the Order message.

@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 13
-	' Date......: 27/01/21
+	' Release...: 14
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -52,6 +52,12 @@ Version=10
 	' Overview..: Mod: Progress indicated added to select centre operation.
 	' Amendee...: D Morris
 	' Details...: Mod: clvCentres_ItemClick().
+	'
+	' Date......: 28/01/21
+	' Release...: 14
+	' Overview..: Maintenance release - QueryNewInstall updated.
+	' Amendee...: D Morris
+	' Details...: Mod: NewAccount().
 	'
 	' Date......: 
 	' Release...: 
@@ -204,9 +210,9 @@ End Sub
 ' Show Create new account form
 public Sub NewAccount
 #if B4A
-	StartActivity(QueryNewInstall)
+	StartActivity(aQueryNewInstall)
 #else
-	frmQueryNewInstall.show
+	xQueryNewInstall.show
 #End If
 End Sub
 

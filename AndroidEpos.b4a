@@ -73,106 +73,106 @@ Library8=contentresolver
 Library9=mlwifi
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
 Module1=About
-Module10=clsCentreInfo
-Module100=ValidateCentreSelection2
-Module101=ValidateDevice
-Module11=clsCentreInfoAndImgRec
-Module12=clsConfigSettings
-Module13=clsConnect
-Module14=clsCustomerBill
-Module15=clsCustomerInfo
-Module16=clsCustomerOrderItemRec
-Module17=clsDataBaseTables
-Module18=clsDatehandler
-Module19=clsDescriptionTableRec
+Module10=aValidateDevice
+Module100=TestStartAt
+Module101=ValidateCentreSelection2
+Module11=ChangeAccountInfo
+Module12=ChangeSettings
+Module13=clsCentreInfo
+Module14=clsCentreInfoAndImgRec
+Module15=clsConfigSettings
+Module16=clsConnect
+Module17=clsCustomerBill
+Module18=clsCustomerInfo
+Module19=clsCustomerOrderItemRec
 Module2=aCardEntry
-Module20=clsDeviceInfo
-Module21=clsEposApiHelper
-Module22=clsEposApiResponseRec
-Module23=clsEposBalanceCheckRec
-Module24=clsEposCustomerBillByItem
-Module25=clsEposCustomerDetails
-Module26=clsEposCustomerInfo
-Module27=clsEposCustomerOrder
-Module28=clsEposCustomerOrderResponse
-Module29=clsEposCustomerPayment
+Module20=clsDataBaseTables
+Module21=clsDatehandler
+Module22=clsDescriptionTableRec
+Module23=clsDeviceInfo
+Module24=clsEposApiHelper
+Module25=clsEposApiResponseRec
+Module26=clsEposBalanceCheckRec
+Module27=clsEposCustomerBillByItem
+Module28=clsEposCustomerDetails
+Module29=clsEposCustomerInfo
 Module3=aCheckAccountStatus
-Module30=clsEposLocationRec
-Module31=clsEposMessageRec
-Module32=clsEposOrderInfo
-Module33=clsEposOrderStatus
-Module34=clsEposOrderStatusList
-Module35=clsEposPublicCardInfo
-Module36=clsEposWebCentreLocationRec
-Module37=clsEposWebCommsMessageRec
-Module38=clsEposWebCustomerRec
-Module39=clsEposWebLocationCoordinates
-Module4=aHome
-Module40=clsGoodsTableRec
-Module41=clsGroupCategoryTableRec
-Module42=clsKeyboardHelper
-Module43=clsLocation
-Module44=clsLocationCoordinates
-Module45=clsMainCategoryTableRec
-Module46=clsMyData
-Module47=clsNotifications
-Module48=clsOrderPaymentRec
-Module49=clsOrderStartResponse
-Module5=aPlaceOrder
-Module50=clsOrderStatusRec
-Module51=clsOrderSummary
-Module52=clsOrderSummaryRec
-Module53=clsOrderTableRec
-Module54=clsPayment
-Module55=clsPreparationTableRec
-Module56=clsProgress
-Module57=clsProgressDialog
-Module58=clsProgressIndicator
-Module59=clsReportErrors
-Module6=aSelectItem
-Module60=clsServer
-Module61=clsSizeOptionTableRec
-Module62=clsSizePriceTableRec
-Module63=clsStripe
-Module64=clsStripeCardRec
-Module65=clsStripeTokenRec
-Module66=clsSubCategoryTableRec
-Module67=clsSyncDatabase
-Module68=ConnectionHelper
-Module69=CreateAccount
-Module7=aSelectPlayCentre3
-Module70=FirebaseMessaging
-Module71=hAbout
-Module72=hCardEntry
-Module73=hChangeAccountInfo
-Module74=hChangeSettings2
-Module75=hCheckAccountStatus
-Module76=hCreateAccount
-Module77=hHome
-Module78=hPlaceOrder
-Module79=hQueryNewInstall
-Module8=ChangeAccountInfo
-Module80=hSelectItem
-Module81=hSelectPlayCentre3
-Module82=hValidateCentreSelection2
-Module83=hValidateDevice
-Module84=modConvert
-Module85=modEposApp
-Module86=modEposWeb
-Module87=NB6
-Module88=QueryNewInstall
-Module89=srvNotification
-Module9=ChangeSettings
-Module90=srvPhoneTotal
-Module91=Starter
-Module92=svcTestSequence
-Module93=TemplateActivity
-Module94=TemplateClass
-Module95=TemplateCode
-Module96=TemplateService
-Module97=TemplateXactivity
-Module98=TemplateXhelper
-Module99=TestStartAt
+Module30=clsEposCustomerOrder
+Module31=clsEposCustomerOrderResponse
+Module32=clsEposCustomerPayment
+Module33=clsEposLocationRec
+Module34=clsEposMessageRec
+Module35=clsEposOrderInfo
+Module36=clsEposOrderStatus
+Module37=clsEposOrderStatusList
+Module38=clsEposPublicCardInfo
+Module39=clsEposWebCentreLocationRec
+Module4=aCreateAccount
+Module40=clsEposWebCommsMessageRec
+Module41=clsEposWebCustomerRec
+Module42=clsEposWebLocationCoordinates
+Module43=clsGoodsTableRec
+Module44=clsGroupCategoryTableRec
+Module45=clsKeyboardHelper
+Module46=clsLocation
+Module47=clsLocationCoordinates
+Module48=clsMainCategoryTableRec
+Module49=clsMyData
+Module5=aHome
+Module50=clsNotifications
+Module51=clsOrderPaymentRec
+Module52=clsOrderStartResponse
+Module53=clsOrderStatusRec
+Module54=clsOrderSummary
+Module55=clsOrderSummaryRec
+Module56=clsOrderTableRec
+Module57=clsPayment
+Module58=clsPreparationTableRec
+Module59=clsProgress
+Module6=aPlaceOrder
+Module60=clsProgressDialog
+Module61=clsProgressIndicator
+Module62=clsReportErrors
+Module63=clsServer
+Module64=clsSizeOptionTableRec
+Module65=clsSizePriceTableRec
+Module66=clsStripe
+Module67=clsStripeCardRec
+Module68=clsStripeTokenRec
+Module69=clsSubCategoryTableRec
+Module7=aQueryNewInstall
+Module70=clsSyncDatabase
+Module71=ConnectionHelper
+Module72=FirebaseMessaging
+Module73=hAbout
+Module74=hCardEntry
+Module75=hChangeAccountInfo
+Module76=hChangeSettings2
+Module77=hCheckAccountStatus
+Module78=hCreateAccount
+Module79=hHome
+Module8=aSelectItem
+Module80=hPlaceOrder
+Module81=hQueryNewInstall
+Module82=hSelectItem
+Module83=hSelectPlayCentre3
+Module84=hValidateCentreSelection2
+Module85=hValidateDevice
+Module86=modConvert
+Module87=modEposApp
+Module88=modEposWeb
+Module89=NB6
+Module9=aSelectPlayCentre3
+Module90=srvNotification
+Module91=srvPhoneTotal
+Module92=Starter
+Module93=svcTestSequence
+Module94=TemplateActivity
+Module95=TemplateClass
+Module96=TemplateCode
+Module97=TemplateService
+Module98=TemplateXactivity
+Module99=TemplateXhelper
 NumberOfFiles=23
 NumberOfLibraries=24
 NumberOfModules=101
@@ -185,8 +185,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 194                                                                                                                                                                  
-	' Date......: 27/01/21
+	' Release...: 195                                                                                                                                                                 
+	' Date......: 28/01/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -263,14 +263,24 @@ Version=10.5
 	' Release...: 194
 	' Overview..: Bugfix: #0586 Order only contains last entered item.
 	'			  Maintenance: New keyboard helper class To reduce code and improve keyboard handling.
-	'             Mod: Select Centre now show the Progress indication whilst select centre. 
-	'			  
+	'             Mod: Select Centre now show the Progress indication whilst selecting centre. 			  
 	' Amendee...: D Morris
 	' Details...: New: clsKeyboardHelper_v1.
 	'			  Mod: hValidateDevice_v22, hCardEntry_v21, hChangeAccountInfo_v19, hCreateAccount_v21,
 	'						hPlaceOrder_v31, hSelectPlayCentre3_v13, clsLocation_v5, clsPayment_v2, hChangeSettings2_v4
 	'			  FORMS: frmChangeAccountInfo_v6, frmChangeSettings2_v3, frmValidateDevice_v8, frmCreateAccount_v8, frmCardEntry_v10,
 	'						frmPlaceOrder_v6.
+	'
+	' Date......: 28/01/21
+	' Release...: 195
+	' Overview..: Bugfix: #0587 - Not returning to the Home screen after paying cash for an order. 
+	'				Maintenance release - Support for renamed QueryNewInstall, CreateAccount and ValidateDevice.
+	' Amendee...: D Morris
+	' Details...: New: aQueryNewInstall_v1, aCreateAccount_v1, aValidateDevice_v1.
+	'			  Mod: hCheckAccountStatus_v23, hSelectPlayCentre3_v14, hCreateAccount_v22, hValidateDevice_v23, clsEposApiHelper_v11.
+	'						clsCustomerInfo_v10, clsKeyboardHelper_v2, hPlaceOrder_v32.
+	'		      Rmoved: QueryNewInstall_v8, CreateAccount_v7, ValidateDevice_V5.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -284,8 +294,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 194
-	#VersionName: 1.0.0.194
+	#VersionCode: 195
+	#VersionName: 1.0.0.195
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

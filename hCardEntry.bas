@@ -91,7 +91,7 @@ Sub Class_Globals
 	Private xui As XUI							'ignore (to remove warning).
 	
 	' Misc objects
-	Private processedDate As clsDatehandler		' Handles processing date.
+	Private processedDate As clsDateHandler		' Handles processing date.
 	Private progressbox As clsProgressDialog	' Progress box.
 	Private cardInfo As clsStripeTokenRec		' Strip relating objects.
 '#if B4A

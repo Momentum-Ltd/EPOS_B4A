@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCreateAccount
-	' Release...: 21
-	' Date......: 27/01/21
+	' Release...: 22
+	' Date......: 28/01/21
 	'
 	' History
 	' Date......: 02/05/20
@@ -48,6 +48,19 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'
+	' Date......: 28/01/21
+	' Release...: 22
+	' Overview..: Maintenance release - QueryNewInstall, CreateAccount and ValidateDevice updated.
+	' Amendee...: D Morris
+	' Details...: Mod: lblBackbutton_Click().
+	'			  Mod: InitializeLocals() calls to mBase.SetColorAndBorder removed - redundant.
+	'             Mod: clsEposApiHelper is now global - InitializeLocal() and EmailAlreadyExist() uses this object.
+	'			  Mod: EmailAlreadyExist() now uses global clsEposApiHelper.
+	'			  Mod: Old commented code removed.
+	'			  Mod: SubmitNewCustomer() now uses global clsEposApiHelper.
+	'			  Mod: UpdateStoredCustomerInfo() now calls clsCustomerInfo.Update().
+	'			  Mod: InitializeLocals() now calls clsKeyboardHelper.SetupTextAndKeyboard().
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -61,19 +74,14 @@ Version=9.3
 
 
 Sub Class_Globals
-	' X-platform related.
-	Private xui As XUI								'ignore (to remove warning)
-	
-	' Misc objects	
-	Private progressbox As clsProgressIndicator		' Progress box
-
+	Private xui As XUI								'ignore (to remove warning) X-platform related.
 	
 	' View declarations
 	Private btnSubmit As SwiftButton				' Button to submit customer details.
 	Private btnWebClose As SwiftButton				' close web view button.
 	Private indLoading As B4XLoadingIndicator		' In progress indicator
 	Private lblBackbutton As B4XView				' Back button 
-	Private lblPrivacyPolicy As B4XView				'ignore Link to Privacy Policy
+	Private lblPrivacyPolicy As B4XView				'ignore - Link to Privacy Policy
 	Private pnlEnterDetails As Panel				' Panel for entering details.	
 	Private pnlHeader As Panel						' Header panel
 	Private pnlWeb As B4XView						' Web view panel
@@ -83,15 +91,10 @@ Sub Class_Globals
 	Private txtVerifyPassword As B4XFloatTextField	' Verify customer's password
 	Private web As WebView							' Web view
 
-	' Used to handle keyboard operation.
-#if B4I 
-'	Dim gWidth As Int								' Saved screen width.
-'	Dim gPnl_Hide As Panel							' Panel added above keyboard the hide keyboard button.
-'	Dim gIm_Hide As ImageView						' Hide keyboard button.
-'	
-'	Private pnlEnterDetailsOrgTop As Int 			' Original top of the Text entry panel (used for moving it above keyboard).
-#End If
+	' Misc objects
+	Private apiHelper As clsEposApiHelper			' API helper.
 	Private kbHelper As clsKeyboardHelper			' Keyboard handler
+	Private progressbox As clsProgressIndicator		' Progress Indicator	
 End Sub
 
 ' This is the Main entry point.
@@ -122,12 +125,6 @@ Sub btnWebClose_Click
 	pnlWeb.Visible = False
 End Sub
 
-'#if B4i
-'' User clicks on hide keyboard
-'Sub Im_Hide_Click
-'	HideKeyboard
-'End Sub
-'#End If
 #if B4i
 Private Sub kbHelper_HideKeyboard
 	HideKeyboard
@@ -137,9 +134,9 @@ End Sub
 ' Handle Back button in title bar
 private Sub lblBackbutton_Click
 #if B4A
-	StartActivity(QueryNewInstall)
+	StartActivity(aQueryNewInstall)
 #else
-	frmQueryNewInstall.show
+	xQueryNewInstall.show
 #End If
 End Sub
 
@@ -166,28 +163,9 @@ End Sub
 #Region  Public Subroutines
 
 #if B4i
-'TODO This is duplicated code!
 ' This method moves a text entry field so it does not get covered by the keyboard.
 ' B4XFloatTextField is taken from here: https://www.b4x.com/android/forum/threads/b4xfloattextfield-keyboard-hiding-views.118242/#post-740784
 Public Sub MoveUpEnterDetailsPanel(height As Float)
-'	If height = 0 Then ' Keyboard has been hidden
-'		pnlEnterDetails.top = pnlEnterDetailsOrgTop
-'	Else ' Keyboard has been shown
-'		pnlEnterDetails.top = pnlEnterDetailsOrgTop
-'		Sleep(0)
-'		For Each v As B4XView In pnlEnterDetails.GetAllViewsRecursive
-'			If v.Tag Is B4XFloatTextField Then
-'				Dim f As B4XFloatTextField = v.Tag
-'				If f.Focused Then
-'					Dim base As Panel = f.mBase
-'					Dim d As Double = base.CalcRelativeKeyboardHeight(height)
-'					If d < base.Height Then
-'						pnlEnterDetails.Top = pnlEnterDetailsOrgTop -(base.Height - d)
-'					End If
-'				End If
-'			End If
-'		Next
-'	End If
 	kbHelper.MoveUpEnterDetailsPanel(height)
 End Sub
 #End If
@@ -208,26 +186,13 @@ End Sub
 #if B4i
 ' Handle resize event
 Public Sub Resize
-'	gWidth = GetPanelWidth
-'	gPnl_Hide.RemoveAllViews
-'	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)
 	kbHelper.Resize
 End Sub
 #End If
 
-
 #End Region  Public Subroutines
 
 #Region  Local Subroutines
-
-'#If B4I
-''TODO Duplicated code.
-'' Add hide keyboard button.
-'Private Sub AddViewToKeyboard (xx As Object, view As Object)
-'	Dim no As NativeObject = xx
-'	no.SetField("inputAccessoryView", view)
-'End Sub
-'#End If
 
 ' Enable/disable user interaction
 '  Status = true all controls on screen enabled.
@@ -307,8 +272,6 @@ End Sub
 ' Check if email already exists
 private Sub EmailAlreadyExist(email As String) As ResumableSub
 	Dim emailExists As Boolean = False
-	Dim apiHelper As clsEposApiHelper
-	apiHelper.Initialize
 	Wait for (apiHelper.GetCustomerId(email)) complete (customerId As Int)
 	If customerId > 0 Then
 		emailExists = True
@@ -333,7 +296,7 @@ End Sub
 #if B4i
 ' Hide the keyboard.
 Private Sub HideKeyboard
-	frmCreateAccount.HideKeyboard
+	xCreateAccount.HideKeyboard
 End Sub
 #End If
 
@@ -341,46 +304,16 @@ End Sub
 private Sub InitializeLocals
 	ControlUserInteraction(True)
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
-	txtName.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
-	txtEmailAddress.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
-	txtPassword.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
-	txtVerifyPassword.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 5dip)
 	
-	
-	
-#if B4I
-	' B4I code for close keyboard button.
-'	pnlEnterDetailsOrgTop = pnlEnterDetails.Top ' Save the original enter panel top postion.
-'	gIm_Hide.Initialize("Im_Hide")
-'	gIm_Hide.Bitmap = LoadBitmap(File.DirAssets, "hide_keyboard.png")
-'	gIm_Hide.Color = xui.Color_Gray
-'	gIm_Hide.Height = 50
-'	gIm_Hide.Width = 40
-'	gWidth = GetPanelWidth
-'	gPnl_Hide.Initialize ("")
-'	gPnl_Hide.Color = Colors.Transparent
-'	gPnl_Hide.AddView ( gIm_Hide, gWidth-55,0,50,40)	
-'	gPnl_Hide.Height = 40
-'	
-'	AddViewToKeyboard(txtName.TextField, gPnl_Hide)
-'	AddViewToKeyboard(txtEmailAddress.TextField, gPnl_Hide)
-'	AddViewToKeyboard(txtPassword.TextField, gPnl_Hide)
-'	AddViewToKeyboard(txtVerifyPassword.TextField, gPnl_Hide)
-#End If
-
+	apiHelper.Initialize
 	kbHelper.Initialize(Me, "kbHelper", pnlEnterDetails)
-	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(txtName, txtEmailAddress, txtPassword, txtVerifyPassword)
-	' All text so no need to attach hide keyboard button
-'	kbHelper.SetupBackcolourAndBorder(txtName)
-'	kbHelper.SetupBackcolourAndBorder(txtEmailAddress)
-'	kbHelper.SetupBackcolourAndBorder(txtPassword)
-'	kbHelper.SetupBackcolourAndBorder(txtVerifyPassword)
-
-#if B4i
-	kbHelper.AddViewToKeyboard2(enterPanelTextField)
-#End If
-	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
-	kbHelper.RemovedTabOrder(enterPanelTextField)
+	Dim enterPanelTextFields() As B4XFloatTextField = Array As B4XFloatTextField(txtName, txtEmailAddress, txtPassword, txtVerifyPassword)
+'#if B4i
+'	kbHelper.AddViewToKeyboard2(enterPanelTextFields)
+'#End If
+'	kbHelper.SetupBackcolourAndBorder2(enterPanelTextFields)
+'	kbHelper.RemovedTabOrder(enterPanelTextFields)
+	kbHelper.SetupTextAndKeyboard(enterPanelTextFields)
 	Private cs As CSBuilder
 	cs.Initialize.Underline.Color(Colors.White).Append("View Privacy Policy").PopAll
 '	lblPrivacyPolicy.Text = cs
@@ -408,21 +341,25 @@ Private Sub SubmitNewCustomer As ResumableSub
 	customerObj.fcmToken = fcmToken
 	customerObj.hash = txtPassword.text.trim
 	customerObj.name = txtName.Text.Trim
-	Dim jsonToSend As String = customerObj.GetJson
+'	Dim jsonToSend As String = customerObj.GetJson
 	If customerObj.fcmToken <> "" Then
-		Log("Sending the customer details to the Web API:" & CRLF & jsonToSend)
-		Dim job As HttpJob : job.Initialize("NewCustomer", Me)
-		Dim msg As String = Starter.server.URL_CUSTOMER_API
-		job.PostString(msg, jsonToSend)
-		job.GetRequest.SetContentType("application/json;charset=UTF-8")	
-		Wait For (job) JobDone(job As HttpJob)
-		If job.Success And job.Response.StatusCode = 200 Then
-			Dim rxCustomerIDStr As String = job.GetString
-			Dim apiCustomerId As Int = 0
-			If rxCustomerIDStr <> "" Then
-				apiCustomerId = rxCustomerIDStr
-			End If 
-			Log("Success received from the Web API – new customer ID: " & rxCustomerIDStr)
+'		Log("Sending the customer details to the Web API:" & CRLF & jsonToSend)
+'		Dim job As HttpJob : job.Initialize("NewCustomer", Me)
+'		Dim msg As String = Starter.server.URL_CUSTOMER_API
+'		job.PostString(msg, jsonToSend)
+'		job.GetRequest.SetContentType("application/json;charset=UTF-8")	
+'		Wait For (job) JobDone(job As HttpJob)
+'		If job.Success And job.Response.StatusCode = 200 Then
+'			Dim rxCustomerIDStr As String = job.GetString
+'			Dim apiCustomerId As Int = 0
+'			If rxCustomerIDStr <> "" Then
+'				apiCustomerId = rxCustomerIDStr
+'			End If 
+
+		Wait for (apiHelper.AddCustomer(customerObj)) complete (apiCustomerId As Int)
+		If apiCustomerId > 0 Then
+	'		Log("Success received from the Web API – new customer ID: " & rxCustomerIDStr)
+			Log("Success received from the Web API – new customer ID: " & apiCustomerId)
 			' Save the entered details (currently bodged, as the fields don't correlate properly)
 			customerObj.rev = modEposWeb.ConvertApiIdtoRev(apiCustomerId) ' Now we have the apiCustomerId - so get the revision.
 			customerObj.ID = modEposWeb.ConvertApiIdToCustomerId(apiCustomerId) ' and customerId.
@@ -435,7 +372,7 @@ Private Sub SubmitNewCustomer As ResumableSub
 		wait for msgbox_result(tempResult As Int)
 	End If
 	ProgressHide 
-	job.Release ' Must always be called after the job is complete, to free its resources
+'	job.Release ' Must always be called after the job is complete, to free its resources
 	Return successful
 End Sub
 
@@ -451,19 +388,19 @@ Private Sub ProgressShow()
 	progressbox.Show
 End Sub
 
-' Update and store the stored customer info.
-' TODO Move to starter service (duplicated with code in hValidateDevice).
+' Update and store the customer info.
 private Sub UpdateStoredCustomerInfo(apiCustomerId As Int, customerInfoRec As clsEposWebCustomerRec)
-	Starter.myData.customer.apiCustomerId = apiCustomerId
-	Starter.myData.customer.address = customerInfoRec.address
-	Starter.myData.customer.customerId = customerInfoRec.ID
-	Starter.myData.customer.customerIdStr = NumberFormat2(apiCustomerId, 3, 0, 0, False)
-	Starter.myData.customer.email = customerInfoRec.email
-	Starter.myData.customer.name = customerInfoRec.name
-	Starter.myData.customer.phoneNumber = customerInfoRec.telephone
-	Starter.myData.customer.postCode = customerInfoRec.postCode
-	Starter.myData.customer.rev = customerInfoRec.rev
-	Starter.myData.Save
+'	Starter.myData.customer.apiCustomerId = apiCustomerId
+'	Starter.myData.customer.address = customerInfoRec.address
+'	Starter.myData.customer.customerId = customerInfoRec.ID
+'	Starter.myData.customer.customerIdStr = NumberFormat2(apiCustomerId, 3, 0, 0, False)
+'	Starter.myData.customer.email = customerInfoRec.email
+'	Starter.myData.customer.name = customerInfoRec.name
+'	Starter.myData.customer.phoneNumber = customerInfoRec.telephone
+'	Starter.myData.customer.postCode = customerInfoRec.postCode
+'	Starter.myData.customer.rev = customerInfoRec.rev
+'	Starter.myData.Save
+	Starter.myData.customer.Update(apiCustomerId, customerInfoRec)
 	Starter.customerInfoAvailable = True ' necessary to signal valid information available.
 End Sub
 
