@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hAbout
-	' Release...: 9
-	' Date......: 03/01/21
+	' Release...: 10
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -42,6 +42,13 @@ Version=9.3
 	' Overview..: Bugfix: (Android) Hyperlinks no underlined, (iOS) Hyperlinks now correctly displayed.
 	' Amendee...: D Morris.
 	' Details...:  Mod: InitializeLocals() code fixed.
+	'
+	' Date......: 30/01/21
+	' Release...: 10
+	' Overview..: Support for renamed Modules.
+	' Amendee...: D Morris
+	' Details...:  Mod: ExitBackToSelectCentre().
+	'			   Mod: IsVisible().
 	'
 	' Date......: 
 	' Release...: 
@@ -116,7 +123,7 @@ private Sub ExitBackToSelectCentre
 #if B4A
 	StartActivity(aSelectPlayCentre3)
 #else
-	frmXSelectPlayCentre3.Show
+	xSelectPlayCentre3.Show
 #End If
 End Sub
 
@@ -145,9 +152,9 @@ End Sub
 ' Is this form shown
 private Sub IsVisible As Boolean
 #if B4A
-	Return (CallSub(About, "IsVisible"))
+	Return (CallSub(aAbout, "IsVisible"))
 #else ' B4i
-	Return frmAbout.IsVisible
+	Return xAbout.IsVisible
 #End If
 End Sub
 

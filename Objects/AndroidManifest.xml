@@ -2,8 +2,8 @@
 <manifest
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="arena.Epos"
-	android:versionCode="195"
-	android:versionName="1.0.0.195"
+	android:versionCode="196"
+	android:versionName="1.0.0.196"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>
@@ -157,7 +157,7 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
-			android:name=".about"
+			android:name=".aabout"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -165,6 +165,20 @@
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
 			android:name=".acardentry"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".achangeaccountinfo"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
+			android:name=".achangesettings"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -220,21 +234,14 @@
 		<activity
 			android:windowSoftInputMode="stateHidden"
 			android:launchMode="singleTop"
+			android:name=".avalidatecentreselection2"
+			android:label="SuperOrder"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
+			android:windowSoftInputMode="stateHidden"
+			android:launchMode="singleTop"
 			android:name=".avalidatedevice"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".changeaccountinfo"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".changesettings"
 			android:label="SuperOrder"
 			android:screenOrientation="portrait">
 		</activity>
@@ -280,13 +287,6 @@
 		</service>
 		<receiver android:name=".teststartat$teststartat_BR">
 		</receiver>
-		<activity
-			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
-			android:name=".validatecentreselection2"
-			android:label="SuperOrder"
-			android:screenOrientation="portrait">
-		</activity>
 		<service android:name=".httputils2service">
 		</service>
 		<receiver android:name=".httputils2service$httputils2service_BR">

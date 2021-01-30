@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 14
-	' Date......: 28/01/21
+	' Release...: 15
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -59,6 +59,18 @@ Version=10
 	' Amendee...: D Morris
 	' Details...: Mod: NewAccount().
 	'
+	' Date......: 30/01/21
+	' Release...: 15
+	' Overview..: Support for renamed modules.
+	' Amendee...: D Morris
+	' Details...: Mod: Initialize(), imgAccount_Click(), IsVisible().
+	'			  Mod: Prefixed 'p' and 'l' removed.
+	'			  Mod: ShowAbout().
+	'			  Mod: ShowValidateCentreSelectionPage().
+	'			  Mod: ShowChangeAccountInfoPage().
+	'			  Mod: ShowChangeSettingsPage().
+	' 			  Mod: DisplayAllCentres() and DisplayNearbyCentres() now uses clsEposApiHelper.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -73,36 +85,33 @@ Version=10
 Sub Class_Globals
 	
 	' Constants
-	Private CENTRE_OPEN	As String = "Open"			' Text to indicate centre is open.
-	Private CENTRE_CLOSED As String = "Closed"		' Text to Indicate centre is closed.
-
-	Private DFT_DELAYNEWLOCATION As Int	= 20000		' Default for initialise the tmrDelayNewLocation timer(msecs).
+	Private const CENTRE_OPEN	As String = "Open"		' Text to indicate centre is open.
+	Private const CENTRE_CLOSED As String = "Closed"	' Text to Indicate centre is closed.
+	Private Const DFT_DELAYNEWLOCATION As Int = 20000	' Default for initialise the tmrDelayNewLocation timer(msecs).
 	
-	' X-platform related.
-	Private xui As XUI								'ignore (to remove warning) -  Required for X platform operation.
+	Private xui As XUI									'ignore (to remove warning) -  Required for X platform operation.
 	
 	' Local variables	
-	Private displayUpdateInProgress As Boolean		' Indicates updating the displayed Centre list is in-progress. 
-	Private forceDisplayUpdate As Boolean			' When set location change will for display to update Centre List.
+	Private displayUpdateInProgress As Boolean			' Indicates updating the displayed Centre list is in-progress. 
+	Private forceDisplayUpdate As Boolean				' When set location change will for display to update Centre List.
 
 	' misc objects
-	Private locationDevice As clsLocation	
-	Private progressbox As clsProgress				' Progress box
-	Private tmrDelayNewLocation As Timer			' Timer to limit how quickly the new location is used to search for centres.	
+	Private apiHelper As clsEposApiHelper				' API helper.
+	Private locationDevice As clsLocation				' Device location.
+	Private progressbox As clsProgress					' Progress indicator/box
+	Private tmrDelayNewLocation As Timer				' Timer to limit how quickly the new location is used to search for centres.	
 	
 	' View declarations
-	Private clvCentres As CustomListView		' Custom listview used to show the list of centres available as options.
-	
-	Private imgAccount As B4XView 				' Account info button 
-	Private imgLogo As B4XView					' Centre logo	
-	Private imgRefresh As B4XView				' Refresh displayed centre list button (See pnlRefreshTouch).
-	Private indLoading As B4XLoadingIndicator	' In progress indicator
-
-	Private lblStatus As B4XView				' Centre status (open, closed etc)
-	Private lblName As B4XView					' Centre name
-	Private lblDistance As B4XView				' Distance
-	Private pnlLoadingTouch As B4XView			' Clickable loading circles to show progress dialog.
-	Private pnlRefreshTouch As B4XView			' Clickable refresh show progress dialog.
+	Private clvCentres As CustomListView				' Custom listview used to show the list of centres available as options.
+	Private imgAccount As B4XView 						' Account info button 
+	Private imgLogo As B4XView							' Centre logo	
+	Private imgRefresh As B4XView						' Refresh displayed centre list button (See pnlRefreshTouch).
+	Private indLoading As B4XLoadingIndicator			' In progress indicator
+	Private lblStatus As B4XView						' Centre status (open, closed etc)
+	Private lblName As B4XView							' Centre name
+	Private lblDistance As B4XView						' Distance
+	Private pnlLoadingTouch As B4XView					' Clickable loading circles to show progress dialog.
+	Private pnlRefreshTouch As B4XView					' Clickable refresh show progress dialog.
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -111,7 +120,7 @@ Public Sub Initialize (parent As B4XView)
 	parent.LoadLayout("frmaSelectPlayCentre3")
 #Else ' B4i
 	parent.LoadLayout("frmXSelectPlayCentre3")
-	Starter.lastPageShown = "frmXSelectPlayCentre3"	
+	Starter.lastPageShown = "xSelectPlayCentre3"	
 #End If
 	InitializeLocals
 End Sub
@@ -138,7 +147,7 @@ Private Sub imgAccount_Click
 #if B4A
 	CallSubDelayed(aSelectPlayCentre3, "ShowMenu")
 #else
-	frmXSelectPlayCentre3.ShowActionMenu
+	xSelectPlayCentre3.ShowActionMenu
 #End If
 End Sub
 
@@ -153,7 +162,7 @@ private Sub locationDevice_LocationReady(location1 As Location)
 End Sub
 
 ' Click on progress circles to show progress dialog box
-Sub pnlLoadingTouch_Click
+Private Sub pnlLoadingTouch_Click
 	progressbox.ShowDialog
 End Sub
 
@@ -198,12 +207,12 @@ public Sub ClearAccount
 End Sub
 
 ' Change customer information
-public Sub IChangeAccountInfo
+public Sub ChangeAccountInfo
 	ShowChangeAccountInfoPage
 End Sub
 
 ' Change operation settings
-public Sub lChangeSettings
+public Sub ChangeSettings
 	ShowChangeSettingsPage
 End Sub
 
@@ -237,19 +246,12 @@ Public Sub SelectCentre(permissionResult As Boolean)
 	If Not(displayUpdateInProgress) Then ' OK to update display?
 		displayUpdateInProgress = True
 		progressbox.Show("Finding centres close to you, please wait...")
+		If locationDevice.IsLocationAvailable Then
+			wait for (DisplayNearbyCentres(locationDevice.GetLocation)) complete(rxMsg As String)
+		Else ' Location permission has been denied
 #if B4A
-		If locationDevice.IsLocationAvailable Then
-			' DisplayNearbyCentres(currentLocation)
-			wait for (DisplayNearbyCentres(locationDevice.GetLocation)) complete(rxMsg As String)
-		Else ' Location permission has been denied
 			xui.MsgboxAsync("The fine location permission has been denied. All centres will now be displayed.", "Cannot Get Location")
-			' DisplayAllCentres
-			Wait For (DisplayAllCentres) complete(rxMsg As String)	
-		End If	
 #else ' B4i
-		If locationDevice.IsLocationAvailable Then
-			wait for (DisplayNearbyCentres(locationDevice.GetLocation)) complete(rxMsg As String)
-		Else ' Location permission has been denied
 			Dim msg As String = "This App will not run correctly without location permissions." & CRLF & _
 				"You can goto settings and allow location for SuperOrder or."  & CRLF & _
 				"remove and re-install the SuperOrder, then Allow location when asked."
@@ -258,13 +260,13 @@ Public Sub SelectCentre(permissionResult As Boolean)
 			If Result = xui.DialogResponse_Positive Then
 				Main.DisplaySettings
 			End If
+#End If ' End B4i			
 			Wait For (DisplayAllCentres) complete(rxMsg As String)
-		End If
-#End If ' End B4i	
+		End If	
 		If rxMsg <> "" Then
 			wait for (DisplayOnListview(rxMsg)) complete(ok As Boolean)
 		End If
-		RestartDisplayNewLocationTimer 	' Do this after the information is display (to avoid calling before previous task is complete)
+		RestartDisplayNewLocationTimer 	' Do this after the information is displayed (to avoid calling before previous task is complete)
 		progressbox.Hide
 		displayUpdateInProgress = False ' Release the display for update.
 	End If
@@ -273,9 +275,9 @@ End Sub
 ' Show about form
 public Sub ShowAbout
 #if B4A
-	StartActivity(About)
+	StartActivity(aAbout)
 #Else
-	frmAbout.show
+	xAbout.show
 #End If
 End Sub
 
@@ -378,69 +380,17 @@ Private Sub DisplayOnListview(inputJson As String) As ResumableSub
 	Return displayListOk
 End Sub
 
-'' Downloads the list of all centres from the Web API and displays them on the listview.
 ' Downloads a list of all centres.
 '   returns rxMsg if download ok else null if error.
 Private Sub DisplayAllCentres() As ResumableSub
-	Dim rxMsg As String = ""	
-'	ProgressShow("Getting a list of all centres, please wait...")
-	Log("Request the Web API to give list of all centres...")
-	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-	Dim urlStr As String = 	Starter.server.URL_CENTRE_API & _
-	"?" & modEposWeb.API_LATITUDE & "=" & modEposWeb.API_GET_ALL & _
-									"&" & modEposWeb.API_LONGITUDE & "=" & modEposWeb.API_GET_ALL					
-	job.Download(urlStr)
-	Wait For (job) JobDone(job As HttpJob)
-	If job.Success And job.Response.StatusCode = 200 Then
-		rxMsg = job.GetString
-		Log("Success received from the Web API – response: " & rxMsg)
-	Else ' An error of some sort occurred
-		If job.Response.StatusCode = 204 Or job.Response.StatusCode = 404 Then
-			Log("The Web API returned no centres available")
-			xui.MsgboxAsync("There are no centres on the system.", _ 
-								"No Nearby Centres" & "Error:" & job.Response.StatusCode)
-		Else ' Any other error
-			Log("An error occurred with the HTTP job: " & job.ErrorMessage)
-			xui.MsgboxAsync("An error occurred while trying to get All centres.", _
-								"Cannot Get All Centres" & "Error:" & job.Response.StatusCode)
-		End If
-	End If
-	job.Release ' Must always be called after the job is complete, to free its resources
+	wait for (apiHelper.DisplayAllCentres) complete(rxMsg As String)
 	Return rxMsg
 End Sub
 
 ' Downloads a list of nearby centres.
 '  returns rxMsg if download ok else null if error.
 Private Sub DisplayNearbyCentres(pCurrentLocation As Location) As ResumableSub
-	Dim rxMsg As String = ""
-	Log("Sending the coordinates to the Web API...")
-	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-	Dim urlStr As String = Starter.server.URL_CENTRE_API & _
-	"?" & modEposWeb.API_LATITUDE & "=" & pCurrentLocation.Latitude & _
-							"&" & modEposWeb.API_LONGITUDE & "=" & pCurrentLocation.Longitude & _
-							"&" & modEposWeb.API_MAX_LIMIT & "=" & Starter.settings.maxCentres & _
-							"&" & modEposWeb.API_SEARCH_RADIUS & "=" & Starter.settings.searchRadius 	
-	If Starter.settings.showTestCentres = True Then ' Include Test Centres?
-		urlStr = urlStr & "&" & modEposWeb.API_SHOW_TEST_CENTRES & "=1"
-	End If
-	job.Download(urlStr)
-	Wait For (job) JobDone(job As HttpJob)
-	If job.Success And job.Response.StatusCode = 200 Then
-		rxMsg = job.GetString
-		Log("Success received from the Web API – response: " & rxMsg)
-	Else ' An error of some sort occurred
-		If job.Response.StatusCode = 204 Or job.Response.StatusCode = 404 Then
-			Log("The Web API returned no nearby centres")
-			xui.MsgboxAsync("There are no centres near your current location. All centres will now be displayed.", _
-								"No Nearby Centres" & "Error:" & job.Response.StatusCode)
-			wait for MsgBox_result(tempResult As Int) '' inserted
-		Else ' Any other error
-			Log("An error occurred with the HTTP job: " & job.ErrorMessage)
-			xui.MsgboxAsync("An error occurred while trying to find nearby centres. All centres will now be displayed.", _
-								 "Cannot Get Nearby Centres" & "Error:" & job.Response.StatusCode)
-		End If
-	End If
-	job.Release ' Must always be called after the job is complete, to free its resources
+	wait for( apiHelper.DisplayNearbyCentres(pCurrentLocation)) complete (rxMsg As String)
 	Return rxMsg
 End Sub
 
@@ -448,6 +398,7 @@ End Sub
 private Sub InitializeLocals
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 	progressbox.Show("Getting your location.")
+	apiHelper.Initialize()
 	tmrDelayNewLocation.Initialize("tmrDelayNewLocation", DFT_DELAYNEWLOCATION)
 	displayUpdateInProgress = False
 	locationDevice.Initialize(Me, "locationDevice")
@@ -458,7 +409,7 @@ private Sub IsVisible As Boolean
 #if B4A
 	Return (CallSub(aSelectPlayCentre3, "IsVisible"))
 #else ' B4i
-	Return frmXSelectPlayCentre3.IsVisible
+	Return xSelectPlayCentre3.IsVisible
 #End If
 End Sub
 
@@ -475,25 +426,12 @@ private Sub RefreshCentreList
 	SelectCentre(True)
 End Sub
 
-#if B4A 
-'' See https://www.b4x.com/android/forum/threads/cards-list-with-customlistview.87720/#content
-'Private Sub SetColorStateList(Btn As Label,Pressed As Int,Enabled As Int)
-'	Dim States(2,1) As Int
-'	States(0,0) = 16842919    'Pressed
-'	States(1,0) = 16842910    'Enabled
-'	Dim CSL As JavaObject
-'	CSL.InitializeNewInstance("android.content.res.ColorStateList",Array(States,Array As Int(Pressed, Enabled)))
-'	Dim B1 As JavaObject = Btn
-'	B1.RunMethod("setTextColor",Array As Object(CSL))
-'End Sub
-#End If
-
 ' Show ChangeAccountInfo page.
 private Sub ShowChangeAccountInfoPage
 #if B4A
 	StartActivity(ChangeAccountInfo)
 #else
-	frmChangeAccountInfo.Show
+	xChangeAccountInfo.Show
 #End If
 End Sub
 
@@ -502,16 +440,16 @@ private Sub ShowChangeSettingsPage
 #if B4A
 	StartActivity(ChangeSettings)
 #else
-	frmChangeSettings.Show
+	xChangeSettings.Show
 #End If
 End Sub
 
 ' Show ValidateCentreSelection Page.
 Private Sub ShowValidateCentreSelectionPage(centreDetails As clsEposWebCentreLocationRec )
 #if B4A
-	CallSubDelayed2(ValidateCentreSelection2, "ValidateSelection", centreDetails)
+	CallSubDelayed2(aValidateCentreSelection2, "ValidateSelection", centreDetails)
 #else
-	frmXValidateCentreSelection2.Show(centreDetails)
+	xValidateCentreSelection2.Show(centreDetails)
 #End If
 End Sub
 

@@ -10,8 +10,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: clsEposApiHelper
-	' Release...: 11
-	' Date......: 28/01/21
+	' Release...: 11-
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 01/07/19
@@ -46,6 +46,12 @@ Version=9.01
 	' Details...: Added: AddCustomer()
 	'			  Bugfix: UpdateCustomerInfo() - release added.
 	'			  Mod: GetCustomerInfo() redundant code removed.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: More methods added.
+	' Amendee...: D Morris
+	' Details...: Added: DisplayAllCentres() and DisplayNearbyCentres().
 	'
 	' Date......: 
 	' Release...: 
@@ -205,6 +211,71 @@ Public Sub CustomerMustActivate(apiCustomerId As Int)As ResumableSub
 	End If
 	job.Release ' Always release the Http job!
 	Return successful
+End Sub
+
+' Downloads a list of all centres.
+'   returns rxMsg if download ok else null if error.
+Public Sub DisplayAllCentres() As ResumableSub
+	Dim rxMsg As String = ""
+'	ProgressShow("Getting a list of all centres, please wait...")
+	Log("Request the Web API to give list of all centres...")
+	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
+	Dim urlStr As String = 	Starter.server.URL_CENTRE_API & _
+	"?" & modEposWeb.API_LATITUDE & "=" & modEposWeb.API_GET_ALL & _
+									"&" & modEposWeb.API_LONGITUDE & "=" & modEposWeb.API_GET_ALL					
+	job.Download(urlStr)
+	Wait For (job) JobDone(job As HttpJob)
+	If job.Success And job.Response.StatusCode = 200 Then
+		rxMsg = job.GetString
+		Log("Success received from the Web API – response: " & rxMsg)
+	Else ' An error of some sort occurred
+		If job.Response.StatusCode = 204 Or job.Response.StatusCode = 404 Then
+			Log("The Web API returned no centres available")
+			xui.MsgboxAsync("There are no centres on the system.", _
+								"No Nearby Centres" & "Error:" & job.Response.StatusCode)
+		Else ' Any other error
+			Log("An error occurred with the HTTP job: " & job.ErrorMessage)
+			xui.MsgboxAsync("An error occurred while trying to get All centres.", _
+								"Cannot Get All Centres" & "Error:" & job.Response.StatusCode)
+		End If
+	End If
+	job.Release ' Must always be called after the job is complete, to free its resources
+	Return rxMsg
+End Sub
+
+' Downloads a list of nearby centres.
+'  returns rxMsg if download ok else null if error.
+Public Sub DisplayNearbyCentres(pCurrentLocation As Location) As ResumableSub
+	Dim rxMsg As String = ""
+	Log("Sending the coordinates to the Web API...")
+	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
+	Dim urlStr As String = Starter.server.URL_CENTRE_API & _
+	"?" & modEposWeb.API_LATITUDE & "=" & pCurrentLocation.Latitude & _
+							"&" & modEposWeb.API_LONGITUDE & "=" & pCurrentLocation.Longitude & _
+							"&" & modEposWeb.API_MAX_LIMIT & "=" & Starter.settings.maxCentres & _
+							"&" & modEposWeb.API_SEARCH_RADIUS & "=" & Starter.settings.searchRadius 	
+	If Starter.settings.showTestCentres = True Then ' Include Test Centres?
+		urlStr = urlStr & "&" & modEposWeb.API_SHOW_TEST_CENTRES & "=1"
+	End If
+	job.Download(urlStr)
+	Wait For (job) JobDone(job As HttpJob)
+	If job.Success And job.Response.StatusCode = 200 Then
+		rxMsg = job.GetString
+		Log("Success received from the Web API – response: " & rxMsg)
+	Else ' An error of some sort occurred
+		If job.Response.StatusCode = 204 Or job.Response.StatusCode = 404 Then
+			Log("The Web API returned no nearby centres")
+			xui.MsgboxAsync("There are no centres near your current location. All centres will now be displayed.", _
+								"No Nearby Centres" & "Error:" & job.Response.StatusCode)
+			wait for MsgBox_result(tempResult As Int) '' inserted
+		Else ' Any other error
+			Log("An error occurred with the HTTP job: " & job.ErrorMessage)
+			xui.MsgboxAsync("An error occurred while trying to find nearby centres. All centres will now be displayed.", _
+								 "Cannot Get Nearby Centres" & "Error:" & job.Response.StatusCode)
+		End If
+	End If
+	job.Release ' Must always be called after the job is complete, to free its resources
+	Return rxMsg
 End Sub
 
 ' Forgot Password handler (when email address known) - sends a email with information. 

@@ -7,12 +7,11 @@ Version=7.3
 '
 ' This service runs at application startup, and is used as a repository for program data as well as handling the socket communications.
 '
-
 #Region Documentation
 	'
 	' Name......: Starter
-	' Release...: 91
-	' Date......: 24/01/21
+	' Release...: 92
+	' Date......: 30/01/21
 	'
 	' History
 	'	For versions 1-15 see Starter_v19.
@@ -50,6 +49,12 @@ Version=7.3
 	' Amendee...: D Morris
 	' Details...: Mod: lHandlePaymentResponse() calls aHome to handle payment.
 	'			  Mod: All 'p' and 'l' Prefixes dropped for calls to aHome and aPlaceOrder activities.
+	' 			  			    
+	' Date......: 30/01/21
+	' Release...: 29
+	' Overview..: Support for rename modules.
+	' Amendee...: D Morris
+	' Details...: Mod: lHandleOpenTabConfirm(), lHandleCustomerDetailsMsg() new name for call modules.
 	' 			  			    
 	' Date......: 
 	' Release...: 
@@ -547,7 +552,7 @@ Private Sub lHandleCustomerDetailsMsg(openTabCmdResponseStr As String)
 		centreSignonOk = True
 	End If
 			
-	CallSubDelayed2(ValidateCentreSelection2, "ConnectToServerResponse", centreSignonOk) ' Calls an Activity
+	CallSubDelayed2(aValidateCentreSelection2, "ConnectToServerResponse", centreSignonOk) ' Calls an Activity
 End Sub
 
 ' Handles EPOS_GET_LOCATION request and sends a response.
@@ -572,7 +577,7 @@ private Sub lHandleOpenTabConfirm(openTabConfirmResponse As String)
 		If customerDetailsObj.customerId = myData.customer.customerId Then ' Customer ID correct?
 			If customerDetailsObj.centreId = myData.centre.centreId Then ' Centre ID correct?
 				myData.centre.signedOn = True ' Flag signed on to this centre.
-				CallSubDelayed(ValidateCentreSelection2, "OpenTabConfirmResponse") ' Calls an Activity
+				CallSubDelayed(aValidateCentreSelection2, "OpenTabConfirmResponse") ' Calls an Activity
 			End If
 		End If
 	End If

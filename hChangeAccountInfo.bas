@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hChangeAccountInfo
-	' Release...: 19
-	' Date......: 27/01/21
+	' Release...: 20
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -57,6 +57,16 @@ Version=9.3
 	' Amendee...: D Morris
 	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'					
+	' Date......: 30/01/21
+	' Release...: 20
+	' Overview..: Maintenance fix to support new names and remove 'l' and 'p' prefixes.
+	' Amendee...: D Morris
+	' Details...: Mod: lReturnToCaller().
+	'			  Mod: General changes to removed 'l' and 'p' prefixes.
+	'			  Mod: Old commented code removed.
+	'			  Mod: kbHelper_HideKeyboard().
+	'			  Mod: InitializeLocals() - New call to clsKeyboardHelper.SetupTextAndKeyboard().
+	'					
 	' Date......: 
 	' Release...: 
 	' Overview..:
@@ -75,19 +85,10 @@ Sub Class_Globals
 	
 	' View declarations (consists of 2 panels)
 	' Authorisation Panel
-'#if B4A
-'	Private chkAuthShowPw As CheckBox			' Show authorisation password.
-'#else 'B4i
-'	Private chkAuthShowPw As Switch				' Show authorisation password
-'#end if
 	Private lblAuthForgotPw As B4XView			' Forgot password hyperlink.
 	Private pnlAuthorisation As B4XView			' Password authorisation panel
-'#if B4A 
 	Private txtAuthorisePw As B4XFloatTextField	' Password (entered by user).
-'#else ' B4i
-'	Private txtAuthorisePw As TextField
-'#end if
-'	Private txtAuthorisePw As B4XView
+
 	' Enter details panel
 	Private btnClear As SwiftButton				' Clear displayed information button
 	Private btnSubmit As SwiftButton			' Submit information button
@@ -132,7 +133,7 @@ End Sub
 ' Handle submit information button on the Enter details panel.
 Private Sub btnSubmit_Click
 	If pnlEnterDetails.Visible = True Then ' Only works if edit details panel shown.
-		wait for (lCheckEnteredInformation) complete (infoOk As Boolean)
+		wait for (CheckEnteredInformation) complete (infoOk As Boolean)
 		If infoOk Then
 			btnClear.mBase.Visible = False ' Switches to the authorisation panel to enter password
 			pnlEnterDetails.Visible = False
@@ -149,22 +150,10 @@ Private Sub btnWebClose_Click
 	pnlWeb.Visible = False
 End Sub
 
-'#if B4A
-'' Handle show password checkbox.
-'Private Sub chkAuthShowPw_CheckedChange(Checked As Boolean)
-'	RevealPassword(Checked)
-'End Sub
-'#else ' B4i
-'' Handle show password switch.
-'Private Sub chkAuthShowPw_ValueChanged (Value As Boolean)
-'	RevealPassword(Value)
-'End Sub
-'#End If
-
 #if B4i
 ' Handle hide keyboard required from keyboard helper class.
 Private Sub kbHelper_HideKeyboard
-	frmChangeAccountInfo.HideKeyboard
+	xChangeAccountInfo.HideKeyboard
 End Sub
 #End If
 
@@ -189,7 +178,7 @@ Public Sub DisplayInfo
 	pnlEnterDetails.Visible = True
 	btnClear.mBase.Visible = True
 	ProgressShow("Getting your information")
-	Wait For (lGetLastestCustomerInfo) complete (infoOk As Boolean)
+	Wait For (GetLastestCustomerInfo) complete (infoOk As Boolean)
 	ProgressHide
 	If infoOk Then
 		txtAuthorisePw.text = ""
@@ -255,17 +244,13 @@ private Sub InitializeLocals
 	kbHelper.Initialize(Me, "kbHelper", pnlEnterDetails)
 	'TODO Check this could be a problem as txtAuthorisePw is on a different panel.
 	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(txtAddress, txtName, txtPostCode, txtTelephone, txtAuthorisePw)
-#if B4i		
-	kbHelper.AddViewToKeyboard2(enterPanelTextField)
-#End If
-	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
-	kbHelper.RemovedTabOrder(enterPanelTextField)
+	kbHelper.SetupTextAndKeyboard(enterPanelTextField)
 End Sub
 
 
 ' Checks if information entered on the form can be accepted.
 ' Returns True of information is ok.
-private Sub lCheckEnteredInformation() As ResumableSub
+private Sub CheckEnteredInformation() As ResumableSub
 	Dim informationOk As Boolean = False
 	txtAddress.Text = modEposWeb.FilterStringInput(txtAddress.Text.Trim)
 	txtName.Text = modEposWeb.FilterStringInput(txtName.Text.trim)
@@ -282,7 +267,7 @@ End Sub
 
 ' Gets the latest information from Web server
 ' Returns true if ok
-Private Sub lGetLastestCustomerInfo As ResumableSub
+Private Sub GetLastestCustomerInfo As ResumableSub
 	Dim infoOk As Boolean = False
 	Dim apiHelper As clsEposApiHelper
 	apiHelper.Initialize
@@ -302,7 +287,7 @@ End Sub
 
 ' Checks if valid password for this user.
 ' Returns true if ok.
-private Sub lQueryPassword(password As String) As ResumableSub
+private Sub QueryPassword(password As String) As ResumableSub
 	Dim passwordOk As Boolean = False
 	Dim apiHelper As clsEposApiHelper
 	apiHelper.Initialize
@@ -316,18 +301,18 @@ End Sub
 ' Programmatically similates the back button.
 private Sub lReturnToCaller
 #if B4A
-	CallSubDelayed(ChangeAccountInfo, "GoBackToCaller")
+	CallSubDelayed(aChangeAccountInfo, "GoBackToCaller")
 #End If
 End Sub
 
 ' Handles the Submit customer information to the Web server
 ' Returns true if submission is ok
-Private Sub lSubmitCustomerInformation() As ResumableSub
+Private Sub SubmitCustomerInformation() As ResumableSub
 	Dim submitOk As Boolean = False
 	ProgressShow("Saving the new information...")
-	wait for (lQueryPassword(txtAuthorisePw.text.Trim)) complete (passwordOk As Boolean)
+	wait for (QueryPassword(txtAuthorisePw.text.Trim)) complete (passwordOk As Boolean)
 	If passwordOk Then
-		wait for (lUpdateAccountInfo) complete (updateOk As Boolean)
+		wait for (UpdateAccountInfo) complete (updateOk As Boolean)
 		If updateOk Then
 			submitOk = True
 		End If
@@ -340,9 +325,34 @@ Private Sub lSubmitCustomerInformation() As ResumableSub
 	Return submitOk
 End Sub
 
+' Show the process box
+Private Sub ProgressHide
+	progressbox.Hide
+End Sub
+
+' Hide The process box.
+Private Sub ProgressShow(message As String)
+	progressbox.Show(message)
+End Sub
+
+' Handles submit password operation.
+private Sub SubmitPassword
+	Wait For (SubmitCustomerInformation) complete (submitOk As Boolean)
+	pnlAuthorisation.Visible = False ' Ensure enter details panel next time (i.e. if activity_resume is invoked).
+	btnClear.mBase.Visible = True
+	pnlEnterDetails.Visible = True
+	If submitOk Then
+#if B4A
+		StartActivity(aCheckAccountStatus)
+#else
+		xCheckAccountStatus.show(True)
+#End If
+	End If
+End Sub
+
 ' Update account information on the web server
 ' returns true if update is ok.
-private Sub lUpdateAccountInfo() As ResumableSub
+private Sub UpdateAccountInfo() As ResumableSub
 	Dim updateOk As Boolean = False
 	Starter.myData.customer.address = txtAddress.Text.Trim
 	Starter.myData.customer.name = txtName.Text.Trim
@@ -356,40 +366,6 @@ private Sub lUpdateAccountInfo() As ResumableSub
 		updateOk = True
 	End If
 	Return updateOk
-End Sub
-
-' Show the process box
-Private Sub ProgressHide
-	progressbox.Hide
-End Sub
-
-' Hide The process box.
-Private Sub ProgressShow(message As String)
-	progressbox.Show(message)
-End Sub
-'
-'' Handles reveal/hide password operation
-'private Sub RevealPassword(showPassword As Boolean)
-'	If showPassword = True Then
-'		txtAuthorisePw.PasswordMode = False
-'	Else
-'		txtAuthorisePw.PasswordMode = True
-'	End If
-'End Sub
-
-' Handles submit password operation.
-private Sub SubmitPassword
-	Wait For (lSubmitCustomerInformation) complete (submitOk As Boolean)
-	pnlAuthorisation.Visible = False ' Ensure enter details panel next time (i.e. if activity_resume is invoked).
-	btnClear.mBase.Visible = True
-	pnlEnterDetails.Visible = True
-	If submitOk Then
-#if B4A
-		StartActivity(aCheckAccountStatus)
-#else
-		xCheckAccountStatus.show(True)
-#End If
-	End If
 End Sub
 
 #End Region  Local Subroutines

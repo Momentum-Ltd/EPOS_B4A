@@ -11,8 +11,8 @@ Version=10.5
 #Region  Documentation
 	'
 	' Name......: clsPayment
-	' Release...: 2
-	' Date......: 27/01/21
+	' Release...: 3
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 24/01/21
@@ -26,6 +26,14 @@ Version=10.5
 	' Amendee...: D Morris
 	' Details...:  Mod: QueryPaymentAfterFailure(), PayWithSavedCard() now private
 	'				Removed: PayWithAnotherCard() and SendOrderPayment().
+	'
+	' Date......: 30/01/21
+	' Release...: 3
+	' Overview..: Bugfix: #0588 - Experimemnt stop problem.
+	' Amendee...: D Morris
+	' Details...: Mod (Bugfix): QueryPaymentMethod() - iOS code "Wait for" inserted.
+	'								QueryPaymentAfterFailure() also updated with "Wait for".
+	'			  Mod: Old commented code removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -49,25 +57,10 @@ End Sub
 
 #Region  Public Subroutines
 
-
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize(progressDialog As clsProgressDialog)	
 	mProgressDialog = progressDialog
 End Sub
-
-'public Sub IsCardPaymentAccepted(paymentInfo As clsEposCustomerPayment) As ResumableSub
-'	Dim cardAccepted As Boolean  = IsPaymentAccepted(paymentInfo.status)
-'	Dim confirmMsg As String = GetPaymentConfirmMsg(paymentInfo.status)
-'
-''	ProgressHide
-'
-'	If cardAccepted Then
-'		xui.MsgboxAsync(confirmMsg,"Card transaction report")
-'		wait for MsgBox_result(tempResult As Int)
-'	End If
-'	Return cardAccepted
-'End Sub
-
 
 ' Query method and invoke payment (Saved card | Another card | Cash).
 Public Sub QueryPaymentMethod(orderPayment As clsOrderPaymentRec) As ResumableSub 
@@ -95,12 +88,11 @@ Public Sub QueryPaymentMethod(orderPayment As clsOrderPaymentRec) As ResumableSu
 			msg = "Please go to the counter to pay."
 			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
 			Wait For MsgBox_Result(Result2 As Int)
-'			exitToTaskSelect = True 'HACK to deal with problem with blank form.
 		Else ' Another Card?
 #if B4A
-			CallSubDelayed2(aCardEntry, "CardEntryAndOrderPayment", orderPayment)
+			CallSubDelayed2(aCardEntry, "CardEntryAndOrderPayment", orderPayment) ' No need wait for as it is in another activity
 #else ' B4i
-			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+			Wait for (xCardEntry.CardEntryAndOrderPayment(orderPayment, False)) complete (a As Boolean) ' Wait for needed for iOS operation (see bug #0588)
 #end if
 		End If
 	Else ' Cards not accepted - must go to the counter
@@ -112,48 +104,20 @@ Public Sub QueryPaymentMethod(orderPayment As clsOrderPaymentRec) As ResumableSu
 	Return queryResult
 End Sub
 
-''Pay with another card (which must be entered).
-'Public Sub PayWithAnotherCard(orderPayment As clsOrderPaymentRec, cardToken As Int, saveCard As Boolean, publicCardInfo As clsEposPublicCardInfo)
-'	Dim paymentObj As clsEposCustomerPayment : paymentObj.initialize
-'	paymentObj.billPayment = False
-'	paymentObj.centreId = Starter.myData.centre.centreId
-'	paymentObj.customerId = Starter.myData.customer.customerId
-'	paymentObj.orderId = orderPayment.orderId
-'	paymentObj.noSave = Not (saveCard)
-'	If saveCard  Then
-'		paymentObj.publicCardInfo = publicCardInfo
-'	End If
-'	paymentObj.token = cardToken
-'	paymentObj.total = orderPayment.amount
-'	Dim msg As String =  modEposApp.EPOS_PAYMENT & paymentObj.XmlSerialize
-'	
-''	ProgressShow("Processing payment, please wait...")
-'
-'
-'	#if B4A
-'	CallSub2(Starter, "pSendMessage", msg)
-'#else ' B4A
-'	Main.SendMessage(msg)
-'#end if
-'End Sub
-
-
 ' Report a payment result
 Public Sub ReportPaymentResult(paymentInfo As clsEposCustomerPayment) As ResumableSub
 	Dim cardAccepted As Boolean  
 	Dim confirmMsg As String = GetPaymentConfirmMsg(paymentInfo.status)	
-'	ProgressHide
 	mProgressDialog.Hide
 	If IsPaymentAccepted(paymentInfo.status) Then
 		xui.MsgboxAsync(confirmMsg,"Card transaction report")
 		wait for MsgBox_result(tempResult As Int)
 		cardAccepted = True
 	Else
-		wait for (QueryPaymentAfterFailure(paymentInfo)) complete(tempResult As Int)
+		wait for (QueryPaymentAfterFailure(paymentInfo)) complete(tempResult As Int) ' Wait for added just in-case, see Bug #0588.
 	End If
 	Return cardAccepted
 End Sub
-
 
 #End Region  Public Subroutines
 
@@ -199,10 +163,8 @@ Private Sub PayWithSavedCard(orderPayment As clsOrderPaymentRec)
 	paymentObj.orderId = orderPayment.orderId
 	paymentObj.total = orderPayment.amount
 	Dim msg As String  = modEposApp.EPOS_PAYMENT & paymentObj.XmlSerialize()
-	
-'	ProgressShow("Processing payment, please wait...")
 	mProgressDialog.Show("Processing payment, please wait...")
-	#if B4A
+#if B4A
 	CallSub2(Starter, "pSendMessage",  msg)
 #else ' B4I
 	Main.SendMessage(msg)
@@ -220,42 +182,22 @@ Private Sub QueryPaymentAfterFailure(paymentInfo As clsEposCustomerPayment) As R
 	wait for Msgbox_Result(tempResult As Int)
 	If tempResult = xui.DialogResponse_Positive Then ' Another card?
 		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize(paymentInfo.orderId, paymentInfo.total)
-'		orderPayment.amount = paymentInfo.total
-'		orderPayment.orderId = paymentInfo.orderId
 #if B4A
 		CallSubDelayed2(aCardEntry, "CardEntryAndOrderPayment", orderPayment)
 #else 'B4I
-		xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+'		xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
+		Wait for (xCardEntry.CardEntryAndOrderPayment(orderPayment, False)) complete (a As Boolean)
 #end if	
 	else if tempResult = xui.DialogResponse_Negative Then ' Cash?
 		Dim msg As String = "Please go to the counter to pay."
 		xui.Msgbox2Async(msg, "Payment Instruction", "OK", "", "", Null)
 		Wait For MsgBox_Result(Result As Int)
-'		ExitToCentreHomePage
 	Else ' Cancel
 		Dim msg As String = "Payment is required before your order can be processed."
 		xui.Msgbox2Async(msg, "Operation Cancelled", "OK", "", "", Null)
 		Wait For MsgBox_Result(Result As Int)
-'		ExitToCentreHomePage
 	End If
 	Return tempResult
 End Sub
 
-'' Send a payment message for a specified order.
-'Private Sub SendOrderPayment(orderId As Int, amount As Float)
-'	Dim payment As clsEposCustomerPayment : payment.initialize
-'	payment.centreId = Starter.myData.centre.centreId
-'	payment.customerId = Starter.myData.customer.customerId
-'	payment.orderId = orderId
-'	payment.total = amount
-'	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
-'	
-''	ProgressShow("Processing payment, please wait...")
-'	
-'	#if B4A
-'	CallSub2(Starter, "pSendMessage",  msg)
-'#else ' B4I
-'	Main.SendMessage(msg)
-'#End If
-'End Sub
 #End Region  Local Subroutines

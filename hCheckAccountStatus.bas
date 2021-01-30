@@ -11,8 +11,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: hCheckAccountStatus
-	' Release...: 23
-	' Date......: 28/01/21
+	' Release...: 24
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 03/08/19
@@ -63,6 +63,12 @@ Version=9.3
 	' Overview..: Maintenance release - QueryNewInstall updated.
 	' Amendee...: D Morris
 	' Details...: Mod: ExitToQueryNewInstall().
+	'
+	' Date......: 30/01/21
+	' Release...: 24
+	' Overview..: Support for rename frmXSelectPlayCentre3 to xSelectPlayCentre3.
+	' Amendee...: D Morris
+	' Details...:  Mod: ExitToSelectPlayCentre().
 	'
 	' Date......: 
 	' Release...: 
@@ -291,7 +297,7 @@ private Sub ExitToSelectPlayCentre
 #if B4A
 	StartActivity(aSelectPlayCentre3)
 #else ' B4i
-	frmXSelectPlayCentre3.Show
+	xSelectPlayCentre3.Show
 #End If
 End Sub
 

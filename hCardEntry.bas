@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 21
-	' Date......: 27/01/21
+	' Release...: 22
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -71,10 +71,19 @@ Version=9.5
 	'
 	' Date......: 27/01/21
 	' Release...: 21
-	' Overview..: new uses clsKeyboardHelper for keyboard handling.
+	' Overview..: New uses clsKeyboardHelper for keyboard handling.
 	' Amendee...: D Morris
 	' Details...: Mod: General changes to support clsKeyboardHelper.
 	'			  Removed: kk as IME removed no longer necessary.
+	'
+	' Date......: 30/01/21
+	' Release...: 22
+	' Overview..: Maintenance fix.
+	'             Issue (iOS)  - Strange submit button operation.
+	' Amendee...: D Morris
+	' Details...: Mod: Old commented code removed.
+	'			  Mod: InitializeLocals() - New call to clsKeyboardHelper.SetupTextAndKeyboard().
+	'			  Mod: btnSubmit_Click() - now generates an internal event.
 	'
 	' Date......: 
 	' Release...: 
@@ -91,19 +100,15 @@ Sub Class_Globals
 	Private xui As XUI							'ignore (to remove warning).
 	
 	' Misc objects
-	Private processedDate As clsDateHandler		' Handles processing date.
+	Private processedDate As clsDatehandler		' Handles processing date.
 	Private progressbox As clsProgressDialog	' Progress box.
 	Private cardInfo As clsStripeTokenRec		' Strip relating objects.
-'#if B4A
-'	Private kk As IME							' Used for hidding the keybaord.
-'#End If
 	Private payment As clsPayment				' Class to handle payments.
 	
 	' View declarations
 	' Card Entry Panel
 	Private btnSubmit As SwiftButton			' Submit card details button.
 	Private btnTestData As SwiftButton			' Load test card data.
-'	Private chkSaveCard As B4XView				' Save card option.
 	Private pnlCardEntry As B4XView				' The Card entry panel enclosing these views.
 	Private swSaveCard As B4XSwitch				' Save Card 
 	Private txtCvc As B4XFloatTextField			' Card CVC.
@@ -112,16 +117,12 @@ Sub Class_Globals
 	Private txtPostCode As B4XFloatTextField	' Billing address postcode.
 	Private txtCardNumber As B4XFloatTextField	' Long card number
 	Private txtExpiryDate As B4XFloatTextField 	' Expiry date.
-
-	' Default card entry panel
-'	Private pnlDefaultCard As B4XView 			' The default card panel.
 	
 	' Local variables
 	Private kbHelper As clsKeyboardHelper		' Keyboard handler
 	Private mOrderId As Int						' The order to pay (if n.a. then = 0)	
 	Private stripe As clsStripe					' Used for Stripe payments.	
 	Private total As Float 						' Amount to charge (if register card and take payment at the same time).
-
 
 End Sub
 
@@ -138,6 +139,7 @@ End Sub
 ' Handle the submit button.
 Private Sub btnSubmit_Click
 	SubmitCard
+	CallSubDelayed(Me, "SubmitButton_Pressed")
 End Sub
 
 ' Load test data.
@@ -152,11 +154,6 @@ End Sub
 
 ' Hide keyboard (click outside the text fields).
 Private Sub pnlCardEntry_Click
-'#if b4A
-'	kk.HideKeyboard
-'#Else
-'	xCardEntry.HideKeyboard
-'#End If
 	HideKeyboard
 End Sub
 
@@ -175,12 +172,6 @@ Private Sub stripe_CardToken(success As Boolean, cardToken As String)
 		ClearCard
 	End If
 End Sub
-
-'' Tab to next field
-'' Code taken from https://www.b4x.com/android/forum/threads/tab-order-of-textedit-views.19489/
-'Private Sub txtCardNumber_EnterPressed
-'	' TabToNext(Sender)
-'End Sub
 
 ' Handle Card number changes.
 Private Sub txtCardNumber_TextChanged (old As String, new As String)
@@ -216,11 +207,6 @@ Private Sub txtCardNumber_TextChanged (old As String, new As String)
 	End If
 End Sub
 
-'' Tab To next field
-'Private Sub txtCvc_EnterPressed
-'	'TabToNext(Sender)
-'End Sub
-
 ' Handle card CVC code
 Private Sub txtCvc_TextChanged(old As String, new As String)
 #if B4i	' See https://www.b4x.com/android/forum/threads/strange-text_changed-behaviour.107128/
@@ -239,41 +225,15 @@ Private Sub txtCvc_TextChanged(old As String, new As String)
 	End If
 End Sub
 
-'' Tab to next field
-'private Sub txtExpiryDate_EnterPressed
-'	'TabToNext(Sender)
-'End Sub
-
 ' Handle expiry date changes.
 private Sub txtExpiryDate_TextChanged (Old As String, New As String)
 	processedDate.Handler_TextChanged_MMYY(txtExpiryDate, Old, New)
 End Sub
 
-'' Tab to next field
-'private Sub txtLine1_EnterPressed
-'	'TabToNext(Sender)
-'End Sub
-'
-'' Tab to next field
-'private Sub txtName_EnterPressed
-'	'TabToNext(Sender)
-'End Sub
-'
-'' Tab to next field
-'Private Sub txtPostCode_EnterPressed
-''	TabToNext(Sender)
-'End Sub
-
 #End Region  Event Handlers
 
 
 #Region  Public Subroutines
-
-'' Entry point to request card information and invoke a charge on the card.
-'public Sub CardEntryAndCharge(amount As Float)
-'	ClearCard
-'	total = amount
-'End Sub
 
 ' Make a card payment against an order.
 ' orderPayment information about amount and order to pay.
@@ -281,38 +241,10 @@ Public Sub CardEntryAndOrderPayment(orderPayment As clsOrderPaymentRec)As Resuma
 	ClearCard
 	total = orderPayment.amount	' Save for later.
 	mOrderId = orderPayment.orderId
-'	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and no card details.
-'		pnlDefaultCard.Visible = True
-'		pnlCardEntry.Visible = False
-'		SendOrderPayment(orderPayment.orderId, orderPayment.amount)
-'	Else
-'		pnlDefaultCard.Visible = False
-		pnlCardEntry.Visible = True
-		Wait for btnSubmit_Click()	' Wait for card information to be entered.
-		SubmitCard
-'	End If
+	pnlCardEntry.Visible = True
+	Wait for SubmitButton_Pressed ' Wait for card information to be entered - and the submit button presed.
 	Return True
 End Sub
-
-'' Entry point for request card with payment.
-'' charge - amount to charge card.
-'' defaultCard - set if use the default card.
-'Public Sub CardEntryAndPayment(amount As Float, defaultCard As Boolean) As ResumableSub
-'	ClearCard
-'	total = amount
-'	mOrderId = 0 ' Order is n.a.
-'	If defaultCard = True And Starter.myData.customer.cardAccountEnabled = True Then ' Protect if default and not card details.
-'		pnlDefaultCard.Visible = True
-'		pnlCardEntry.Visible = False
-'		SendPayment(amount)
-'	Else 
-'		pnlDefaultCard.Visible = False
-'		pnlCardEntry.Visible = True
-'		Wait for btnSubmit_Click()	' Wait for card information to be entered.
-'		SubmitCard
-'	End If
-'	Return True
-'End Sub
 
 #if B4i
 ' Moves up the panel when necessary.
@@ -337,70 +269,9 @@ End Sub
 
 ' Handles activity resume operation.
 Public Sub ResumeOp
-	btnTestData.mBase.Visible = Starter.settings.testMode ' Short cut for setting Test Card button.
+'	btnTestData.mBase.Visible = Starter.settings.testMode ' Short cut for setting Test Card button.
 	cardInfo.Initialize
 End Sub
-
-' Reports the result of a card transaction.
-'Public Sub ReportPaymentStatus(paymentInfo As clsEposCustomerPayment)
-'	ClearCard
-'	Log("Payment status:" & modConvert.ConvertPaymentStatusIntToString(paymentInfo.status))
-'	Dim cardAccepted As Boolean  = False
-'	Dim confirmMsg As String
-'	ProgressHide
-'	Select paymentInfo.status
-'		Case modConvert.payStatusCreateCardAccProblem
-'			confirmMsg = "Card not accepted"
-'		Case modConvert.payStatusSaveCard
-'			cardAccepted = True
-'			confirmMsg = "Card saved"
-'		Case modConvert.payStatusSucceeded
-'			cardAccepted = True
-'			confirmMsg = "Payment accepted"
-'		Case modConvert.payrequestRetry
-'			confirmMsg = " Operation failed - please retry"
-'		Case modConvert.payStatusPending
-'			cardAccepted = True
-'			confirmMsg = "Payment pending"
-'		Case modConvert.payStatusFailed
-'			confirmMsg = "Payment failed"
-'		Case Else
-'			confirmMsg = "Failed"
-'	End Select
-'	If cardAccepted = True Then
-'		xui.MsgboxAsync(confirmMsg,"Card transaction report")
-'		wait for MsgBox_result(tempResult As Int)
-'		ExitToCentreHomePage
-'	Else ' Card rejected give the customer some options
-'#if B4A
-'		xui.Msgbox2Async(confirmMsg,"Card declined", "Another" & CRLF & "  Card", "Cancel", "Cash" , Null)
-'#else ' B4i - CRLF removed!
-'		xui.Msgbox2Async(confirmMsg,"Card declined", "Another Card", "Cancel", "Cash" , Null)
-'#end if
-'		wait for Msgbox_Result(tempResult As Int)
-'		If tempResult = xui.DialogResponse_Positive Then ' Another card?
-'			Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize
-'			orderPayment.amount = paymentInfo.total
-'			orderPayment.orderId = paymentInfo.orderId
-'#if B4A
-'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False) 
-'#else 'B4I
-'			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
-'#end if	
-'		else if tempResult = xui.DialogResponse_Negative Then ' Cash?
-'			Dim msg As String = "Please go to the counter to pay."
-'			xui.Msgbox2Async(msg, "Payment Instruction", "OK", "", "", Null)
-'			Wait For MsgBox_Result(Result As Int)
-'			ExitToCentreHomePage
-'		Else ' Cancel
-'			Dim msg As String = "Payment is required before your order can be processed."
-'			xui.Msgbox2Async(msg, "Operation Cancelled", "OK", "", "", Null)
-'			Wait For MsgBox_Result(Result As Int)
-'			ExitToCentreHomePage
-'		End If
-'	End If
-'End Sub
-
 
 #End Region  Public Subroutines
 
@@ -468,57 +339,25 @@ private Sub HandleStripeResponse(success As Boolean, cardToken As String)
 	End If	
 End Sub
 
-
 ' Hide Keyboard
 Private Sub HideKeyboard
-#if b4A
-'	kk.HideKeyboard
-#Else
+#If B4i
 	xCardEntry.HideKeyboard
 #End If
 End Sub
 	
 ' Initialize the locals etc.
 private Sub InitializeLocals
-'#if B4A
-'	kk.Initialize("")
-'#End If
 	processedDate.Initialize
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT)
 	payment.Initialize(progressbox)
 	cardInfo.Initialize
-'	stripe.Initialize(Me, "sk_test_4eC39HqLyjWDarjtT1zdp7dc","Stripe")
 	stripe.Initialize(Me, "stripe") ' 
 	btnTestData.mBase.Visible = Starter.settings.testMode ' Short cut for setting Test Card button.
 	SetupTabOrder
-	' Necessary to set the background and border colour.
-'	txtCvc.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'	txtLine1.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'	txtName.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'	txtPostCode.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'	txtCardNumber.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'	txtExpiryDate.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-
 	kbHelper.Initialize(Me, "kbHelper", pnlCardEntry)
 	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(txtCardNumber, txtExpiryDate, txtCvc, txtName, txtLine1, txtPostCode)
-#if B4i		
-'	kbHelper.AddViewToKeyboard(txtCvc)
-'	kbHelper.AddViewToKeyboard(txtLine1)
-'	kbHelper.AddViewToKeyboard(txtName)
-'	kbHelper.AddViewToKeyboard(txtPostCode)
-'	kbHelper.AddViewToKeyboard(txtCardNumber)
-'	kbHelper.AddViewToKeyboard(txtExpiryDate)
-	kbHelper.AddViewToKeyboard2(enterPanelTextField)
-#End If
-'	kbHelper.SetupBackcolourAndBorder(txtCvc)
-'	kbHelper.SetupBackcolourAndBorder(txtLine1)
-'	kbHelper.SetupBackcolourAndBorder(txtName)
-'	kbHelper.SetupBackcolourAndBorder(txtPostCode)
-'	kbHelper.SetupBackcolourAndBorder(txtCvc)
-'	kbHelper.SetupBackcolourAndBorder(txtCardNumber)
-'	kbHelper.SetupBackcolourAndBorder(txtExpiryDate)
-	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
-	kbHelper.RemovedTabOrder(enterPanelTextField)
+	kbHelper.SetupTextAndKeyboard(enterPanelTextField)
 End Sub
 
 ' Load test data.
@@ -564,42 +403,6 @@ Private Sub SendCardTokenToServer(cardToken As String, pTotal As Float)
 	ClearCard
 End Sub
 
-'' Send a payment message for a specified order.
-'Private Sub SendOrderPayment(orderId As Int, amount As Float)
-'	Dim payment As clsEposCustomerPayment : payment.initialize
-'	payment.centreId = Starter.myData.centre.centreId
-'	payment.customerId = Starter.myData.customer.customerId
-'	payment.orderId = orderId
-'	payment.total = amount
-'	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
-'	ProgressShow("Processing payment, please wait...")
-'#if B4A
-'	CallSub2(Starter, "pSendMessage",  msg)
-'#else ' B4I
-'	Main.SendMessage(msg)
-'#End If
-'End Sub
-
-'' Send a payment message
-'Private Sub SendPayment(amount As Float)
-'	Dim payment As clsEposCustomerPayment : payment.initialize
-'	payment.centreId = Starter.myData.centre.centreId
-'	payment.customerId = Starter.myData.customer.customerId
-'	payment.total = amount
-'	Dim msg As String  = modEposApp.EPOS_PAYMENT & payment.XmlSerialize()
-'	ProgressShow("Processing payment, please wait...")
-'#if B4A
-'	CallSub2(Starter, "pSendMessage",  msg)
-'#else ' B4I
-'	Main.SendMessage(msg)
-'#End If
-'End Sub
-
-'' Will setup the back colour to white and the border to orange
-'Private Sub SetupBackcolourAndBorder( txtObj As B4XFloatTextField)
-'	txtObj.mBase.SetColorAndBorder(xui.Color_White, 3dip, xui.Color_RGB(230, 100, 15), 15dip)
-'End Sub
-
 ' Setup the tab order (adjust as necessary - currently no tab operation and keyboard will hide when enter pressed).
 ' IMPORTANT - Don't remove otherwise it will autotab to the next field and not hide the keyboard when Enter is pressed!
 Private Sub SetupTabOrder
@@ -624,8 +427,8 @@ Private Sub SubmitCard
 	cardInfo.card.name = txtName.Text.trim
 	cardInfo.card.number = FormatCardNumber(txtCardNumber.Text).Replace(" ", "")
 	ProgressShow("Checking your card...")
-'	stripe.GetCardToken(Me,cardInfo)
 	stripe.GetCardToken(cardInfo)
 End Sub
 
 #End Region  Local Subroutines
+

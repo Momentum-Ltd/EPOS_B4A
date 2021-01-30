@@ -11,8 +11,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hValidateCentreSelection2
-	' Release...: 11
-	' Date......: 03/01/21
+	' Release...: 12
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -44,6 +44,12 @@ Version=10
 	' Details...:  Mod: InitializeLocals() code fixed.
 	'			   Mod: HandleMoreInformation() now will only prefix https to URL.
 	'			   Mod: OnClose() now disables timer.
+	'
+	' Date......: 30/01/21
+	' Release...: 12
+	' Overview..: Support for rename frmXSelectPlayCentre3 to xSelectPlayCentre3.
+	' Amendee...: D Morris
+	' Details...:  Mod: ExitToSelectCentre().
 	' 
 	' Date......: 
 	' Release...: 
@@ -248,7 +254,7 @@ private Sub ExitToSelectCentre
 #if B4A
 	StartActivity(aSelectPlayCentre3)
 #else
-	frmXSelectPlayCentre3.Show	
+	xSelectPlayCentre3.Show	
 #End If
 End Sub
 

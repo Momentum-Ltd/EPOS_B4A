@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: aSelectPlayCentre3
-	' Release...: 4
-	' Date......: 11/11/20
+	' Release...: 5
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -36,6 +36,12 @@ Version=10
 	' Overview..: Bugfix #0551 (Android tablets) Select centre screen unable to select the menu option.
 	' Amendee...: D morris
 	' Details...: Mod: Changed to using B4AListTemplate - This is a issue with Android see https://www.b4x.com/android/forum/threads/problem-with-openmenu-on-android-v5-1.124423/
+	'				
+	' Date......: 30/01/21
+	' Release...: 5
+	' Overview..: Maintenance - 'p' and 'l' prefixes removed.
+	' Amendee...: D Morris
+	' Details...: Mod: SelectMenuItem() 'l' prefixes removed.
 	'				
 	' Date......: 
 	' Release...: 
@@ -63,23 +69,14 @@ Sub Globals
 	' For the option menu 
 	Private Dialog As B4XDialog 				'ignore
 	Private menuOptions As B4XListTemplate
-	Private Base As B4XView
+'	Private Base As B4XView
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
-
-
 	hc.Initialize(Activity)
 	' Setup menu button
-	Activity.Title = "Select centre"	' This appears necessary (setting in form designer don't work).
-'	Activity.AddMenuItem("Edit Account", "mnuChangeAccountInfo")
-'	Activity.AddMenuItem("Settings", "mnuChangeSettings")
-'	Activity.AddMenuItem("New account", "mnuNewAccount")
-'	Activity.AddMenuItem("Remove Account", "mnuRemoveAccount")
-'	Activity.AddMenuItem("Show Location", "mnuShowLocation")
-'	Activity.AddMenuItem("About", "mnuAbout")
-	' Setup refresh button
-'	Activity.AddMenuItem3("", "refresh", xui.LoadBitmapResize(File.DirAssets, "ic_cached_white_24dp.png", 32dip, 32dip, True), True)
+'	Activity.Title = "Select centre"	' This appears necessary (setting in form designer don't work).
+
 End Sub
 
 ' Inhibit back button.
@@ -95,11 +92,7 @@ End Sub
 
 Sub Activity_Resume
 	Log("StartPlayCentre - Activity_Resume run!")
-' Insert for old system	
 	Wait for (CheckPermission) complete(result As Boolean)
-'	hc.SelectCentre(result)
-
-' Insert for new system
 	hc.StartLocationUpdates
 End Sub
 
@@ -112,42 +105,6 @@ End Sub
 
 #Region  Event Handlers
 
-'' Handles menu option About.
-'Private Sub mnuAbout_Click
-'	StartActivity(About)
-'End Sub
-'
-'' Handles menu option Change Customer information
-'Private Sub mnuChangeAccountInfo_Click
-'	hc.IChangeAccountInfo
-'End Sub
-'
-'' Handles menu option Settings
-'Private Sub mnuChangeSettings_Click
-'	hc.lChangeSettings
-'End Sub
-'
-'' Handles menu option New Account
-'Private Sub mnuNewAccount_Click
-''	StartActivity(QueryNewInstall)
-'	hc.NewAccount
-'End Sub
-'
-'' Handles menu option to remove/clear account.
-'Private Sub mnuRemoveAccount_Click()
-'	hc.ClearAccount
-'End Sub
-'
-'' Handles menu option to show location
-'Private Sub mnuShowLocation_Click
-'	hc.ShowLocation
-'End Sub
-'
-'' Hendle refresh list title bar item.
-'Private Sub refresh_Click
-'	hc.Refresh
-'End Sub
-
 #End Region  Event Handlers
 
 #Region  Public Subroutines
@@ -159,7 +116,6 @@ End Sub
 
 ' Show the Account menu
 Public Sub ShowMenu
-'	Activity.OpenMenu	
 	CreateMenuTemplate
 	Wait for (Dialog.ShowTemplate(menuOptions, "", "", "CANCEL")) complete(result As Int)
 	If result = xui.DialogResponse_Positive Then
@@ -195,8 +151,9 @@ End Sub
 
 ' Creates the menu options template (See C:\Projects\B4A_Dev\TestMenu for example of usage).
 Private Sub CreateMenuTemplate
-	Base = Activity
-	Dialog.Initialize (Base)
+'	Base = Activity
+'	Dialog.Initialize (Base)
+	Dialog.Initialize(Activity)
 	Dialog.Title = "Select option"
 	menuOptions.Initialize
 	menuOptions.Options = Array("Edit Account", "Settings", "New Account", _
@@ -209,15 +166,15 @@ End Sub
 private Sub SelectMenuItem(item As String)
 	Select item
 		Case "About"
-			StartActivity(About)
+			StartActivity(aAbout)
 		Case "Edit Account"
-			hc.IChangeAccountInfo
+			hc.ChangeAccountInfo
 		Case "New Account"
 			hc.NewAccount
 		Case "Remove Account"
 			hc.ClearAccount
 		Case "Settings"
-			hc.lChangeSettings
+			hc.ChangeSettings
 		Case "Show Location"
 			hc.ShowLocation
 	End Select

@@ -11,8 +11,8 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: hChangeSettings2
-	' Release...: 4
-	' Date......: 25/01/21
+	' Release...: 5
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 26/01/20
@@ -39,6 +39,13 @@ Version=10.2
 	' Overview..: Bugfix: #0576 - Setting screen not hiding keyboard when return pressed.
 	' Amendee...: D Morris
 	' Details...:   Mod: uses clsKeyboardHelper to handle keyboard. 
+	'					
+	' Date......: 30/01/21
+	' Release...: 5
+	' Overview..: Maintenance fix to support new names.
+	' Amendee...: D Morris
+	' Details...: Mod: kbHelper_HideKeyboard(), DisplayCurrentSettings(). 
+	'			  Mod: InitializeLocals() - New call to clsKeyboardHelper.SetupTextAndKeyboard().
 	'
 	' Date......: 
 	' Release...: 
@@ -137,7 +144,7 @@ End Sub
 #if b4i 
 ' Hide the keyboard
 Public Sub kbHelper_HideKeyboard
-	frmChangeSettings.HideKeyboard
+	xChangeSettings.HideKeyboard
 End Sub
 #End If
 
@@ -169,7 +176,7 @@ public Sub DisplayCurrentSettings
 		' See https://www.b4x.com/android/forum/threads/call-back-button-programmatically.113242/#post-709683
 		Main.NavControl.RemoveCurrentPage
 	Else
-		frmChangeSettings.ShowBackbutton
+		xChangeSettings.ShowBackbutton
 #End If
 	End If
 End Sub
@@ -269,11 +276,7 @@ private Sub InitializeLocals
 	kbHelper.SetupBackcolourAndBorder(edtRadius)
 	
 	Dim enterPanelTextField() As B4XFloatTextField = Array As B4XFloatTextField(edtMaxCentres, edtRadius)
-#if B4i		
-	kbHelper.AddViewToKeyboard2(enterPanelTextField)
-#End If
-	kbHelper.SetupBackcolourAndBorder2(enterPanelTextField)
-	kbHelper.RemovedTabOrder(enterPanelTextField)
+	kbHelper.SetupTextAndKeyboard(enterPanelTextField)
 End Sub
 
 ' Process the Search radius setting.

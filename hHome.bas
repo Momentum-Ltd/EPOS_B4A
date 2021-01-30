@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 14
-	' Date......: 24/01/21
+	' Release...: 15
+	' Date......: 30/01/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -63,6 +63,12 @@ Version=10
 	'			  Mod: All 'p' and 'l' Prefixes dropped.
 	'		      Mod: Old commented code removed
 	'			  Mod: btnLeaveCentre_Click() uses LeaveCentre().
+	'
+	' Date......: 30/01/21
+	' Release...: 15
+	' Overview..: Support for rename moduels.
+	' Amendee...: D Morris
+	' Details...:  Mod: ExitToSelectPlayCentre(), progressbox_Timeout().
 	'			
 	' Date......: 
 	' Release...: 
@@ -191,9 +197,9 @@ End Sub
 Private Sub progressbox_Timeout()
 	ViewControl(True)
 #if B4A
-	CallSubDelayed2(ValidateCentreSelection2, "ValidateSelection", Starter.selectedCentreLocationRec)
+	CallSubDelayed2(aValidateCentreSelection2, "ValidateSelection", Starter.selectedCentreLocationRec)
 #else ' B4I
-	frmXValidateCentreSelection2.Show(Starter.selectedCentreLocationRec)
+	xValidateCentreSelection2.Show(Starter.selectedCentreLocationRec)
 #end if
 End Sub
 
@@ -267,11 +273,7 @@ Public Sub HandleOrderInfo(orderInfoStr As String)
 	Wait For MsgBox_Result(Result As Int)
 	If Result = xui.DialogResponse_Cancel Then
 		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize(orderInfoObj.orderId, totalCost)
-'		orderPayment.amount = totalCost
-'		orderPayment.orderId = orderInfoObj.orderId
 		wait for (payment.QueryPaymentMethod(orderPayment)) complete(queryResult As Boolean)
-'		Dim test As Boolean
-'		test = True
 	End If
 End Sub
 
@@ -316,23 +318,6 @@ Public Sub HandleOrderStatusList(orderStatusStr As String)
 		orderListObj = orderListObj.XmlDeserialize(xmlStr) ' TODO - need to get the deserializer working?
 		If orderListObj.customerId <> 0 Then ' XML string was deserialised OK
 			DisplayOrderList(orderListObj.order, orderListObj.overflowFlag)
-	'		Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Record used to mark of end of list or invalid item.
-	'		invalidItem.status = modConvert.statusUnknown
-	'		lvwOrderSummary.Clear
-	'		If orderListObj.customerId <> 0 Then ' XML string was deserialised OK
-	'			If orderListObj.order.Size > 0 Then ' List contains orders
-	'				For Each order As clsEposOrderStatus In orderListObj.order
-	'					AddOrderEntryToListview(order)
-	'				Next
-	'				If orderListObj.overflowFlag Then ' Order list overflowed?
-	'					lvwOrderSummary.AddTextItem("More orders....", invalidItem)
-	'				End If
-	'			Else ' No orders found in order list
-	'				lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
-	'			End If
-	'		Else ' XML failed to deserialise properly
-	'			lvwOrderSummary.AddTextItem("Error reading order list" & CRLF & "Please retry", invalidItem)
-	'		End If
 		End If
 		displayUpdateInProgress = False
 	End If
@@ -455,15 +440,6 @@ Public Sub UpdateOrderStatus(statusObj As clsEposOrderStatus)
 			currentItems.Add(statusObj)
 		End If
 		lvwOrderSummary.Clear
-'		If currentItems.Size > 0 Then
-'			For Each listStatus As clsEposOrderStatus In currentItems
-'				AddOrderEntryToListview(listStatus )
-'			Next
-'		Else ' No orders left in order list
-'			Dim invalidItem As clsEposOrderStatus : invalidItem.Initialize	' Used to mark end of list or invalid item.
-'			invalidItem.status = modConvert.statusUnknown
-'			lvwOrderSummary.AddTextItem("No active orders found", invalidItem)
-'		End If
 		DisplayOrderList(currentItems, False)
 		displayUpdateInProgress = False
 	End If
@@ -564,7 +540,7 @@ Private Sub ExitToSelectPlayCentre
 	StartActivity(aSelectPlayCentre3)
 #else 'B4I
 	Main.SendMessage(msg)
-	frmXSelectPlayCentre3.Show				
+	xSelectPlayCentre3.Show				
 #end if
 End Sub
 
@@ -631,51 +607,6 @@ Private Sub ProgressShow(message As String)
 	progressbox.Show(message)
 End Sub
 
-' Query and implement payment operation
-' *** Very similar to code in hPlaceOrder.QueryPayment().
-'Private Sub QueryPayment(orderPayment As clsOrderPaymentRec) 
-'	Dim msg As String
-'	If Starter.myData.centre.acceptCards Then ' Cards accepted
-'		msg = "Payment is required before your order can be processed." & CRLF & "How do you want to pay?"
-'		If Starter.myData.customer.cardAccountEnabled Then ' Included Saved Card as an option?
-'#if B4A
-'			xui.Msgbox2Async(msg, "Payment Options", "Saved" & CRLF & " Card", "Cash", "Another" & CRLF & " Card", Null)
-'#else ' B4i - don't support CRLF in button text.
-'			xui.Msgbox2Async(msg, "Payment Options", "Saved Card", "Cash", "Another Card", Null)
-'#end if
-'		Else ' ELSE no saved card available.
-'#if B4A
-'			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
-'#else ' B4i - don't support CRLF in button text.
-'			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
-'#end if						
-'		End If
-'		Wait For MsgBox_Result(Result As Int)
-'		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
-'#if B4A
-'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, True)
-'#else ' b4i
-'			xCardEntry.CardEntryAndOrderPayment(orderPayment, True)
-'#end if
-'		else if Result = xui.DialogResponse_Cancel Then ' Cash?
-'			msg = "Please go to the counter to pay."
-'			xui.Msgbox2Async(msg, "Cash Payment", "OK", "", "", Null)
-'			Wait For MsgBox_Result(Result2 As Int)
-'		Else ' Another Card?
-'#if B4A
-'			CallSubDelayed3(aCardEntry, "CardEntryAndOrderPayment", orderPayment, False)
-'#else ' B4i
-'			xCardEntry.CardEntryAndOrderPayment(orderPayment, False)
-'#end if
-'		End If
-'	Else ' Cards not accepted - must go to the counter
-'		msg = "Payment is required before your order can be processed." & CRLF & "Please go to the counter."
-'		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
-'		Wait For MsgBox_Result(Result3 As Int)
-'	End If
-'	Return True
-'End Sub
-
 ' Report no internet detected.
 Private Sub ReportNoInternet
 	xui.MsgboxAsync("Unable to continue without a working Internet connection.", "No Internet!" )
@@ -702,7 +633,6 @@ Private Sub StartPlaceOrder()
 		Else ' Menu error = resync data.
 			xui.MsgboxAsync("Your will need to resync your menu with the Centre.", "Menu out of date!" )
 			Wait For Msgbox_Result (Result As Int)
-
 			syncDb.InvokeDatabaseSync
 		End If
 	End If
