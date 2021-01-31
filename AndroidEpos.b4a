@@ -185,8 +185,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 196                                                                                                                                                                 
-	' Date......: 30/01/21
+	' Release...: 197                                                                                                                                                                
+	' Date......: 31/01/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -289,8 +289,15 @@ Version=10.5
 	' Details...:  New: aChangeSettings_v1, aChangeAcountInfo_v1, aAbout_v1, aValidateCentreSelection2_v1.
 	'				Mod: hSelectPlayCentre3_v15, hAbout_v10, hCheckAccountStatus_v24, hHome_v15,
 	'						hValidateCentreSelection2_v12, aSelectPlayCentre3_v5, hChangeAccountInfo_v20,
-	'						Starter_v92, hChangeSettings2_v5, hCardEntry_v22, clsPayment_v3.
+	'						Starter_v92, hChangeSettings2_v5, hCardEntry_v22, clsPayment_v3, clsApiHelper_v12.
 	'               Removed: ChangeSettings_v16, ChangeAccountInfo_v8, About_v4, ValidateCentreSelection2_v3
+	'
+	' Date......: 31/01/21
+	' Release...: 197
+	' Overview..: Bugfix (Android) Change settings and Change account info not working. 
+	'             Issue: Fix to deal with problems with showing progress during payment.
+	' Amendee...: D Morris
+	' Details...: Mod: hSelectPlayCentre3_v15, hHome_v16, aHome_v5.
 	'
 	' Date......: 
 	' Release...: 
@@ -305,8 +312,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 196
-	#VersionName: 1.0.0.196
+	#VersionCode: 197
+	#VersionName: 1.0.0.197
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

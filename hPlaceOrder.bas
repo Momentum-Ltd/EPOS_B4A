@@ -387,13 +387,16 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 		If responseObj.queuePosition < 1 Then queueStr = ""
 		msg = "Your order is being processed, and is" & queueStr & " in the queue."
 		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
-		Wait For MsgBox_Result(Result As Int)
+		Wait For MsgBox_Result(result As Int)
 	'	ExitToCentreHomePage
 	Else If responseObj.status = modConvert.statusWaitingForPayment Then ' Payment required before order is processed
 		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize (responseObj.orderId, responseObj.amount)
-'		orderPayment.amount = responseObj.amount
-'		orderPayment.orderId = responseObj.orderId
-		wait for (QueryPayment(orderPayment)) complete(Result1 As Boolean)
+'		wait for (QueryPayment(orderPayment)) complete(Result1 As Boolean)
+#if B4A
+		CallSubDelayed2(aHome, "QueryAndMakePayment", orderPayment)
+#else ' B41
+		xHome.QueryAndMakePayment(orderPayment)
+#End If
 	End If
 	ExitToCentreHomePage
 End Sub
