@@ -304,6 +304,6 @@ ModuleClosedNodes96=
 ModuleClosedNodes97=
 ModuleClosedNodes98=
 ModuleClosedNodes99=
-NavigationStack=aPlaceOrder,Activity_Resume,95,0,hPlaceOrder,ResumeOp,486,0,hPlaceOrder,txtTableNumber_EnterPressed,315,0,hPlaceOrder,txtTableNumber_TextChanged,321,0,hPlaceOrder,QueryDisplayKeyboard,656,0,hPlaceOrder,HideKeyboard,585,0,hPlaceOrder,ShowKeyboard_B4A,790,0,hPlaceOrder,ShowKeyboard,782,4,hPlaceOrder,InitializeLocals,607,0,aHome,Activity_Pause,83,0,hHome,LeaveCentre,345,0
+NavigationStack=hPlaceOrder,ResumeOp,486,0,hPlaceOrder,txtTableNumber_EnterPressed,315,0,hPlaceOrder,txtTableNumber_TextChanged,321,0,hPlaceOrder,QueryDisplayKeyboard,656,0,hPlaceOrder,HideKeyboard,585,0,hPlaceOrder,ShowKeyboard_B4A,790,0,hPlaceOrder,ShowKeyboard,782,4,hPlaceOrder,InitializeLocals,607,0,aHome,Activity_Pause,83,0,hHome,LeaveCentre,345,0,Visual Designer,frmCardEntry.bal,-100,1
 SelectedBuild=1
 VisibleModules=

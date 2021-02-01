@@ -185,8 +185,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 197                                                                                                                                                                
-	' Date......: 31/01/21
+	' Release...: 198                                                                                                                                                                
+	' Date......: 01/02/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -299,6 +299,13 @@ Version=10.5
 	' Amendee...: D Morris
 	' Details...: Mod: hSelectPlayCentre3_v15, hHome_v16, aHome_v5.
 	'
+	' Date......: 01/02/21
+	' Release...: 198
+	' Overview..: Mod: Entry Card screen (Test and Submit buttons arranges as on iOS)
+	'			  Mod: uses latest version of hHome.
+	' Amendee...: D Morris
+	' Details...: FORMS: frmCardEntry_v11, hHome_v17.
+	'
 	' Date......: 
 	' Release...: 
 	' Overview..: 
@@ -312,8 +319,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 197
-	#VersionName: 1.0.0.197
+	#VersionCode: 198
+	#VersionName: 1.0.0.198
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
