@@ -42,7 +42,6 @@ Sub Globals
 	Private hc As hValidateCentreSelection2		' This activity's helper class.
 End Sub
 
-
 ' Back button pressed in title bar
 Private Sub Activity_ActionBarHomeClick
 	Activity.Finish

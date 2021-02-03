@@ -185,8 +185,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 198                                                                                                                                                                
-	' Date......: 01/02/21
+	' Release...: 199                                                                                                                                                               
+	' Date......: 03/02/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -278,7 +278,7 @@ Version=10.5
 	' Amendee...: D Morris
 	' Details...: New: aQueryNewInstall_v1, aCreateAccount_v1, aValidateDevice_v1.
 	'			  Mod: hCheckAccountStatus_v23, hSelectPlayCentre3_v14, hCreateAccount_v22, hValidateDevice_v23, clsEposApiHelper_v11.
-	'						clsCustomerInfo_v10, clsKeyboardHelper_v2, hPlaceOrder_v32, clsEposApiHelper_v12.
+	'						clsCustomerInfo_v10, clsKeyboardHelper_v2, hPlaceOrder_v32, clsEposApiHelper_v12, hQueryNewInstall_v8.
 	'		      Rmoved: QueryNewInstall_v8, CreateAccount_v7, ValidateDevice_V5.
 	'
 	' Date......: 30/01/21
@@ -301,10 +301,19 @@ Version=10.5
 	'
 	' Date......: 01/02/21
 	' Release...: 198
-	' Overview..: Mod: Entry Card screen (Test and Submit buttons arranges as on iOS)
+	' Overview..: Mod: Entry Card screen (Test and Submit buttons now arranged as on iOS versions)
 	'			  Mod: uses latest version of hHome.
 	' Amendee...: D Morris
-	' Details...: FORMS: frmCardEntry_v11, hHome_v17.
+	' Details...: FORMS: frmCardEntry_v11.
+	'			   Mods: hHome_v17.
+		'
+	' Date......: 03/02/21
+	' Release...: 199
+	' Overview..: General Maintenances fixes.
+	' Amendee...: D Morris
+	' Details...: Mod:	clsEposApiHelper_v13, aSelectPlayCentre3_v6, hSelectPlayCentre3_v17,
+	'						hChangeAccountInfo_v21, hCreateAccount_v23, hValidateDevice_v24, hChangeSettings2_v6,
+	'						hCheckAccountStatus_v25, hHome_v18.
 	'
 	' Date......: 
 	' Release...: 
@@ -319,8 +328,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 198
-	#VersionName: 1.0.0.198
+	#VersionCode: 199
+	#VersionName: 1.0.0.199
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

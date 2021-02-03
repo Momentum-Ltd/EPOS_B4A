@@ -53,6 +53,12 @@ Version=10
 	' 
 	' Date......: 
 	' Release...: 
+	' Overview..: Maintenance code reduction. 
+	' Amendee...: D Morris.
+	' Details...: Mod: WebSignedOntoCentre() uses clsEposApiHelper.
+	' 
+	' Date......: 
+	' Release...: 
 	' Overview..: 
 	' Amendee...: 
 	' Details...: 
@@ -315,21 +321,23 @@ End Sub
 
 ' Informs the Web Server that this device has signed onto a centre.
 Private Sub WebSignedOntoCentre As ResumableSub
-	Dim signonSuccessful As Boolean = False
-	
-	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
-	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & Starter.myData.customer.customerIdStr & _
-								"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_SET_SIGNON & _
-								"&" & modEposWeb.API_SETTING_1 & "=" & Starter.myData.centre.centreId & _
-								"&" & modEposWeb.API_SETTING_2 & "=1"
-	Dim jsonToSend As String = ""
-	job.PutString(urlStrg, jsonToSend)
-	job.GetRequest.SetContentType("application/json;charset=UTF-8")
-	Wait For (job) JobDone(job As HttpJob)
-	If job.Success And job.Response.StatusCode = 200 Then
-		signonSuccessful = True
-	End If
-	job.Release
+'	Dim signonSuccessful As Boolean = False
+'	
+'	Dim job As HttpJob : job.Initialize("UseWebAPI", Me)
+'	Dim urlStrg As String = Starter.server.URL_CUSTOMER_API & "/" & Starter.myData.customer.customerIdStr & _
+'								"?" & modEposWeb.API_SETTING & "=" & modEposWeb.API_SET_SIGNON & _
+'								"&" & modEposWeb.API_SETTING_1 & "=" & Starter.myData.centre.centreId & _
+'								"&" & modEposWeb.API_SETTING_2 & "=1"
+'	Dim jsonToSend As String = ""
+'	job.PutString(urlStrg, jsonToSend)
+'	job.GetRequest.SetContentType("application/json;charset=UTF-8")
+'	Wait For (job) JobDone(job As HttpJob)
+'	If job.Success And job.Response.StatusCode = 200 Then
+'		signonSuccessful = True
+'	End If
+'	job.Release
+	Dim apiHelper As clsEposApiHelper : apiHelper.Initialize
+	wait for (apiHelper.WebSignedOntoCentre) complete(signonSuccessful As Boolean)
 	Return signonSuccessful
 End Sub
 #End Region  Local Subroutines
