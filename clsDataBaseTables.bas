@@ -403,7 +403,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	Log("Parsing XML complete:" & timeStamp )
 	If dataBaseTables.Get("mainCatTable") Is Map Then	' Bit of protection - Check if main cat available
 		Dim mainCatList As Map = dataBaseTables.Get("mainCatTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If mainCatList.Get("clsMainCategoryTableRec") Is List Then ' List of main category records?
 			Dim localMainCatList As List = mainCatList.Get("clsMainCategoryTableRec")
 			For Each item As Map In localMainCatList
@@ -417,7 +416,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Update Sub Category table
 	If dataBaseTables.Get("subCatTable") Is Map Then	' Bit of protection - Check if sub cat available
 		Dim subCatList As Map = dataBaseTables.Get("subCatTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If subCatList.Get("clsSubCategoryTableRec") Is List Then ' List of sub category records?
 			Dim localSubCatList As List = subCatList.Get("clsSubCategoryTableRec")
 			For Each item As Map In localSubCatList
@@ -431,7 +429,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Update Size Option table
 	If dataBaseTables.Get("sizeOptTable") Is Map Then	' Bit of protection - Check if Size Option available
 		Dim sizeOptionList As Map = dataBaseTables.Get("sizeOptTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If sizeOptionList.Get("clsSizeOptionTableRec") Is List Then ' List of size option records?
 			Dim localSizeOptionList As List = sizeOptionList.Get("clsSizeOptionTableRec")
 			For Each item As Map In localSizeOptionList
@@ -445,7 +442,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Udpate Size Price table
 	If dataBaseTables.Get("sizePriceTable") Is Map Then	' Bit of protection - Check if Size Price available
 		Dim sizePriceList As Map = dataBaseTables.Get("sizePriceTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If sizePriceList.Get("clsSizePriceTableRec") Is List Then ' List of size price records?
 			Dim localSizePriceList As List = sizePriceList.Get("clsSizePriceTableRec")
 			For Each item As Map In localSizePriceList
@@ -459,7 +455,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Udpate Group Category table
 	If dataBaseTables.Get("groupCatTable") Is Map Then	' Bit of protection - Check if Group category available
 		Dim groupCatList As Map = dataBaseTables.Get("groupCatTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If groupCatList.Get("clsGroupCategoryTableRec") Is List Then ' List of group category records?
 			Dim localGroupCatList As List = groupCatList.Get("clsGroupCategoryTableRec")
 			For Each item As Map In localGroupCatList
@@ -474,7 +469,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Udpate Goods table
 	If dataBaseTables.Get("goodsTable") Is Map Then	' Bit of protection - Check if Goods available
 		Dim goodsList As Map = dataBaseTables.Get("goodsTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If goodsList.Get("clsGoodsTableRec") Is List Then ' List of groups category records?
 			Dim localGoodsList As List = goodsList.Get("clsGoodsTableRec")
 			For Each item As Map In localGoodsList
@@ -489,9 +483,7 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Update Description table
 	If dataBaseTables.Get("descriptionTable")  Is Map Then	' Bit of protection - Check if Descriptions available
 		Dim descriptionList As Map = dataBaseTables.Get("descriptionTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If descriptionList.Get("clsDescriptionTableRec") Is List Then ' List description records?
-	'		Dim localDescriptionList As List = descriptionList.Get("clsDesciptionTableRec")
 			Dim localDescriptionList As List : localDescriptionList.initialize() ' Not sure why we must initialize this List (when ok above and below).
 			localDescriptionList = descriptionList.Get("clsDescriptionTableRec")
 			For Each item As Map In localDescriptionList
@@ -506,7 +498,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 	' Udpate Preparation table
 	If dataBaseTables.Get("preparationTable") Is Map Then	' Bit of protection - Check if perparations are available
 		Dim preparationList As Map = dataBaseTables.Get("preparationTable")
-		' Fix to deal with single and no items - based on https://www.b4x.com/android/forum/threads/xml2map-error-while-parsing-rss.75274/#post-478013'
 		If preparationList.Get("clsPreparationTableRec") Is List Then ' List of groups category records?
 			Dim localPreparationList As List = preparationList.Get("clsPreparationTableRec")
 			For Each item As Map In localPreparationList
@@ -517,7 +508,6 @@ Public Sub XmlDeserialize(xmlString As String) As clsDataBaseTables
 			localRetObject.preparationTable.Add(lGetPreparationRec(preparationListMap))
 		End If
 	End If
-	
 	Return localRetObject
 	
 End Sub

@@ -105,12 +105,12 @@ Public Sub HandleOrderInfo(orderInfoStr As String)
 	hc.HandleOrderInfo(orderInfoStr)
 End Sub
 
-' Handles the Order Start repsonse from the Server by displaying a relevant messagebox and then starting the Show Order activity.
+' Handles the Order Start response from the Server by displaying a relevant messagebox and then starting the Show Order activity.
 Public Sub HandleOrderStart(orderStartStr As String)
 	hc.HandleOrderStart(orderStartStr)
 End Sub
 
-' Displays a list of orders statuses.
+' Displays a list of order status.
 Public Sub HandleOrderStatusList(orderStatusStr As String)
 	hc.HandleOrderStatusList(orderStatusStr)
 End Sub

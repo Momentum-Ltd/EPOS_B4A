@@ -185,8 +185,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 199                                                                                                                                                               
-	' Date......: 03/02/21
+	' Release...: 200                                                                                                                                                               
+	' Date......: 06/02/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -194,119 +194,9 @@ Version=10.5
 	' for releases v152 - 162 see release v163
 	' for releases v163 - 173 see release v177.
 	' for releases v174 - 182 see release v183.
-	' for releases v183 - 188 see release v189
-	'		
-	' Date......: 28/11/20
-	' Release...: 189
-	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
-	' Amendee...: D Morris
-	' Details...:    New: clsSyncDatabase_v1.
-	'				 Mod: Starter_v89, hHome_v11, hValidateCentreSelection2_v9, aHome_v3.
-	'			  Rmoved: aSyncDatabase, frmSyncDatabase, hSyncDatabase.
-	'		
-	' Date......: 06/01/21
-	' Release...: 190
-	' Overview..: Bugfix: Check account not showing sign-on long enough when restarted.
-	'			  Bugfix: (Android) Hyperlinks no underlined (iOS) Hyperlinks now correctly displayed. 
-	'             Bugfix: Settings form and Get location EPOS message - Display location option now works.
-	'             Bugfix #0570 Crashes when search radius increased to > 999.	
-	'			  Bugfix: #0571 Place order - problem if table number not a number digit.	
-	'             Bugfix: #0572 (Android) Place order cursor missplaced after backspace or non number digit entered. 
-	'			  Issue: #0360 Place order backbutton clears order - confirmation required.
-	'             Issue: #0475 Card operation - internal problem with callback. 
-	'             Issue: #0482 Auto retry on non-activated account.
-	'             Issue: #0486 Create account remembering email and password.
-	'			  Issue: #0559 Email address now included in activation messages.
-	'			  Issue: #0561 Uses web viewer for viewing website information. 
-	' Amendee...: D Morris
-	' Details...:  New: clsEposApiResponse_v1
-	'				Mod: hCheckAccountStatus_v20, CheckAccountStatus_v9, hSelectPlayCentre3_v10, clsEposApiHelper_v10,
-	'						hValidateDevice_v18, hCreateAccount_v18, hValidateCentreSelection2_v10, modEposWeb_v13, 
-	'						hAbout_v8, hPlaceOrder_v27, clsStripe_v6, hChangeSettings2_v3.
-	'			  FORMS: frmValidateCentreSelection3_v5, frmCreateAccount_v7, frmChangeAccountInfo_v5. frmAbout_v4, frmChangeSettings2_v2.
-	'			    Mod: ModEposApp_v29, hPlaceOrder_v28, clsConfigSettings_v19, hCheckAccountStatus_v21, hSelectPlayCentre3_v11, hAbout_v9,
-	'						hCreateAccount_v19, hChangeAccountInfo_v16, hValidateCentreSelection2_v11, hValidateDevice_v19, clsSyncDatabase_v2,
-	'						clsLocationCoordinates_v1, Starter_v90, clsLocation_v4, hCardEntry_v18, hChangeSettings2_v3.
-	'		
-	' Date......: 20/01/21
-	' Release...: 191
-	' Overview..: Bugfix: #0464 - Save card option now works correctly.
-	'			  Bugfix: #0578 - Payment message orderId is now included in the message.
-	'			  Bugfix: #0583 - Payment query saved card option is now not shown when no saved card available.
-	' Amendee...: D Morris.
-	' Details...: Added: clsEposPublicCardInfo_v1.
-	'			  FORMS: frmCardEntry_v9.
-	'			   Mods: clsEposCustomerOrderResponse_v4, clsEposCustomerPayment_v6, hCardEntry_v19, hHome_v12, hPlaceOrder_v29.
-	'			   Mods: aPlaceOrder_v12.
-	'		
-	' Date......: 23/01/21
-	' Release...: 192
-	' Overview..: Maintenance release (internal only) - Update to latest standards CheckAccountStatus and associated modules. 
-	' Amendee...: D Morris
-	' Details...:  Mod: Activity_Create() now calls aCheckAccountStatus().
-	'				  New: xCheckAccountStatus_v1.
-	'             Removed: CheckAccountStatus.
-	'			      Mod: ChangeAccountInfo_V8, hChangeAccountInfo_v17, hCheckAccountStatus_v23, hCreateAccount_V20,
-	'							hHome_V13, hQueryNewInstall_v7, hSelectPlayCentre3_v12, hValidateDevice_v20.
-	'		
-	' Date......: 24/01/21
-	' Release...: 193
-	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
-	'			  Bugfix: #0582 - Underline "Forgot password" hyperlink.
-	'             Bugfix: Missed underlining of hyperlink done - hValidateDevice.
-	' Amendee...: D Morris
-	' Details...: Added: clsPayment_v1.
-	'			    Mod: hHome_v14, aHome_v4, Starter_v91, hCardEntry_v20, hPlaceOrder_v30, aPlaceOrder_v13.
-	'						aCardEntry_v9, clsOrderPaymentRec_v2, hValidateDevice_v21, hChangeAccountInfo_v18.
-	'		
-	' Date......: 27/01/21
-	' Release...: 194
-	' Overview..: Bugfix: #0586 Order only contains last entered item.
-	'			  Maintenance: New keyboard helper class To reduce code and improve keyboard handling.
-	'             Mod: Select Centre now show the Progress indication whilst selecting centre. 			  
-	' Amendee...: D Morris
-	' Details...: New: clsKeyboardHelper_v1.
-	'			  Mod: hValidateDevice_v22, hCardEntry_v21, hChangeAccountInfo_v19, hCreateAccount_v21,
-	'						hPlaceOrder_v31, hSelectPlayCentre3_v13, clsLocation_v5, clsPayment_v2, hChangeSettings2_v4
-	'			  FORMS: frmChangeAccountInfo_v6, frmChangeSettings2_v3, frmValidateDevice_v8, frmCreateAccount_v8, frmCardEntry_v10,
-	'						frmPlaceOrder_v6.
+	' for releases v183 - 188 see release v189.
+	' for releases v189 = 198 see release v199.
 	'
-	' Date......: 28/01/21
-	' Release...: 195
-	' Overview..: Bugfix: #0587 - Not returning to the Home screen after paying cash for an order. 
-	'				Maintenance release - Support for renamed QueryNewInstall, CreateAccount and ValidateDevice.
-	' Amendee...: D Morris
-	' Details...: New: aQueryNewInstall_v1, aCreateAccount_v1, aValidateDevice_v1.
-	'			  Mod: hCheckAccountStatus_v23, hSelectPlayCentre3_v14, hCreateAccount_v22, hValidateDevice_v23, clsEposApiHelper_v11.
-	'						clsCustomerInfo_v10, clsKeyboardHelper_v2, hPlaceOrder_v32, clsEposApiHelper_v12, hQueryNewInstall_v8.
-	'		      Rmoved: QueryNewInstall_v8, CreateAccount_v7, ValidateDevice_V5.
-	'
-	' Date......: 30/01/21
-	' Release...: 196
-	' Overview..: Mod: Renamed for iOS frmXSelectPlayCentre3 to xSelectPlayCentre3.
-	'			  Mod: Renamed ChangeSettings and ChangeAccountInfo
-	' Amendee...: D Morris
-	' Details...:  New: aChangeSettings_v1, aChangeAcountInfo_v1, aAbout_v1, aValidateCentreSelection2_v1.
-	'				Mod: hSelectPlayCentre3_v15, hAbout_v10, hCheckAccountStatus_v24, hHome_v15,
-	'						hValidateCentreSelection2_v12, aSelectPlayCentre3_v5, hChangeAccountInfo_v20,
-	'						Starter_v92, hChangeSettings2_v5, hCardEntry_v22, clsPayment_v3, clsApiHelper_v12.
-	'               Removed: ChangeSettings_v16, ChangeAccountInfo_v8, About_v4, ValidateCentreSelection2_v3
-	'
-	' Date......: 31/01/21
-	' Release...: 197
-	' Overview..: Bugfix (Android) Change settings and Change account info not working. 
-	'             Issue: Fix to deal with problems with showing progress during payment.
-	' Amendee...: D Morris
-	' Details...: Mod: hSelectPlayCentre3_v15, hHome_v16, aHome_v5.
-	'
-	' Date......: 01/02/21
-	' Release...: 198
-	' Overview..: Mod: Entry Card screen (Test and Submit buttons now arranged as on iOS versions)
-	'			  Mod: uses latest version of hHome.
-	' Amendee...: D Morris
-	' Details...: FORMS: frmCardEntry_v11.
-	'			   Mods: hHome_v17.
-		'
 	' Date......: 03/02/21
 	' Release...: 199
 	' Overview..: General Maintenances fixes.
@@ -314,6 +204,13 @@ Version=10.5
 	' Details...: Mod:	clsEposApiHelper_v13, aSelectPlayCentre3_v6, hSelectPlayCentre3_v17,
 	'						hChangeAccountInfo_v21, hCreateAccount_v23, hValidateDevice_v24, hChangeSettings2_v6,
 	'						hCheckAccountStatus_v25, hHome_v18.
+	'
+	' Date......: 06/02/21
+	' Release...: 200
+	' Overview..: General Maintenances fixes (Starting at Home).
+	' Amendee...: D Morris
+	' Details...: Mod: hHome_v19, aCardEntry_v10, hCardEntry_v23, aPlaceOrder_v14, hPlaceOrder_v33, aSelectItem_v9,
+	'						hSelectItem_v14, hChangeSettings2_v7.
 	'
 	' Date......: 
 	' Release...: 
@@ -328,8 +225,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 199
-	#VersionName: 1.0.0.199
+	#VersionCode: 200
+	#VersionName: 1.0.0.200
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	

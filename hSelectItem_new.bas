@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hSelectItem
-	' Release...: 14
-	' Date......: 06/02/21
+	' Release...: 13-
+	' Date......: 04/02/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -40,7 +40,7 @@ Version=9.5
 	' Overview..: Issue: #0338 Item size dropdown problem.
 	' Amendee...: D Morris
 	' Details...: Mod: frmSelectItem.bal - lblItemSize overlays spnItemSize on only one selection available.
-	'		      Mod: PopulateListviewAtLevel() and pEditItem() will now display spinner for multiple items or label for single items.
+	'		      Mod: PopulateListView() and pEditItem() will now display spinner for multiple items or label for single items.
 	'
 	' Date......: 11/05/20
 	' Release...: 11
@@ -64,8 +64,8 @@ Version=9.5
 	'			  Mod: replace lvwItemSize ursListView with customListView.
 	'			  Mod: GetSizeName() now used version of clsDataBaseTables.
 	'
-	' Date......: 06/02/21
-	' Release...: 14
+	' Date......: 
+	' Release...: 
 	' Overview..: General maintenance. 
 	' Amendee...: D Morris
 	' Details...:   Mod: old commented code removed.
@@ -114,17 +114,17 @@ Sub Class_Globals
 	Private btnIncQty As B4XView 				' The button which increments the item quantity.
 #if B4I
 	Private btnItemSize As Button 				' The button which invokes the lvwItemSize listview palette to be displayed.
-	Private btnMoreSizes As SwiftButton			' The button to show more sizes options list.
+	Private btnMoreSizes As SwiftButton				' The button to show more sizes options list.
 #End If
 	Private btnTopLevel As SwiftButton 			' The button which returns the user to the top (Main Category) level of the selection tree.
 	Private btnUpOneLevel As SwiftButton		' The button which returns the user to the previous selection level.
 	Private imgSuperorder As B4XView 			' SuperOrder header icon.
 	Private lblQty As B4XView 					' The label which displays the currently selected item quantity.
 	Private lblSelection As B4XView 			' The label which displays the current selection and its 'path' (parent categories).
+
 	Private lblTotal As B4XView 				' The label which displays the item subtotal (item's individual cost * quantity).
 	Private lvwSelectItem As CustomListView		' The listview used to display the selection choices available at the current level.
-
-#if b4i
+#if B4i
 	Private lvwItemSize As CustomListView 		' The listview which can be shown to allow the user to select the desired item size option.
 	Private pnlSizeMask As Panel 				' The full-screen-size panel, used to block controls beneath the Size listview from being clicked.
 #End If
@@ -137,9 +137,14 @@ Sub Class_Globals
 #else ' B4I
 	' TODO need a spinner for B4I.
 #End If
-	
+
 	' Misc objects	
 	Private notification As clsNotifications	' Handles notifications
+End Sub
+
+' Cancel the Select Item process.
+Public Sub CancelSelectItem
+	ExitToPlaceOrder
 End Sub
 
 'Initializes the object. You can add parameters to this method if needed.
@@ -155,6 +160,7 @@ End Sub
  ' Handles the Click event of the Add/Update Item button.
 Private Sub btnAddUpdateItem_Click
 	Dim duplicateItemFound As Boolean
+	
 	If btnAddUpdateItem.xLBL.Text = BTNTEXT_ADD Then ' The user is adding a new item to the order
 		If Starter.customerOrderInfo.IsItemFound(mSelectedSizePriceKey) = False Then
 			Starter.customerOrderInfo.AddItem(mSelectedSizePriceKey, lblQty.Text)
@@ -178,11 +184,16 @@ Private Sub btnAddUpdateItem_Click
 	End If
 	
 	If duplicateItemFound Then
-		' TODO - Should this update the existing item's quantity? (Need to query the customer just in-case they are not aware it's duplicated
+		' TODO - should this instead update the existing item's quantity (and notify the customer)?
 		Dim itemDuplicatedMsg As String = "An identical item already exists in the order." & CRLF & "The item will not " & _
-												"be added – please edit the previous entry and change its quantity instead."
+												"be added – please edit the previous entry and increase its quantity instead."
+#if B4A
 		xui.Msgbox2Async(itemDuplicatedMsg, "Duplicate Item", "OK", "", "", Null) ' Don't allow the user to cancel the message
 		Wait For Msgbox_Result (Result As Int) ' Only proceed when the user has acknowledged the message
+#else ' B4I 
+		Msgbox2("duplicateMsg", itemDuplicatedMsg, "Duplicate Item", Array("OK"))
+		 ' See the duplicateMsg_Click() handler for continuation, as it should only proceed when the user has dismissed the message
+#End If
 	End If
 	ExitToPlaceOrder
 End Sub
@@ -198,6 +209,7 @@ End Sub
 
 ' Handles the Click event of the Delete Item button.
 Private Sub btnDelete_Click
+	' TODO - Should there be a confirmation request at this point?
 	Starter.customerOrderInfo.orderList.RemoveAt(mEditingOrderItem)
 	ExitToPlaceOrder
 End Sub
@@ -231,6 +243,11 @@ End Sub
 ' Handles the Click event of the Up One Level button.
 Private Sub btnUpOneLevel_Click
 	GoUpALevel
+End Sub
+
+' Asynchronously handles a button being pressed on the "duplicate item" message box invoked in btnAddUpdateItem_Click()
+Private Sub duplicateMsg_Click(ButtonText As String)
+	ExitToPlaceOrder ' Message has been read, just close the form
 End Sub
 
 ' Handle back button
@@ -274,12 +291,6 @@ End Sub
 #End Region  Event Handlers
 
 #Region  Public Subroutines
-
-' Cancel the Select Item process.
-Public Sub CancelSelectItem
-	ExitToPlaceOrder
-End Sub
-
 ' Sets up the form to modify the specified item which currently exists in teh order's item list.
 Public Sub EditItem(orderIndex As Int)
 	' Set up the form's views as required
@@ -287,6 +298,7 @@ Public Sub EditItem(orderIndex As Int)
 	btnDelete.mBase.Visible = True
 	btnAddUpdateItem.xLBL.Text = BTNTEXT_UPDATE
 	btnAddUpdateItem.mBase.Visible = True
+	
 	' Get the specified order item's info and display the relevant selection level
 	Dim customerOrderObj As clsCustomerOrderItemRec = Starter.customerOrderInfo.orderList.Get(orderIndex)
 	Dim sizePriceObj As clsSizePriceTableRec = Starter.DataBase.GetSizePriceRec(customerOrderObj.priceId)
@@ -295,8 +307,8 @@ Public Sub EditItem(orderIndex As Int)
 	mSelectedSubCatKey = goodsTableObj.subCategory
 	mSelectedGroupCatKey = goodsTableObj.groupCategory
 	mSelectedGoodsDescKey = goodsTableObj.key
-	PopulateListviewAtLevel(LEVEL_SIZEPRICE)
-	mSelectedSizePriceKey = sizePriceObj.key ' Must occur after PopulateListviewAtLevel as it sets this member to default
+	PopulateListView(LEVEL_SIZEPRICE)
+	mSelectedSizePriceKey = sizePriceObj.key ' Must occur after PopulateListView as it sets this member to default
 #if B4A
 	' Get and select the relevant item in the Size spinner
 	mItemSizePriceTable = Starter.DataBase.SortSizePrice(mSelectedGoodsDescKey)
@@ -381,83 +393,22 @@ Private Sub GetSizeName(sizePriceKey As Int) As String
 End Sub
 #End If
 
-' Get a list of items available at the specified level.
-' Return list of item objects (the type is dependant on the level).
-private Sub GetItemList(level As Int) As List
-	Dim itemList As List : itemList.Initialize
-	Select Case (level)
-		Case LEVEL_MAINCAT
-			itemList  = Starter.DataBase.mainCatTable
-		Case LEVEL_SUBCAT
-			itemList = Starter.DataBase.SortSubCat(mSelectedMainCatKey)
-		Case LEVEL_GROUPCAT
-			itemList = Starter.DataBase.SortGrpCat(mSelectedSubCatKey, mSelectedMainCatKey)
-		Case LEVEL_GOODSDESC
-			itemList = Starter.DataBase.SortGoods(mSelectedGroupCatKey, mSelectedSubCatKey, mSelectedMainCatKey)
-		Case Else 'LEVEL_SIZEPRICE
-			Starter.DataBase.SortSizePrice(mSelectedGoodsDescKey)
-	End Select
-	Return itemList
-End Sub
-
-' Get next lower level
-' Returns the next lower level (returns lowest level if already at that level).
-private Sub GetNextLowerLevel(currentLevel As Int) As Int
-	Dim newlevel As Int = LEVEL_SIZEPRICE
-	Select Case (currentLevel)
-		Case LEVEL_MAINCAT
-			newlevel = LEVEL_SUBCAT
-		Case LEVEL_SUBCAT
-			newlevel = LEVEL_GROUPCAT
-		Case LEVEL_GROUPCAT
-			newlevel = LEVEL_GOODSDESC
-		Case LEVEL_GOODSDESC
-			newlevel = LEVEL_SIZEPRICE
-		Case Else
-			newlevel = LEVEL_SIZEPRICE
-	End Select
-	Return newlevel
-End Sub
-
-' Get the next viewable item list.
-' Return list of item objects (the type is dependant on the level).
-private Sub GetNextViewableItemList(level As Int) As List
-	Dim itemList As List
-	Dim nextLevel As Int = level
-	Do While (True) ' See code below to exit
-		nextLevel = GetNextLowerLevel(nextLevel)
-		itemList = GetItemList(nextLevel)
-		If itemList.Size > 0 Or nextLevel = LEVEL_SIZEPRICE Then ' Items available in this category?
-			If nextLevel = LEVEL_SIZEPRICE Or itemList.Size >= 2 Then
-				mSelectionLevel = nextLevel
-				Exit ' Exit the loop!
-			End If
-			UpdateSelectedCatKey(nextLevel, itemList)
-		Else ' No items in this category.
-			itemList = GetItemList(level) 	' Retun the current item list.
-			xui.MsgboxAsync("There are NO items available in this category. Please select category.", "No items available")
-			Exit ' Exit loop!
-		End If
-	Loop
-	Return itemList
-End Sub
-
 ' Returns the user to the selection level above the currently displayed one.
 ' E.g. if the current level displays Subcategories, the user will be returned to the Main level.
 Private Sub GoUpALevel
 	Select Case mSelectionLevel
 		Case LEVEL_SUBCAT
 			mSelectedMainCatKey = -1
-			PopulateListviewAtLevel(LEVEL_MAINCAT)
+			PopulateListView(LEVEL_MAINCAT)
 		Case LEVEL_GROUPCAT
 			mSelectedSubCatKey = -1
-			PopulateListviewAtLevel(LEVEL_SUBCAT)
+			PopulateListView(LEVEL_SUBCAT)
 		Case LEVEL_GOODSDESC
 			mSelectedGroupCatKey = -1
-			PopulateListviewAtLevel(LEVEL_GROUPCAT)
+			PopulateListView(LEVEL_GROUPCAT)
 		Case LEVEL_SIZEPRICE
 			mSelectedGoodsDescKey = -1
-			PopulateListviewAtLevel(LEVEL_GOODSDESC)
+			PopulateListView(LEVEL_GOODSDESC)
 	End Select
 End Sub
 
@@ -484,19 +435,13 @@ private Sub PopulateSizeDropdown
 End Sub
 #end if 
 
-' Populate the list view.
-' This will automatically move to the next level if only one option is available at the current level (except the bottom level).
-private Sub PopulateListView()
-	GetNextViewableItemList(mSelectionLevel)
-	PopulateListviewAtLevel(mSelectionLevel)
-End Sub
-
 ' Populates the Item Selection listview with the relevant choices at the specified selection level. If the specified
 ' level is LEVEL_SIZEPRICE then the listview will be hidden and the Item Details panel will be populated instead.
-Private Sub PopulateListviewAtLevel(selectLevel As Int)
+Private Sub PopulateListView(selectLevel As Int)
 	Dim itemList As List : itemList.Initialize
 	lvwSelectItem.Clear
 	mSelectionLevel = selectLevel
+	
 	Select Case selectLevel
 		Case LEVEL_MAINCAT
 			ShowTopLevelOnListView
@@ -505,6 +450,7 @@ Private Sub PopulateListviewAtLevel(selectLevel As Int)
 			itemList = Starter.DataBase.SortSubCat(mSelectedMainCatKey)
 			For Each subCat As clsSubCategoryTableRec In itemList
 				lvwSelectItem.AddTextItem(subCat.value, subCat.key)
+
 			Next
 		Case LEVEL_GROUPCAT
 			UpdateSelectionLabel
@@ -560,7 +506,8 @@ Private Sub PopulateListviewAtLevel(selectLevel As Int)
 				If mItemSizePriceTable.Size > 1 Then
 					btnMoreSizes.mBase.Visible = True
 				End If
-#End If			
+#End If
+				
 				Dim sizePriceRec As sizePriceTableRec = mItemSizePriceTable.Get(0)
 				mSelectedSizePriceKey = sizePriceRec.sizePriceKey
 				lblQty.Text = "1"
@@ -596,29 +543,7 @@ Private Sub ShowTopLevelOnListView
 	btnAddUpdateItem.mBase.Visible = False
 	pnlItemDetails.Visible = False
 	'https://www.b4x.com/android/forum/threads/customlistview-visibility-problem.81651/
-	lvwSelectItem.AsView.Visible = True
-End Sub
-
-' Updates the Selected Category key for the specified level
-'   The associated database key of the currently selected Category is updated.
-Private Sub UpdateSelectedCatKey(level As Int, itemList As List)
-	Select Case (level)
-		Case LEVEL_MAINCAT
-			Dim mainCatRec As clsMainCategoryTableRec = itemList.Get(0) ' used to cast types
-			mSelectedMainCatKey = mainCatRec.key
-		Case LEVEL_SUBCAT
-			Dim subCatRec As clsSubCategoryTableRec = itemList.Get(0) ' used to cast types
-			mSelectedSubCatKey = subCatRec.key
-		Case LEVEL_GROUPCAT
-			Dim groupCatRec As clsGroupCategoryTableRec = itemList.Get(0) ' used to cast types
-			mSelectedGroupCatKey = groupCatRec.key
-		Case LEVEL_GOODSDESC
-			Dim goodsCatRec As descriptionAbridgedTableRec = itemList.Get(0) ' used to cast types
-			mSelectedGoodsDescKey = goodsCatRec.key
-		Case Else ' LEVEL_SIZEPRICE
-			Dim sizePriceCatRec As clsSizePriceTableRec = itemList.Get(0) ' used to cast types
-			mSelectedSizePriceKey = sizePriceCatRec.key
-	End Select
+	lvwSelectItem.AsView.Visible = True 
 End Sub
 
 ' Updates the Selection label to display the current selection and its 'path' (parent categories)
@@ -647,5 +572,95 @@ Private Sub UpdateSubtotalLabel
 	lblTotal.Text = "Item Subtotal: £" & modEposApp.FormatCurrency(priceTotal)
 End Sub
 
+' Get a list of items available at the specified level.
+' Return list of item objects (the type is dependant on the level).
+private Sub GetItemList(level As Int) As List 
+	Dim itemList As List : itemList.Initialize
+	Select Case (level)
+		Case LEVEL_MAINCAT
+			itemList  = Starter.DataBase.mainCatTable
+		Case LEVEL_SUBCAT
+			itemList = Starter.DataBase.SortSubCat(mSelectedMainCatKey)
+		Case LEVEL_GROUPCAT
+			itemList = Starter.DataBase.SortGrpCat(mSelectedSubCatKey, mSelectedMainCatKey)
+		Case LEVEL_GOODSDESC
+			itemList = Starter.DataBase.SortGoods(mSelectedGroupCatKey, mSelectedSubCatKey, mSelectedMainCatKey)
+		Case Else 'LEVEL_SIZEPRICE
+			Starter.DataBase.SortSizePrice(mSelectedGoodsDescKey)
+	End Select
+	Return itemList
+End Sub
+
+
+' Get next lower level
+' Returns the next lower level (returns lowest level if already at that level).
+private Sub GetNextLowerLevel(currentLevel As Int) As Int
+	Dim newlevel As Int = LEVEL_SIZEPRICE
+	Select Case (currentLevel)
+		Case LEVEL_MAINCAT
+			newlevel = LEVEL_SUBCAT
+		Case LEVEL_SUBCAT
+			newlevel = LEVEL_GROUPCAT
+		Case LEVEL_GROUPCAT
+			newlevel = LEVEL_GOODSDESC
+		Case LEVEL_GOODSDESC
+			newlevel = LEVEL_SIZEPRICE
+		Case Else
+			newlevel = LEVEL_SIZEPRICE
+	End Select
+	Return newlevel
+End Sub
+
+' Get the next viewable item list.
+' Return list of item objects (the type is dependant on the level).
+private Sub GetNextViewableItemList(level As Int) As List
+	Dim itemList As List 
+	Dim nextLevel As Int = level
+	Do While (True) ' See code below to exit
+		nextLevel = GetNextLowerLevel(nextLevel)		
+		itemList = GetItemList(nextLevel)
+		If itemList.Size > 0 Or nextLevel = LEVEL_SIZEPRICE Then ' Items available in this category?
+			If nextLevel = LEVEL_SIZEPRICE Or itemList.Size >= 2 Then
+				mSelectionLevel = nextLevel
+				Exit ' Exit the loop!
+			End If
+			UpdateSelectedCatKey(nextLevel, itemList)
+		Else ' No items in this category.
+			itemList = GetItemList(level) 	' Retun the current item list.
+			xui.MsgboxAsync("There are NO items available in this category. Please select category.", "No items available")
+			Exit ' Exit loop!
+		End If
+	Loop
+	Return itemList
+End Sub
+
+' Populate the list view.
+' This will automatically move to the next level if only one option is available at the current level (except the bottom level).
+private Sub PopulateListView()
+	GetNextViewableItemList(mSelectionLevel)
+	PopulateListView(mSelectionLevel)		
+End Sub
+
+' Updates the Selected Category key for the specified level
+'   The associated database key of the currently selected Category is updated.
+Private Sub UpdateSelectedCatKey(level As Int, itemList As List)
+	Select Case (level)
+		Case LEVEL_MAINCAT
+			Dim mainCatRec As clsMainCategoryTableRec = itemList.Get(0) ' used to cast types
+			mSelectedMainCatKey = mainCatRec.key
+		Case LEVEL_SUBCAT
+			Dim subCatRec As clsSubCategoryTableRec = itemList.Get(0) ' used to cast types
+			mSelectedSubCatKey = subCatRec.key
+		Case LEVEL_GROUPCAT
+			Dim groupCatRec As clsGroupCategoryTableRec = itemList.Get(0) ' used to cast types
+			mSelectedGroupCatKey = groupCatRec.key
+		Case LEVEL_GOODSDESC
+			Dim goodsCatRec As descriptionAbridgedTableRec = itemList.Get(0) ' used to cast types
+			mSelectedGoodsDescKey = goodsCatRec.key
+		Case Else ' LEVEL_SIZEPRICE
+			Dim sizePriceCatRec As clsSizePriceTableRec = itemList.Get(0) ' used to cast types
+			mSelectedSizePriceKey = sizePriceCatRec.key
+	End Select
+End Sub
 
 #End Region  Local Subroutines

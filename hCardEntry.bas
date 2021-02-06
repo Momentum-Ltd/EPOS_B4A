@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 22
-	' Date......: 30/01/21
+	' Release...: 23
+	' Date......: 06/02/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -84,6 +84,12 @@ Version=9.5
 	' Details...: Mod: Old commented code removed.
 	'			  Mod: InitializeLocals() - New call to clsKeyboardHelper.SetupTextAndKeyboard().
 	'			  Mod: btnSubmit_Click() - now generates an internal event.
+	'
+	' Date......: 06/02/21
+	' Release...: 23
+	' Overview..: General maintenance.
+	' Amendee...: D Morris
+	' Details...: Mod: Old commented code removed.
 	'
 	' Date......: 
 	' Release...: 
@@ -178,14 +184,12 @@ Private Sub txtCardNumber_TextChanged (old As String, new As String)
 #if B4i	' See https://www.b4x.com/android/forum/threads/strange-text_changed-behaviour.107128/
 	Sleep(0)	' Ensure the new value is ok
 #end if
-	' So cursor can be positioned correctly.
 	' Adapted from https://www.b4x.com/android/forum/threads/b4xfloattextfield-filter-characters-allowed.114681/
 #if B4A
-	Dim et As EditText = txtCardNumber.TextField
+	Dim et As EditText = txtCardNumber.TextField	' So cursor can be positioned correctly.
 #else ' B4i
 	Dim et As TextField = txtCardNumber.TextField
 #end if
-'	Dim eos As Int = (new.Length + 1)
 	If old.Length > new.Length Then
 		If new.Length = 4 Or new.Length = 9 Or new.Length = 14 Then ' backspace over space?
 			Dim x As String = FormatCardNumber(new)
@@ -212,10 +216,9 @@ Private Sub txtCvc_TextChanged(old As String, new As String)
 #if B4i	' See https://www.b4x.com/android/forum/threads/strange-text_changed-behaviour.107128/
 	Sleep(0)	' Ensure the new value is ok
 #end if
-	' So cursor can be positioned correctly.
 	' Adapted from https://www.b4x.com/android/forum/threads/b4xfloattextfield-filter-characters-allowed.114681/
 #if B4A
-	Dim et As EditText = txtCvc.TextField
+	Dim et As EditText = txtCvc.TextField	' So cursor can be positioned correctly.
 #else ' B4i
 	Dim et As TextField = txtCvc.TextField
 #end if
@@ -269,7 +272,6 @@ End Sub
 
 ' Handles activity resume operation.
 Public Sub ResumeOp
-'	btnTestData.mBase.Visible = Starter.settings.testMode ' Short cut for setting Test Card button.
 	cardInfo.Initialize
 End Sub
 
