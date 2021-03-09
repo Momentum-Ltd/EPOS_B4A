@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 19
-	' Date......: 06/02/21
+	' Release...: 20
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -21,80 +21,20 @@ Version=10
 	'
 	' Versions
 	' 	v2 - 10 see v10.
-	'		
-	' Date......: 26/11/20
-	' Release...: 10
-	' Overview..: Bugfix: #0466 Android phone restart after screen locked. 
-	'			   Issue: #0561 Viewing website information.
-	'			   Issue: #0564 Home screen flashing when drawing (fixed in Place order screen). 
-	'             Bugfix: #0566 Home screen not displaying size in order information.
-	' Amendee...: D Morris
-	' Details...: Mod: btnLeaveCentre_Click() clears centreId from centre information. 
-	'			  Mod: pHandleOrderInfo() - code fixed to include the size in order information.
-	'		
-	' Date......: 28/11/20
-	' Release...: 11
-	' Overview..: Issue: #0567 Download/sync menu now handled by the Home activity.
-	' Amendee...: D Morris
-	' Details...: Mod: lStartPlaceOrder() check if sync menu required.
-	'			Added: syncDbDatabase class.
-	'		   Public: HandleSyncDbReponse().
-	'			  Mod: InitializeLocals(), OnClose() supports syncDbDatabase.
-	'			
-	' Date......: 20/01/21
-	' Release...: 12
-	' Overview..: Maintenance release.
-	'			  Bugfix: #0583 - Payment query saved card option is now not shown when no saved card available.
-	' Amendee...: D Morris
-	' Details...: Mod: pHandleOrderInfo() header updated.
-	'			  Mod: QueryPayment() - removes Saved Card option when not available.	
-	'		
-	' Date......: 23/01/21
-	' Release...: 13
-	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
-	' Amendee...: D Morris
-	' Details...: Mod: CheckConnection() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.	  
-	'		
-	' Date......: 24/01/21
-	' Release...: 14
-	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
-	' Amendee...: D Morris
-	' Details...: Mod: General changes to use clsPayment class for card payment.
-	'			  Mod: All 'p' and 'l' Prefixes dropped.
-	'		      Mod: Old commented code removed
-	'			  Mod: btnLeaveCentre_Click() uses LeaveCentre().
-	'
-	' Date......: 30/01/21
-	' Release...: 15
-	' Overview..: Support for rename moduels.
-	' Amendee...: D Morris
-	' Details...:  Mod: ExitToSelectPlayCentre(), progressbox_Timeout().
-	'	
-	' Date......: 31/01/21
-	' Release...: 16
-	' Overview..: Issue: Fix to deal with problems with showing progress during payment.
-	' Amendee...: D Morris
-	' Details...  Added: QueryAndMakePayment().	
-	'             		
-	' Date......: 01/02/21
-	' Release...: 17
-	' Overview..: Bugfix: #0590 - Confirmation screen shown when cash payments. 
-	' Amendee...: D Morris
-	' Details...: Mod: QueryAndMakePayment() call to Refresh() removed.
-	'             		
-	' Date......: 03/02/21
-	' Release...: 18
-	' Overview..: General maintenance.
-	' Amendee...: D Morris
-	' Details...: Mod: Old commented code removed.
-	'			  Mod: IsCentreOpen() moved to clsEposApiHelper.
-	'		      Mod: SendMessage() created to reduce code size. 
+	'   v11 - 18 vee v19.
 	'             		
 	' Date......: 05/02/21
 	' Release...: 19
 	' Overview..: General maintenance.
 	' Amendee...: D Morris
 	' Details...: Mod: Old commented code removed.
+	'             		
+	' Date......: 10/02/21
+	' Release...: 20
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
+	'			  Mod: CheckConnection() call to B4i code changed.
 	'             		
 	' Date......: 
 	' Release...: 
@@ -135,6 +75,7 @@ Sub Class_Globals
 	Private pnlRefreshTouch As B4XView					' Clickabke region around the refrest order list button.
 	
 	' Misc objects
+'	Private apiHelper As clsEposApiHelper				' API helper. 
 	Private notification As clsNotifications			' Handles notifications
 	Private payment As clsPayment						' Handles payments.	
 	Private progressbox As clsProgress					' Progress indicator and box
@@ -492,10 +433,12 @@ private Sub CheckConnection(handleProgress As Boolean) As ResumableSub
 	If handleProgress = True Then
 		ProgressShow("Checking connection...")		
 	End If
+	Dim apiHelper As clsEposApiHelper : apiHelper.initialize
 #if B4A
-	Wait For (Starter.connect.IsInternetAvailable) complete (internetAvailable As Boolean)
+	'Wait For (Starter.connect.IsInternetAvailable) complete (internetAvailable As Boolean)
+	Wait For (apiHelper.IsInternetAvailable) complete (internetAvailable As Boolean)
 #else ' B4I
-	Wait For (Main.connect.IsInternetAvailable) complete (internetAvailable As Boolean)
+	Wait For (apiHelper.IsInternetAvailable) complete (internetAvailable As Boolean)
 #End If
 	If internetAvailable Then
 		Wait For (IsCentreOpen(Starter.myData.centre.centreId)) complete(centreOpen As Boolean)
@@ -556,6 +499,7 @@ End Sub
 
 ' Initialize the locals etc.
 private Sub InitializeLocals
+'	apiHelper.Initialize
 	indLoading.mBase.Visible = False
 	progressbox.Initialize(Me, "progressbox", modEposApp.DFT_PROGRESS_TIMEOUT, indLoading)
 	progressDialog.Initialize(Me, "progressDialog", modEposApp.DFT_PROGRESS_TIMEOUT)
@@ -610,8 +554,9 @@ End Sub
 ' Sends a message
 Private Sub SendMessage(msg As String)
 #if B4A
-	CallSubDelayed2(Starter, "pSendMessage", msg)
+	CallSubDelayed2(Starter, "SendMessage", msg)
 #else ' B4I
+	' Main.comms.SendMessage(msg)
 	Main.SendMessage(msg)
 #End If		
 End Sub
@@ -621,16 +566,16 @@ Private Sub StartPlaceOrder()
 	ProgressShow("Starting your order, please wait...") 
 	Wait For (CheckConnection(False)) complete(centreConnectionOk As Boolean)
 	If centreConnectionOk Then
-		Dim apiHelper As clsEposApiHelper
-		apiHelper.Initialize
+		Dim apiHelper As clsEposApiHelper : apiHelper.Initialize
 		Wait for (apiHelper.CheckMenuRevision) complete (menuOk As Boolean)
 		If menuOk Then ' Menu ok
 			Dim msgToSend As String = modEposApp.EPOS_ORDER_START & "," & Starter.myData.Customer.customerId & _
 									"," & DEFAULT_TIME_STAMP & "," & Starter.customerOrderInfo.tableNumber	
 			' Taken from https://www.b4x.com/android/forum/threads/solved-resumable-subs-and-callbacks.103775/
 #if B4A
-			Dim SendMsg As ResumableSub = CallSub2(Starter, "pSendMessageAndCheckReconnect", msgToSend)
+			Dim SendMsg As ResumableSub = CallSub2(Starter, "SendMessageAndCheckReconnect", msgToSend)
 #else ' B4I
+			'Dim SendMsg As ResumableSub = Main.comms.SendMessageAndCheckReconnect(msgToSend)
 			Dim SendMsg As ResumableSub = Main.SendMessageAndCheckReconnect(msgToSend)
 #End If
 			Wait For (SendMsg) Complete(statusCodeResult As Int)

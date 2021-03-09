@@ -12,8 +12,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: FirebaseMessaging 
-	' Release...: 7
-	' Date......: 08/08/20
+	' Release...: 8
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 04/06/19
@@ -58,6 +58,12 @@ Version=9.01
 	' Overview..: Support for new UI. 
 	' Amendee...: D Morris
 	' Details...: Mod: fm_MessageArrived().
+	'             		
+	' Date......: 10/02/21
+	' Release...: 8
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from calls to.
 	'
 	' Date......: 
 	' Release...: 
@@ -128,7 +134,7 @@ Sub fm_MessageArrived (Message As RemoteMessage)
 	'	ToastMessageShow(Message.GetData.Get("Message"), True)
 	
 	' Always pass FCM communications to the system for processing.
-	CallSub2(Starter, "pProcessInputStrg", Message.GetData.Get("Message"))		
+	CallSub2(Starter, "ProcessInputStrg", Message.GetData.Get("Message"))		
 
 End Sub
 

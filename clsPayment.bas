@@ -11,8 +11,8 @@ Version=10.5
 #Region  Documentation
 	'
 	' Name......: clsPayment
-	' Release...: 3
-	' Date......: 30/01/21
+	' Release...: 4
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 24/01/21
@@ -34,6 +34,12 @@ Version=10.5
 	' Details...: Mod (Bugfix): QueryPaymentMethod() - iOS code "Wait for" inserted.
 	'								QueryPaymentAfterFailure() also updated with "Wait for".
 	'			  Mod: Old commented code removed.
+	'             		
+	' Date......: 10/02/21
+	' Release...: 4
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	'
 	' Date......: 
 	' Release...: 
@@ -165,8 +171,9 @@ Private Sub PayWithSavedCard(orderPayment As clsOrderPaymentRec)
 	Dim msg As String  = modEposApp.EPOS_PAYMENT & paymentObj.XmlSerialize()
 	mProgressDialog.Show("Processing payment, please wait...")
 #if B4A
-	CallSub2(Starter, "pSendMessage",  msg)
+	CallSub2(Starter, "SendMessage",  msg)
 #else ' B4I
+	' Main.comms.SendMessage(msg)
 	Main.SendMessage(msg)
 #End If	
 End Sub

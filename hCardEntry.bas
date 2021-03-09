@@ -10,8 +10,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hCardEntry
-	' Release...: 23
-	' Date......: 06/02/21
+	' Release...: 24
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 13/10/19
@@ -21,75 +21,19 @@ Version=9.5
 	'
 	' Versions 2 - 6 see v7
 	'   	   7 - 14 see v15.
-	'
-	' Date......: 08/08/20
-	' Release...: 15
-	' Overview..: Support for new UI. 
-	' Amendee...: D Morris
-	' Details...: Mod: Changes to now exit to Centre Home page.
-	'
-	' Date......: 09/10/20
-	' Release...: 16
-	' Overview..: Bugfix: #0515 - Exception thrown if invalid card information entered.
-	' Amendee...: D Morris.
-	' Details...: Mod: SubmitCard() code fixed.
-	'		
-	' Date......: 20/11/20
-	' Release...: 17
-	' Overview..: Issue: #0437 Enter card details difficult. 
-	'			  Issue: #0453 Expiry date format.
-	' Amendee...: D Morris
-	' Details...: Mod: SetupTabOrder() now will just show a accept button and not tab to next field.
-	'			  Added: (for Android) clicking on background hides keyboard. 
-	'			  Mod: uses clsMMYYhandler to process date string.
-	'
-	' Date......: 03/01/21
-	' Release...: 18
-	' Overview..: Bugfix: iOS unable to accept card.
-	'			  Issue: Test data expiry date replaced with later date. 
-	' Amendee...: D Morris
-	' Details...: Mod: InitializeLocals() - Problem with iOS initialization of clsStripe case changed.
-	'			  Mod: LoadTestData() - Expiry date changed.
-	'             Mod: clsStripe - now uses latest parameters InitializeLocals() and SubmitCard().			  
-	'		
-	' Date......: 20/01/21
-	' Release...: 19
-	' Overview..: Bugfix: #0464 - Save card option now works correctly.
-	'			  Bugfix: #0578 - Payment message orderId is now included in the message.
-	' Amendee...: D Morris.
-	' Details...: Mod: chkSaveCard replaced with swSaveCard.
-	'			  Mod: SendCardTokenToServer() znc ReportPaymentStatus().
-	'			  Removed: CardEntryAndPayment(), SendPayment().
-	'			  Mod: ClearCard() now includes the swSaveCard set to false.
-	'		
-	' Date......: 24/01/21
-	' Release...: 20
-	' Overview..: Bugfix: #0562 - Payment with Saved card shows Enter card as background fixed. 
-	' Amendee...: D Morris
-	' Details...: Mod: General changes to use clsPayment class for card payment.
-	'			  Mod: CardEntryAndOrderPayment() defaultCard parameter removed.
-	'
-	' Date......: 27/01/21
-	' Release...: 21
-	' Overview..: New uses clsKeyboardHelper for keyboard handling.
-	' Amendee...: D Morris
-	' Details...: Mod: General changes to support clsKeyboardHelper.
-	'			  Removed: kk as IME removed no longer necessary.
-	'
-	' Date......: 30/01/21
-	' Release...: 22
-	' Overview..: Maintenance fix.
-	'             Issue (iOS)  - Strange submit button operation.
-	' Amendee...: D Morris
-	' Details...: Mod: Old commented code removed.
-	'			  Mod: InitializeLocals() - New call to clsKeyboardHelper.SetupTextAndKeyboard().
-	'			  Mod: btnSubmit_Click() - now generates an internal event.
+	'		   15 -22 see v23.
 	'
 	' Date......: 06/02/21
 	' Release...: 23
 	' Overview..: General maintenance.
 	' Amendee...: D Morris
 	' Details...: Mod: Old commented code removed.
+	'             		
+	' Date......: 10/02/21
+	' Release...: 24
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	'
 	' Date......: 
 	' Release...: 
@@ -398,8 +342,9 @@ Private Sub SendCardTokenToServer(cardToken As String, pTotal As Float)
 	Dim msg As String =  modEposApp.EPOS_PAYMENT & cardTokenObj.XmlSerialize
 	ProgressShow("Making Payment")
 #if B4A
-	CallSub2(Starter, "pSendMessage", msg)
+	CallSub2(Starter, "SendMessage", msg)
 #else ' B4A
+	'Main.comms.SendMessage(msg)
 	Main.SendMessage(msg)
 #end if
 	ClearCard

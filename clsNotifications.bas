@@ -10,8 +10,8 @@ Version=9.8
 #Region  Documentation
 	'
 	' Name......: clsNotifications
-	' Release...: 5
-	' Date......: 20/05/20
+	' Release...: 6
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 02/04/20
@@ -42,13 +42,19 @@ Version=9.8
 	' Overview..: Mod: Previous stored message/status test is cleared when displayed.
 	' Amendee...: D Morris
 	' Details...:  Mod: ShowMessageNotificationMsgBox() and ShowStatusNotificationMsgBox() code to clear text moved.
+	'             		
+	' Date......: 10/02/21
+	' Release...: 6
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	'
 	' Date......: 
 	' Release...: 
 	' Overview..:
 	' Amendee...: 
 	' Details...: 
-	'
+	' 
 #End Region  Documentation
 
 #Region  Mandatory Subroutines & Data
@@ -149,7 +155,7 @@ End Sub
 ' Sends a message to the Server acknowledging the specified status notification.
 Private Sub SendStatusAckn(statusRec As clsEposOrderStatus)
 	Dim msg As String = modEposApp.EPOS_ORDERSTATUS & statusRec.XmlSerialize
-	CallSub2(Starter, "pSendMessage", msg)
+	CallSub2(Starter, "SendMessage", msg)
 End Sub
 #end if
 

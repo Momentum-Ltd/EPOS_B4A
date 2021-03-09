@@ -11,8 +11,8 @@ Version=8.5
 #Region  Documentation
 	'
 	' Name......: clsConnect
-	' Release...: 13
-	' Date......: 11/06/20
+	' Release...: 14
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 08/01/19
@@ -45,6 +45,13 @@ Version=8.5
 	' Overview..: Mod: Support for second Server.
 	' Amendee...: D Morris.
 	' Details...:  Mod: IsInternetAvailable().
+	'             		
+	' Date......: 10/02/21
+	' Release...: 14
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
+	'			  
 	'
 	' Date......: 
 	' Release...: 
@@ -59,15 +66,15 @@ Version=8.5
 Sub Class_Globals
 		
 	' Public variables
-	Public connectionStatus As Int ' The current connection status. Should only ever be set to ModEposApp.CONNECTION_* constants.
-	Public reconnectInProgress As Boolean = False ' Whether there is currently a reconnection attempt in progress.
-	Public autoReconnect As Boolean = False ' Whether the app should try to automatically reconnect when the connection is lost.
+	Public connectionStatus As Int 					' The current connection status. Should only ever be set to ModEposApp.CONNECTION_* constants.
+	Public reconnectInProgress As Boolean = False 	' Whether there is currently a reconnection attempt in progress.
+	Public autoReconnect As Boolean = False 		' Whether the app should try to automatically reconnect when the connection is lost.
 	
 	' Local variables
-	Private prevWifiStrengthOk As Boolean = True ' Whether the Wifi strength was OK the previous time it was checked.
-	Private tmrReconnectTimeOut As Timer ' The timer used to time-out reconnection attempts.
-	Private tmrServerCheckTimeout As Timer ' The timer used to time-out server check attempts.
-	Private tmrServerCheckTimer As Timer ' The timer used to invoke server checks at regular intervals.
+	Private prevWifiStrengthOk As Boolean = True 	' Whether the Wifi strength was OK the previous time it was checked.
+	Private tmrReconnectTimeOut As Timer 			' The timer used to time-out reconnection attempts.
+	Private tmrServerCheckTimeout As Timer 			' The timer used to time-out server check attempts.
+	Private tmrServerCheckTimer As Timer 			' The timer used to invoke server checks at regular intervals.
 
 End Sub
 
@@ -106,7 +113,7 @@ Private Sub tmrReconnectTimeOut_Tick()
 	If autoReconnect Then
 		reconnectInProgress = False
 #if B4A
-		CallSub(Starter, "pIncrementDisconnectCounter")
+		CallSub(Starter, "IncrementDisconnectCounter")
 #else ' B4I
 		Main.IncrementDisconnectCounter
 #end if
@@ -131,8 +138,9 @@ Private Sub tmrServerCheckTimer_Tick()
 									modEposWeb.ConvertToString(Starter.myData.customer.customerId) & _
 									"," & timeStamp
 #if B4A
-			CallSub2(Starter, "pSendMessage", txMsg )
+			CallSub2(Starter, "SendMessage", txMsg )
 #else ' B4I
+			' Main.comms.SendMessage(txMsg)
 			Main.SendMessage(txMsg)
 #end if
 			connectionStatus = modEposApp.CONNECTION_CHECK
@@ -165,47 +173,47 @@ End Sub
 
 
 
-#if B4A
-' Checks if internet available (timeout on check is 5 seconds).
-' return true if internet available.
-public Sub IsInternetAvailable As ResumableSub
-'	Dim wifiConnected As MLwifi
+'#if B4A
+'' Checks if internet available (timeout on check is 5 seconds).
+'' return true if internet available.
+'public Sub IsInternetAvailable As ResumableSub
+''	Dim wifiConnected As MLwifi
+''	Dim internetAvailable As Boolean = False
+''	
+''	If wifiConnected.isWifiEnabled Or wifiConnected.isMobileConnected Then ' need wifi and/or data connection
+''		internetAvailable = wifiConnected.isOnlinePing3(5000)	' ping web Google dns (timeout 5 seconds).
+''	End If
+'
+'' Need to add code something like this (problem with resummable sub) 
 '	Dim internetAvailable As Boolean = False
-'	
-'	If wifiConnected.isWifiEnabled Or wifiConnected.isMobileConnected Then ' need wifi and/or data connection
-'		internetAvailable = wifiConnected.isOnlinePing3(5000)	' ping web Google dns (timeout 5 seconds).
+'	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
+''	job.Download("https://www.superord.co.uk/api/centre")
+''	job.Download( modEposWeb.URL_CENTRE_API)
+'	job.Download( Starter.server.URL_CENTRE_API)
+'	job.GetRequest.Timeout = 5000
+'	Wait For (job) JobDone(job As HttpJob)
+'	If job.Success And job.Response.StatusCode = 200 Then
+'		internetAvailable = True
 '	End If
-
-' Need to add code something like this (problem with resummable sub) 
-	Dim internetAvailable As Boolean = False
-	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
-'	job.Download("https://www.superord.co.uk/api/centre")
-'	job.Download( modEposWeb.URL_CENTRE_API)
-	job.Download( Starter.server.URL_CENTRE_API)
-	job.GetRequest.Timeout = 5000
-	Wait For (job) JobDone(job As HttpJob)
-	If job.Success And job.Response.StatusCode = 200 Then
-		internetAvailable = True
-	End If
-	job.release
-	Return internetAvailable
-End Sub
-#else 'B4I
-' Checks if interent is available and our Server is on-line.
-Public Sub IsInternetAvailable As ResumableSub
-	Dim internetOk As Boolean = False
-	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
-'	job.Download("https://www.superord.co.uk/api/centre")
-'	job.Download( modEposWeb.URL_CENTRE_API)
-	job.Download( Starter.server.URL_CENTRE_API)
-	Wait For (job) JobDone(job As HttpJob)
-	If job.Success And job.Response.StatusCode = 200 Then
-		internetOk = True
-	End If
-	job.Release		' Important: Release.
-	Return internetOk
-End Sub
-#end if
+'	job.release
+'	Return internetAvailable
+'End Sub
+'#else 'B4I
+'' Checks if interent is available and our Server is on-line.
+'Public Sub IsInternetAvailable As ResumableSub
+'	Dim internetOk As Boolean = False
+'	Dim job As HttpJob : job.Initialize("UseWebApi", Me)
+''	job.Download("https://www.superord.co.uk/api/centre")
+''	job.Download( modEposWeb.URL_CENTRE_API)
+'	job.Download( Starter.server.URL_CENTRE_API)
+'	Wait For (job) JobDone(job As HttpJob)
+'	If job.Success And job.Response.StatusCode = 200 Then
+'		internetOk = True
+'	End If
+'	job.Release		' Important: Release.
+'	Return internetOk
+'End Sub
+'#end if
 
 Public Sub IsInternateAvailbleSync As Boolean
 	Dim internetAvailable As Boolean = False
@@ -312,7 +320,7 @@ Public Sub ReconnectToServer
 #if B4A
 	Starter.reconnectEnabled = True
 	connectionStatus = modEposApp.CONNECTION_RECON
-	CallSub(Starter, "pConnectToServer")
+	CallSub(Starter, "ConnectToServer")
 	reconnectInProgress = True ' Start reconnection timer
 	tmrReconnectTimeOut.Enabled = True
 #else ' B4I

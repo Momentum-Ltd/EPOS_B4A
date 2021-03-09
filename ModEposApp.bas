@@ -11,8 +11,8 @@ Version=7.3
 #Region  Documentation
 	'
 	' Name......: ModEposApp
-	' Release...: 29
-	' Date......: 03/01/21
+	' Release...: 30
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 23/12/16
@@ -68,6 +68,12 @@ Version=7.3
 	' Details...: Mod: Val() - checks if string can be converted to a number.
 	'			  Added: CheckNumberRange().
 	'			  Added: DFT_MAX_CENTRES and DFT_SEARCH_RADIUS.
+	'
+	' Date......: 10/02/21
+	' Release...: 30
+	' Overview..: Socket contants supported.
+	' Amendee...: D Morris
+	' Details...: Added: EOF_STRING and HEADER_STRING.
 	'
 	' Date......: 
 	' Release...: 
@@ -147,6 +153,10 @@ Sub Process_Globals
 	''' <summary>The (arbitrary) fixed IP address given to all normal Server machines.</summary>
 	Public Const SERVER_FIXED_IP As String = "192.168.0.240"
 	Public Const DFT_PROGRESS_TIMEOUT As Int = 20000	' Default Progress dialog timeout (msecs). 
+	
+	' Socket constants
+	Public Const EOF_STRING As String  = "<EOF>" 						' The string that should appear at the end of a socket transmisssion.
+	Public Const HEADER_STRING As String = "<MESSAGE_HEADER>" 			' The string that should appear at the start of a socket transmission.
 	
 	' Network connection status:
 	Public Const CONNECTION_UNKNOWN As Int = 0	' Unknown state  

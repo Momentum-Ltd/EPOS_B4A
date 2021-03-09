@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hSelectPlayCentre3
-	' Release...: 17
-	' Date......: 03/02/21
+	' Release...: 18
+	' Date......: 08/02/21
 	'
 	' History
 	' Date......: 02/08/20
@@ -19,64 +19,9 @@ Version=10
 	' Created by: D Morris
 	' Details...: Based on hSelectPlayCentre2_v4.
 	'
-	' Versions
-	'   2 - 8 see v9
-	'
-	' Date......: 26/11/20
-	' Release...: 9
-	' Overview..: Bugfix: Select Centre - not scrolling to top list after refresh.
- 	' 			    Mod: Usage of null for strings and objects removed.
-	' Amendee...: D Morris
-	' Details...: Mod: DisplayCentreList() call to ScrollToItem() added.
-	'		
-	' Date......: 15/12/20
-	' Release...: 10
-	' Overview..: Bugfix: iOS not displaying centres correctly when only a few.
-	' Amendee...: D Morris
-	' Details...: Mod: DisplayCentreList() code excluded for B4i.
-	'
-	' Date......: 03/01/21
-	' Release...: 11
-	' Overview..: Bugfix: iOS not restarted when account information is cleared.
-	' Amendee...: D Morris
-	' Details...: Mod: ClearAccount() Code fixed.
-	'		
-	' Date......: 23/01/21
-	' Release...: 12
-	' Overview..: Maintenance release Update to latest standards for CheckAccountStatus and associated modules. 
-	' Amendee...: D Morris
-	' Details...: Mod: ClearAccount() calls to CheckAccountStatus changed to aCheckAccountStatus and xCheckAccountStatus.
-	'
-	' Date......: 27/01/21 
-	' Release...: 13
-	' Overview..: Mod: Progress indicated added to select centre operation.
-	' Amendee...: D Morris
-	' Details...: Mod: clvCentres_ItemClick().
-	'
-	' Date......: 28/01/21
-	' Release...: 14
-	' Overview..: Maintenance release - QueryNewInstall updated.
-	' Amendee...: D Morris
-	' Details...: Mod: NewAccount().
-	'
-	' Date......: 30/01/21
-	' Release...: 15
-	' Overview..: Support for renamed modules.
-	' Amendee...: D Morris
-	' Details...: Mod: Initialize(), imgAccount_Click(), IsVisible().
-	'			  Mod: Prefixed 'p' and 'l' removed.
-	'			  Mod: ShowAbout().
-	'			  Mod: ShowValidateCentreSelectionPage().
-	'			  Mod: ShowChangeAccountInfoPage().
-	'			  Mod: ShowChangeSettingsPage().
-	' 			  Mod: DisplayAllCentres() and GetNearbyCentres() now uses clsEposApiHelper.
-	'
-	' Date......: 31/01/21
-	' Release...: 16
-	' Overview..: Bugfix: Problems with calling Change settings, Change Account info.
-	' Amendee...: D Morris.
-	' Details...: Mod: ShowChangeSettingsPage().
-	'			  Mod: ShowChangeAccountInfoPage().
+	' Versions:
+	'   2 - 8 see v9.
+	'	9 - 16 see v17.
 	'
 	' Date......: 03/02/21
 	' Release...: 17
@@ -89,6 +34,12 @@ Version=10
 	'             Rename: DisplayAllCentres() to GetAllCentres().
 	'			  Rename: GetNearbyCentres() to GetNearbyCentres().
 	'			  Rename: DisplayCentreList() to DisplayCentreList().
+	'
+	' Date......: 10/02/21
+	' Release...: 18
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: DisplayCentreList().
 	'
 	' Date......: 
 	' Release...: 
@@ -445,7 +396,11 @@ Private Sub DisplayCentreList(inputJson As String) As ResumableSub
 		centreInfo.centre.webSite = centreDetailsMap.Get("website")
 		Dim img  As ImageView
 		img.Initialize("test")
+#if B4A
 		Wait For (Starter.DownloadImage( centreInfo.centre.picture, img)) complete(downloadOk As Boolean)
+#else 'B4i
+		Wait For (Main.DownloadImage( centreInfo.centre.picture, img)) complete(downloadOk As Boolean)
+#End If
 		centreInfo.imgPanel = CreateItem(clvCentres.AsView.Width, centreInfo.centre, img)
 		centreInfoList.Add(centreInfo)
 	Next

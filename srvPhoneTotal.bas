@@ -7,12 +7,11 @@ Version=7.8
 '
 ' Service module to handle phone totals
 '
-
 #Region  Documentation
 	'
 	' Name......: srvPhoneTotal
-	' Release...: 3
-	' Date......: 07/08/19
+	' Release...: 4
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 31/05/18
@@ -25,7 +24,7 @@ Version=7.8
 	' Overview..: Changes to support separate phone totals for each centre.
 	' Amendee...: D Hathway
 	' Details...: 
-	'		Mod: Large changes to lGetPrevPhoneTotal() and lWritePhoneTotal() to save/load values for separate centres
+	'		Mod: Large changes to lGetPrevPhoneTotal() and WritePhoneTotal() to save/load values for separate centres
 	'		Mod: Changed lGetPrevPhoneTotal() to public, so that it can be called when the Centre ID number changes
 	'		Mod: Tidied up the module by adding method headers, etc.
 	'
@@ -33,7 +32,13 @@ Version=7.8
 	' Release...: 3
 	' Overview..: Support for myData.
 	' Amendee...: D Morris
-	' Details...: Mod: support for myData pGetPrevPhoneTotal() and lWritePhoneTotal().
+	' Details...: Mod: support for myData pGetPrevPhoneTotal() and WritePhoneTotal().
+	'             		
+	' Date......: 10/02/21
+	' Release...: 4
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: Usage of 'p' and 'l' dropped.
 	'
 	' Date......: 
 	' Release...: 
@@ -61,7 +66,7 @@ Sub Process_Globals
 End Sub
 
 Sub Service_Create
-	pGetPrevPhoneTotal
+	GetPrevPhoneTotal
 End Sub
 
 Sub Service_Start (StartingIntent As Intent)
@@ -82,15 +87,15 @@ End Sub
 
 #Region  Public Subroutines
 
-Public Sub pAdjustPhoneTotal(changeValue As Float) As Float
+Public Sub AdjustPhoneTotal(changeValue As Float) As Float
 	phoneTotal = phoneTotal + changeValue
-	lWritePhoneTotal
+	WritePhoneTotal
 	Return phoneTotal
 End Sub
 
 ' Sets this service's .phoneTotalObject to the previously-saved phone total value for the currently-connected centre.
 ' It will be set to 0 if the save file does not exist or is an old version of the file (without Centre IDs).
-Public Sub pGetPrevPhoneTotal
+Public Sub GetPrevPhoneTotal
 	If File.Exists(File.DirInternal, PHONETOTALS_FILENAME) Then
 		Dim savedStr As String = File.ReadString(File.DirInternal, PHONETOTALS_FILENAME)
 		If savedStr.Contains(CENTRE_VALUE_DIVIDER) Then ' Protection against the old version of the saved file
@@ -102,23 +107,25 @@ Public Sub pGetPrevPhoneTotal
 				End If
 			Next
 		Else ' For the old version of the file (no Centre IDs), just overwrite with new zeroed value
-			lWritePhoneTotal
+			WritePhoneTotal
 		End If
 	End If
 End Sub
 
 ' Sets the phone total to zero (for the currently-connected centre).
-Public Sub pZeroPhoneTotal
+Public Sub ZeroPhoneTotal
 	phoneTotal = 0
-	lWritePhoneTotal
+	WritePhoneTotal
 End Sub
 
 #End Region  Public Subroutines
 
 #Region  Local Subroutines
 
+
+
 ' Saves the current phone total to its file (preserving any other centres' values).
-Private Sub lWritePhoneTotal
+Private Sub WritePhoneTotal
 	' Get current saved values
 	Dim valuesToSave As List : valuesToSave.Initialize
 	If File.Exists(File.DirInternal, PHONETOTALS_FILENAME) Then

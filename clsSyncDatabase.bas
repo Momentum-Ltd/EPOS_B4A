@@ -10,8 +10,8 @@ Version=10.2
 #Region  Documentation
 	'
 	' Name......: clsSyncDatabase
-	' Release...: 2
-	' Date......: 03/01/21
+	' Release...: 3
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 28/11/20
@@ -24,6 +24,13 @@ Version=10.2
 	' Overview..: Bugfix: iOS sync complete callback no working.
 	' Amendee...: D Morris
 	' Details...:  Mod: RaiseSyncCompleteEvent() code fixed.
+	'             		
+	' Date......: 10/02/21
+	' Release...: 3
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
+	'			  Mod: GetMenuFromWebServer() calls starter.ProcessInputStrg().
 	'
 	' Date......: 
 	' Release...: 
@@ -118,6 +125,13 @@ Public Sub HandleSyncDbReponse(syncDbResponseStr As String)
 	DelayRaiseSyncCompleteEvent
 End Sub
 
+'' Experiment to check problem within XmlDeserialize()
+'' Returns the specified comms response string with everything before the actual XML removed (e.g. command code and XML headers).
+'' Necessary as the B4i XML deserialiser can't process the standard headers prepended to XML documents (for some reason).
+'Private Sub TrimToXmlOnly(inputStr As String) As String
+'	Return inputStr.SubString(inputStr.IndexOf2("<", inputStr.IndexOf("<") + 1))
+'End Sub
+
 ' Sends the Sync Database command to the Server.
 Public Sub InvokeDatabaseSync
 	tmrMinimumDisplayPeriod.Enabled = False ' Just in case the timer was previously running.
@@ -132,8 +146,9 @@ Public Sub InvokeDatabaseSync
 		Dim msg As String = modEposApp.EPOS_SYNC_DATA & "," &  _
 								modEposWeb.ConvertToString(Starter.myData.customer.customerId) & "," & DEFAULT_TIME_STAMP
 #if B4A	
-		CallSub2(Starter, "pSendMessage", msg)
+		CallSub2(Starter, "SendMessage", msg)
 #else ' B4I
+		' Main.comms.SendMessage(msg)
 		Main.SendMessage(msg)
 #end if	
 	End If
@@ -185,7 +200,7 @@ private Sub GetMenuFromWebServer(centreId As Int)
 	menuItems  = root.Get("menuItems")
 	job.Release ' Must always be called after the job is complete, to free its resources
 #if B4A
-	CallSubDelayed2(Starter, "pProcessInputStrg", menuItems)
+	CallSubDelayed2(Starter, "ProcessInputStrg", menuItems)
 #else ' B4I
 	Main.ProcessInputStrg(menuItems)
 #end if

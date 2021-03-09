@@ -7,8 +7,8 @@ Version=7.8
 #Region  Documentation
 	'
 	' Name......: TestStartAt
-	' Release...: 4
-	' Date......: 26/04/20   
+	' Release...: 5
+	' Date......: 10/02/21   
 	'
 	' History
 	' Date......: 17/02/18
@@ -33,6 +33,12 @@ Version=7.8
 	' Overview..: Calling pSendMessage changed.
 	' Amendee...: D Morris
 	' Details...:  Mod: Service_Start().
+	'             		
+	' Date......: 10/02/21
+	' Release...: 5
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	'
 	' Date......: 
 	' Release...: 
@@ -68,7 +74,7 @@ Sub Service_Start (StartingIntent As Intent)
 		Dim message As String =  modEposApp.EPOS_PING & " From Customer #" & _ 
 								Starter.myData.customer.customerIdStr & _
 								"  Time:" & DateTime.Date(DateTime.Now)
-		CallSub2(Starter, "pSendMessage", message )
+		CallSub2(Starter, "SendMessage", message )
 		StartServiceAtExact(Me, DateTime.Now + 5 *1000, True)
 	Else
 		stopCalled = False		

@@ -11,8 +11,8 @@ Version=8.5
 #Region  Documentation
 	'
 	' Name......: svcTestSequence
-	' Release...: 3
-	' Date......: 26/04/20
+	' Release...: 4
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 25/10/18
@@ -31,6 +31,12 @@ Version=8.5
 	' Overview..: Bugfix: Integer to string conversion if numbers too big.
 	' Amendee...: D Morris
 	' Details...:  Mod: lSendNextTestCmd().
+	'             		
+	' Date......: 10/02/21
+	' Release...: 4
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	'
 	' Date......: 
 	' Release...: 
@@ -165,7 +171,7 @@ Private Sub lSendNextTestCmd
 		mCommandsSent = mCommandsSent + 1
 		tmrTestCmdResponseTimeout.Enabled = True
 		Dim msg As String = modEposApp.EPOS_ORDERSTATUSLIST & modEposWeb.ConvertToString(Starter.myData.customer.customerId)
-		CallSub2(Starter, "pSendMessage", msg )
+		CallSub2(Starter, "SendMessage", msg )
 		lRaiseMsgSentEvent
 	Else If mNeedsToStop Then
 		TestSeqRunning = False

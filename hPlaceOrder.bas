@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 33
-	' Date......: 06/02/21
+	' Release...: 34
+	' Date......: 10/02/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -36,6 +36,12 @@ Version=9.5
 	' Overview..: Maintenance fix.
 	' Amendee...: D Morris
 	' Details...: Mod: Old commented code removed.
+	'             		
+	' Date......: 10/02/21
+	' Release...: 34
+	' Overview..: Maintenance fix.
+	' Amendee...: D Morris
+	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	' 			  
 	' Date......: 
 	' Release...: 
@@ -164,8 +170,9 @@ Private Sub btnOrder_Click
 #End If
 		Dim msg As String = modEposApp.EPOS_ORDER_SEND & xmlOrder
 #if B4A
-		CallSub2(Starter, "pSendMessageAndCheckReconnect", msg )
+		CallSub2(Starter, "SendMessageAndCheckReconnect", msg )
 #else ' B4I
+		'Main.comms.SendMessageAndCheckReconnect(msg)
 		Main.SendMessageAndCheckReconnect(msg)
 #End If
 	Else ' Errors have been detected with the entered order details
@@ -369,11 +376,12 @@ Public Sub HandleOrderResponse(orderResponseStr As String)
 				Dim msg As String = modEposApp.EPOS_ORDER_ACKN & localOrderObj.XmlSerialize(localOrderObj)
 				Log(msg)
 #if B4A
-				CallSub2(Starter, "pSendMessage",  msg)
+				CallSub2(Starter, "SendMessage",  msg)
 				' DM 27/5/18 & 19/09/18 - This is not ideal as the order may not be accepted by the server - need to investigate.
-				CallSub2(srvPhoneTotal, "pAdjustPhoneTotal", Starter.latestOrderTotal)
+				CallSub2(srvPhoneTotal, "AdjustPhoneTotal", Starter.latestOrderTotal)
 #Else ' B4I
-				Main.SendMessage( msg)
+				' Main.comms.SendMessage( msg)
+				Main.SendMessage(msg)
 				' DM 27/5/18 & 19/09/18 - This is not ideal as the order may not be accepted by the server - need to investigate.
 				svcPhoneTotal.AdjustPhoneTotal(Main.LatestOrderTotal)
 #End If
