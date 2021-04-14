@@ -10,8 +10,8 @@ Version=9.8
 #Region  Documentation
 	'
 	' Name......: clsOrderPaymentRec
-	' Release...: 2
-	' Date......: 24/01/21
+	' Release...: 2-
+	' Date......: 06/03/21
 	'
 	' History
 	' Date......: 31/05/20
@@ -24,6 +24,13 @@ Version=9.8
 	' Overview..: Maintenance modifications.
 	' Amendee...: D Morris
 	' Details...: Mod: Initialize() - has parameters.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Support for sessionId (Stripe Checkout)
+	' Amendee...: D Morris
+	' Details...: Add: sessionId.
+	'		      Mod: Initialize() now includes sessionId.
 	'
 	' Date......: 
 	' Release...: 
@@ -43,6 +50,9 @@ Sub Class_Globals
 	' Order ID
 	Public orderId As Int
 	
+	' Session ID 
+	Public sessionId As String
+	
 End Sub
 
 #End Region  Mandatory Subroutines & Data
@@ -50,9 +60,10 @@ End Sub
 #Region  Public Subroutines
 
 'Initializes the object. You can add parameters to this method if needed.
-Public Sub Initialize(pOrderId As Int, pAmount As Float)
+Public Sub Initialize(pOrderId As Int, pAmount As Float, pSessionId As String)
 	amount = pAmount
 	orderId = pOrderId
+	sessionId = pSessionId
 End Sub
 
 #End Region  Public Subroutines

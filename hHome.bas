@@ -10,8 +10,8 @@ Version=10
 #Region  Documentation
 	'
 	' Name......: hHome
-	' Release...: 20
-	' Date......: 10/02/21
+	' Release...: 20-
+	' Date......: 07/04/21
 	'
 	' History
 	' Date......: 08/08/20
@@ -35,6 +35,12 @@ Version=10
 	' Amendee...: D Morris
 	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
 	'			  Mod: CheckConnection() call to B4i code changed.
+	'
+	' Date......: 
+    ' Release...: 
+	' Overview..: Support for sessionId (Stripe Checkout operation).
+    ' Amendee...: D Morris
+    ' Details...: Mod: HandleOrderInfo() supports session ID.
 	'             		
 	' Date......: 
 	' Release...: 
@@ -57,6 +63,7 @@ Sub Class_Globals
 		
 	' Local constants
 	Private Const DEFAULT_TIME_STAMP As Int = 1
+	
 #if B4I
 	Private DFT_UPDATE_ORDERSTATUS As Int = 20000		' Default for initialise the tmrUpdateOrderStatus (msecs).
 #End If	
@@ -93,6 +100,7 @@ Public Sub Initialize (parent As B4XView)
 #if B4i
 	Starter.lastPageShown = "xHome"	
 #End If
+	
 	InitializeLocals
 End Sub
 
@@ -230,7 +238,7 @@ Public Sub HandleOrderInfo(orderInfoStr As String)
 	xui.Msgbox2Async(msg, title, "OK", payPrompt, "", Null ) ' necessary so Wait for is correct.
 	Wait For MsgBox_Result(Result As Int)
 	If Result = xui.DialogResponse_Cancel Then ' Make a payment?
-		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize(orderInfoObj.orderId, totalCost)
+		Dim orderPayment As clsOrderPaymentRec : orderPayment.initialize(orderInfoObj.orderId, totalCost, orderInfoObj.sessionId )
 		wait for (payment.QueryPaymentMethod(orderPayment)) complete(queryResult As Boolean)
 	End If
 End Sub

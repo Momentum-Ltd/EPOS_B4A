@@ -11,8 +11,8 @@ Version=9.01
 #Region  Documentation
 	'
 	' Name......: modEposWeb
-	' Release...: 13
-	' Date......: 15/12/20
+	' Release...: 13-
+	' Date......: 08/04/21
 	'
 	' History
 	' Date......: 01/07/19
@@ -41,6 +41,12 @@ Version=9.01
 	' Overview..: URL constant added.
 	' Amendee...: D Morris
 	' Details...: Added: URL_CENTRE_INFO_NOT_AVAILABLE.
+    '           
+    ' Date......: 
+    ' Release...: 
+    ' Overview..: Support for Stripe Checkoout operation.
+    ' Amendee...: D Morris.
+    ' Details...: Added: URL_PAYMENT_FAIL and URL_PAYMENT_SUCCESS.
 	'
 	' Date......: 
 	' Release...: 
@@ -75,7 +81,15 @@ Sub Process_Globals
 	Public Const CONTROLLER_CENTREMENU_API As String = "/centremenu"
 	
 	''' <summary>Centre Information not available.</summary>
-	Public Const URL_CENTRE_INFO_NOT_AVAILABLE As String = "https://superord.co.uk/nocentredetailsavailable.html"	
+	Public Const URL_CENTRE_INFO_NOT_AVAILABLE As String = "https://superord.co.uk/nocentredetailsavailable.html"
+		
+	''' <summary>Payment failed URL (Used in Stripe Checkout operation).</summary>
+	''' <remarks>If this is changed the Phone modEposWeb module must be updated.</remarks>
+	Public Const URL_PAYMENT_FAIL As String = "https://superorder.co.uk/cancel.html"
+
+	''' <summary>Payment success URL (Used in Stripe Checkout operation).</summary>
+	''' <remarks>If this is changed the Phone modEposWeb module must be updated.</remarks>
+	Public Const URL_PAYMENT_SUCCESS As String = "https://superorder.co.uk/success.html"
 	
 	''' <summary>Privacy policy.</summary>
     Public Const URL_PRIVACY_POLICY As String = "https://www.superorder.co.uk/legal/privacypolicy.html"

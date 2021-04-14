@@ -1,21 +1,22 @@
 ﻿Build1=Default,arena.Epos
-Build2=CentreImages,arena.Epos,CENTRE_LOGOS,INCLUDE_SOCKET_CODE
+Build2=CentreImages,arena.Epos,CENTRE_LOGOS,INCLUDE_SOCKET_CODE,STRIPECHECKOUT
 File1=AppMenuLogo.png
-File10=frmCreateAccount.bal
-File11=frmHome.bal
-File12=frmPlaceOrder.bal
-File13=frmQueryNewInstall.bal
-File14=frmselectitem.bal
-File15=frmValidateCentreSelection3.bal
-File16=frmValidateDevice.bal
-File17=Home-icon.png
-File18=ic_cached_white_24dp.png
-File19=IconSilhouette.png
+File10=frmCheckout.bal
+File11=frmCreateAccount.bal
+File12=frmHome.bal
+File13=frmPlaceOrder.bal
+File14=frmQueryNewInstall.bal
+File15=frmselectitem.bal
+File16=frmValidateCentreSelection3.bal
+File17=frmValidateDevice.bal
+File18=Home-icon.png
+File19=ic_cached_white_24dp.png
 File2=cardSelectCentreDetails2.bal
-File20=ImageNotAvailableSmall.png
-File21=SuperOrderLogo.png
-File22=SuperOrderTextTransSmall.png
-File23=TapHouseRound.png
+File20=IconSilhouette.png
+File21=ImageNotAvailableSmall.png
+File22=SuperOrderLogo.png
+File23=SuperOrderTextTransSmall.png
+File24=TapHouseRound.png
 File3=Contacts-icon.png
 File4=frmAbout.bal
 File5=frmASelectPlayCentre3.bal
@@ -39,6 +40,7 @@ FileGroup20=Default Group
 FileGroup21=Default Group
 FileGroup22=Default Group
 FileGroup23=Default Group
+FileGroup24=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
 FileGroup5=Default Group
@@ -71,12 +73,13 @@ Library6=phone
 Library7=javaobject
 Library8=contentresolver
 Library9=mlwifi
-ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="29"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~	~\n~SetActivityAttribute(aCardEntry, android:windowSoftInputMode, adjustResize|stateHidden)~\n~	~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~' This line added for notification exp - otherwise a "Generating R file.    Error" occurred.~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~~\n~' These lines added for notification exp~\n~'************ Required with GetSafeDirDefaultExternal ***********~\n~AddManifestText(<uses-permission~\n~android:name="android.permission.WRITE_EXTERNAL_STORAGE"~\n~android:maxSdkVersion="18" />~\n~)~\n~~\n~' Added for Firebase~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.GooglePlayBase)~\n~CreateResourceFromFile(Macro, FirebaseAnalytics.Firebase)~\n~CreateResourceFromFile(Macro, FirebaseNotifications.FirebaseNotifications)~\n~'**************************************~\n~~\n~' Added for location services~\n~AddApplicationText(<meta-data~\n~    android:name="com.google.android.gms.version"~\n~    android:value="@integer/google_play_services_version" />)~\n~AddPermission(android.permission.ACCESS_FINE_LOCATION)~\n~~\n~' Added for non-https communications see https://www.b4x.com/android/forum/threads/android-jar-targetsdkversion-minsdkversion.87610/#content~\n~' Don't appear to work.~\n~' CreateResourceFromFile(Macro, Core.NetworkClearText)~\n~~\n~
 Module1=aAbout
 Module10=aSelectItem
-Module100=TemplateXactivity
-Module101=TemplateXhelper
-Module102=TestStartAt
+Module100=TemplateService
+Module101=TemplateXactivity
+Module102=TemplateXhelper
+Module103=TestStartAt
 Module11=aSelectPlayCentre3
 Module12=aValidateCentreSelection2
 Module13=aValidateDevice
@@ -159,25 +162,25 @@ Module82=hPlaceOrder
 Module83=hQueryNewInstall
 Module84=hSelectItem
 Module85=hSelectPlayCentre3
-Module86=hValidateCentreSelection2
-Module87=hValidateDevice
-Module88=modConvert
-Module89=modEposApp
+Module86=hStripeCheckout
+Module87=hValidateCentreSelection2
+Module88=hValidateDevice
+Module89=modConvert
 Module9=aQueryNewInstall
-Module90=modEposWeb
-Module91=NB6
-Module92=srcTestSequence
-Module93=srvNotification
-Module94=srvPhoneTotal
-Module95=Starter
-Module96=TemplateActivity
-Module97=TemplateClass
-Module98=TemplateCode
-Module99=TemplateService
-NumberOfFiles=23
+Module90=modEposApp
+Module91=modEposWeb
+Module92=NB6
+Module93=srcTestSequence
+Module94=srvNotification
+Module95=srvPhoneTotal
+Module96=Starter
+Module97=TemplateActivity
+Module98=TemplateClass
+Module99=TemplateCode
+NumberOfFiles=24
 NumberOfLibraries=24
-NumberOfModules=102
-Version=10.5
+NumberOfModules=103
+Version=10.7
 @EndOfDesignText@
 
 ' This is the Main form (currently unused for other than for startup procedures and for project documentation).
@@ -186,8 +189,8 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 202                                                                                                                                                               
-	' Date......: 09/03/21
+	' Release...: 202-                                                                                                                                                               
+	' Date......: 05/04/21
 	'
 	' History
 	' For releases v1   - 144 see release v145.
@@ -229,6 +232,16 @@ Version=10.5
 	'					FirebaseMessaging_v8, hValidateCentreSelection2_v14, srvPhoneTotal_v4, hSelectPlayCentre_v18,
 	'					ModEposApp_v30.
 	'			  Removed: svcTestSequence.
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Compiled using b4A v10.7.
+	' Amendee...: D Morris
+	' Details...: Mod: Using latest version of B4A (v10.7)
+	'			  Mod: clsEposOrderStatus_v8, clsOrderPaymentRec_v3, hPlaceOrder_v35, clsPayment_v5, clsEposOrderInfo_v5,
+	'					clsEposCustomerPayment_v7, hHome_v21, modEposWeb_v14.
+	'			  Add: hStripeCheckout_v1.
+	'			  Add: New compiler switch STRIPECHECKOUT.
 	'
 	' Date......: 
 	' Release...: 

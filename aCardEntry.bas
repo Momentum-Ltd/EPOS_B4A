@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: aCardEntry
-	' Release...: 10
-	' Date......: 06/02/21   
+	' Release...: 10-
+	' Date......: 06/04/21   
 	'
 	' History
 	' Date......: 13/10/19
@@ -37,6 +37,12 @@ Version=9.3
 	'
 	' Date......: 
 	' Release...: 
+	' Overview..: Support for Stripe Checkout operation. 
+	' Amendee...: D Morris
+	' Details...: Mod: Support compiler switch STRIPECHECKOUT.
+	'
+	' Date......: 
+	' Release...: 
 	' Overview..: 
 	' Amendee...: 
 	' Details...: 
@@ -45,7 +51,7 @@ Version=9.3
 
 #Region  Activity Attributes 
 	#FullScreen: False
-	#IncludeTitle: true
+	#IncludeTitle: False
 #End Region
 
 #Region  Mandatory Subroutines & Data
@@ -55,8 +61,14 @@ Sub Process_Globals
 End Sub
 
 Sub Globals
-	Private bar As StdActionBar		' New title bar 
+'	Private bar As StdActionBar		' New title bar 
+	
+#if STRIPECHECKOUT
+	Private hc As hStripeCheckout	' Helper class for Stripe Checkout operation
+#else 
 	Private hc As hCardEntry 		' This activity's helper class.
+#end if
+
 End Sub
 
 #End Region  Mandatory Subroutines & Data
@@ -73,8 +85,20 @@ private Sub Activity_ActionBarHomeClick
 End Sub
 
 Private Sub Activity_Create(FirstTime As Boolean)
-	modEposApp.InitializeStdActionBar(bar, "bar")
+	
+'	modEposApp.InitializeStdActionBar(bar, "bar")
+
 	hc.Initialize(Activity)
+End Sub
+
+' Detect back button(bottom of phone).
+private Sub Activity_Keypress(KeyCode As Int) As Boolean
+	Dim rtnValue As Boolean = False ' Initialised to False, as that will allow the event to continue
+	If KeyCode = KeyCodes.KEYCODE_BACK Then ' The 'Back' softbutton was pressed,
+		rtnValue = True ' Returning true consumes the event, preventing the 'Back' action
+		hc.UserPressesBackButton
+	End If
+	Return rtnValue
 End Sub
 
 Private Sub Activity_Pause (UserClosed As Boolean)

@@ -12,8 +12,8 @@ Version=8.28
 #Region  Documentation
 	'
 	' Name......: clsEposOrderInfo
-	' Release...: 4
-	' Date......: 13/10/19
+	' Release...: 4-
+	' Date......: 07/04/21
 	'
 	' History
 	' Date......: 15/08/18
@@ -41,6 +41,12 @@ Version=8.28
     ' Details...:  Mod: "p-" and "l-" prefixes from all methods.
 	'
 	' Date......: 
+    ' Release...: 
+	' Overview..: Support for sessionId (Stripe Checkout operation).
+    ' Amendee...: D Morris
+    ' Details...: Added: sessionId with support code.
+	'
+	' Date......: 
 	' Release...: 
 	' Overview..: 
 	' Amendee...: 
@@ -53,14 +59,15 @@ Version=8.28
 Sub Class_Globals
 	
 	' Public variables
-	Public customerNumber As String ' The customer number.
-	Public deliverToTable As Boolean ' Indicates if order is to be delivered (otherwise for collection).
-	Public itemList As List ' List of clsCustomerOrderItemRec objects which store all the goods items in the order.
-	Public orderId As Int ' The order identifier.
-	Public orderMessage As String ' The message attached to the order.
-	Public orderStarted As String ' The order's timestamp. When deserialising, a date & time is provided but only the time is stored.
-	Public paid As Boolean ' Indicates if the order has been paid.
-	Public tableNumber As Int	' Table number for order 	
+	Public customerNumber As String 	' The customer number.
+	Public deliverToTable As Boolean 	' Indicates if order is to be delivered (otherwise for collection).
+	Public itemList As List 			' List of clsCustomerOrderItemRec objects which store all the goods items in the order.
+	Public orderId As Int 				' The order identifier.
+	Public orderMessage As String 		' The message attached to the order.
+	Public orderStarted As String 		' The order's timestamp. When deserialising, a date & time is provided but only the time is stored.
+	Public paid As Boolean 				' Indicates if the order has been paid.
+	Public sessionId As String			' The Session ID.
+	Public tableNumber As Int			' Table number for order 	
 End Sub
 
 #End Region  Mandatory Subroutines & Data
@@ -110,7 +117,7 @@ Public Sub XmlDeserialize(xmlString As String) As clsEposOrderInfo
 	If timeStr.Contains(".") Then timeStr = timeStr.SubString2(0, timeStr.IndexOf("."))
 	rtnLocalObject.orderStarted = timeStr
 	rtnLocalObject.paid = mapOrderInfo.Get("paid")
-	
+	rtnLocalObject.sessionId = mapOrderInfo.GetDefault("sessionId", "")
 	Return rtnLocalObject
 End Sub
 

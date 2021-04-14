@@ -11,8 +11,8 @@ Version=7.8
 #Region  Documentation
 	'
 	' Name......: clsEposOrderStatus
-    ' Release...: 7
-    ' Date......: 13/05/20
+    ' Release...: 7-
+    ' Date......: 05/04/21
     '
     ' History
 	' Date......: 27/02/17
@@ -65,6 +65,12 @@ Version=7.8
 	'
 	' Date......: 
     ' Release...: 
+	' Overview..: Support for sessionId (Stripe Checkout operation).
+    ' Amendee...: D Morris
+    ' Details...: Added: sessionId with support code.
+	'
+	' Date......: 
+    ' Release...: 
 	' Overview..:
     ' Amendee...: 
     ' Details...: 
@@ -83,9 +89,9 @@ Sub Class_Globals
 	Public messageId As Int			' The message ID (= 0 if no response required).
 	Public orderId As Int 			' The order's ID number.
 	Public queuePosition As Int 	' The position in the queue of the order. 0 is unknown and -1 is not in queue.
+	Public sessionId As String		' The session ID.
 	Public status As Int 			' The status of the order (as a ModConvert.status*** int value)
-	Public tableNumber As Int 		' The customer's table number.
-	
+	Public tableNumber As Int 		' The customer's table number.	
 End Sub
 
 #End Region  Mandatory Subroutines & Data
@@ -103,6 +109,7 @@ Public Sub ConvertFromMap(mapInput As Map) As clsEposOrderStatus
 	rtnObj.messageId = mapInput.GetDefault("messageId", 0)
 	rtnObj.orderId = mapInput.GetDefault("orderId", 0)
 	rtnObj.queuePosition = mapInput.GetDefault("queuePosition", 0)
+	rtnObj.sessionId = mapInput.GetDefault("sessionId", "")
 	rtnObj.status = modConvert.ConvertStringToStatus(mapInput.GetDefault("status", "unknown"))
 	rtnObj.tableNumber = mapInput.GetDefault("tableNumber", 0)
 	Return rtnObj
@@ -140,6 +147,7 @@ Public Sub XmlSerialize() As String
 	x = x.element("messageId").text(messageId).up
 	x = x.element("orderId").text(orderId).up
 	x = x.element("queuePosition").text(queuePosition).up
+	x = x.element("sessionId").text(sessionId).up
 	x = x.element("status").text(modConvert.ConvertStatusToString(status)).up
 	x = x.element("tableNumber").text(tableNumber).up
 #if B4A	

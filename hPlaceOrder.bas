@@ -11,8 +11,8 @@ Version=9.5
 #Region  Documentation
 	'
 	' Name......: hPlaceOrder
-	' Release...: 34
-	' Date......: 10/02/21
+	' Release...: 34-
+	' Date......: 06/04/21
 	'
 	' History
 	' Date......: 22/10/19
@@ -42,6 +42,12 @@ Version=9.5
 	' Overview..: Maintenance fix.
 	' Amendee...: D Morris
 	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
+	' 			  
+	' Date......: 
+	' Release...: 
+	' Overview..: Support for Stripe Checkout (session ID)
+	' Amendee...: D Morris
+	' Details...: Mod: HandleOrderAcknResponse() - saves session to clsOrderPaymentRec.
 	' 			  
 	' Date......: 
 	' Release...: 
@@ -333,7 +339,7 @@ Public Sub HandleOrderAcknResponse(orderAcknResponseStr As String)
 		xui.Msgbox2Async(msg, "Order Status", "OK", "", "", Null)
 		Wait For MsgBox_Result(result As Int)
 	Else If responseObj.status = modConvert.statusWaitingForPayment Then ' Payment required before order is processed
-		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize (responseObj.orderId, responseObj.amount)
+		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize (responseObj.orderId, responseObj.amount, responseObj.sessionId )
 #if B4A
 		CallSubDelayed2(aHome, "QueryAndMakePayment", orderPayment)
 #else ' B41

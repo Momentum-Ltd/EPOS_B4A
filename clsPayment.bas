@@ -11,8 +11,8 @@ Version=10.5
 #Region  Documentation
 	'
 	' Name......: clsPayment
-	' Release...: 4
-	' Date......: 10/02/21
+	' Release...: 4-
+	' Date......: 07/04/21
 	'
 	' History
 	' Date......: 24/01/21
@@ -40,6 +40,13 @@ Version=10.5
 	' Overview..: Maintenance fix.
 	' Amendee...: D Morris
 	' Details...: Mod: 'p' dropped from call to Starter.SendMessage().
+	'
+	' Date......: 
+	' Release...: 
+	' Overview..: Support for Session ID (Stripe Checkout).
+	' Amendee...: D Morris
+	' Details...: Mod: QueryPaymentAfterFailure().
+	'			  Mod: QueryPaymentMethod() message changed when not card account available.
 	'
 	' Date......: 
 	' Release...: 
@@ -82,13 +89,13 @@ Public Sub QueryPaymentMethod(orderPayment As clsOrderPaymentRec) As ResumableSu
 #end if
 		Else ' ELSE no saved card available.
 #if B4A
-			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another" & CRLF & " Card", Null)
+			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", " Card", Null)
 #else ' B4i - don't support CRLF in button text.
-			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Another Card", Null)
+			xui.Msgbox2Async(msg, "Payment Options", "", "Cash", "Card", Null)
 #end if						
 		End If
 		Wait For MsgBox_Result(Result As Int)
-		If Result = xui.DialogResponse_Positive Then ' Saved (Default) Card?
+		If Result = xui.DialogResponse_Positive Then ' Saved Card?
 			PayWithSavedCard(orderPayment)
 		else if Result = xui.DialogResponse_Cancel Then ' Cash?
 			msg = "Please go to the counter to pay."
@@ -188,7 +195,8 @@ Private Sub QueryPaymentAfterFailure(paymentInfo As clsEposCustomerPayment) As R
 #end if
 	wait for Msgbox_Result(tempResult As Int)
 	If tempResult = xui.DialogResponse_Positive Then ' Another card?
-		Dim orderPayment As clsOrderPaymentRec: orderPayment.initialize(paymentInfo.orderId, paymentInfo.total)
+		Dim orderPayment As clsOrderPaymentRec: 
+		orderPayment.initialize(paymentInfo.orderId, paymentInfo.total, paymentInfo.sessionId )
 #if B4A
 		CallSubDelayed2(aCardEntry, "CardEntryAndOrderPayment", orderPayment)
 #else 'B4I

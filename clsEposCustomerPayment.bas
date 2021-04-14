@@ -10,8 +10,8 @@ Version=9.3
 #Region  Documentation
 	'
 	' Name......: clsEposCustomerPayment.
-	' Release...: 6
-	' Date......: 20/01/21
+	' Release...: 6-
+	' Date......: 07/04/21
 	'
 	' History
 	' Date......: 03/09/19
@@ -51,6 +51,12 @@ Version=9.3
 	' Details...: Added: publicCardInfo, billPayment, noSave and paymentId.
     '               Mod: Constructors to support publicCardInfo.
 	'			    Mod: XmlDeserialize() and XmlSerialize() support for new elemnts.
+	'
+	' Date......: 
+    ' Release...: 
+	' Overview..: Support for sessionId (Stripe Checkout operation).
+    ' Amendee...: D Morris
+    ' Details...: Added: sessionId with support code.
 	'
 	' Date......: 
 	' Release...: 
@@ -100,6 +106,11 @@ Sub Class_Globals
 	Public publicCardInfo As clsEposPublicCardInfo
 	
 	''' <summary>
+	''' The session ID.
+	''' </summary>
+	Public sessionId As String		
+	
+	''' <summary>
 	''' The payment/operation (bidirectional) flag.
 	''' </summary>
 	Public status As Int
@@ -143,7 +154,8 @@ Public Sub XmlDeserialize(xmlString As String) As clsEposCustomerPayment
 		If cardInfoMap Is Map Then
 			localRetObject.publicCardInfo.expiryDate = cardInfoMap.GetDefault("expiryDate", "")
 			localRetObject.publicCardInfo.last4Digits = cardInfoMap.GetDefault("last4Digits", "")
-		End If		
+		End If	
+		localRetObject.sessionId = customerPaymentResult.GetDefault("sessionId", "")	
 		localRetObject.Token = customerPaymentResult.GetDefault("token", "")
 		localRetObject.total = customerPaymentResult.GetDefault("total", 0)
 	End If
@@ -162,6 +174,7 @@ Public Sub XmlSerialize() As String
 	x = x.element("orderId").text(orderId).up
 	x = x.element("noSave").text(noSave).up
 	x = x.element("paymentId").text(paymentId).up
+	x = x.element("sessionId").text(sessionId).up
 	x = x.element("status").text(modConvert.ConvertPaymentStatusIntToString(status)).up	
 	x = x.element("token").text(token).up
 	x = x.element("total").text(total).up
