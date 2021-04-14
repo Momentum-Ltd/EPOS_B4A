@@ -186,7 +186,7 @@ Version=10.5
 
 	' Form Version Documentation:
 	' Name......: Main
-	' Release...: 201-                                                                                                                                                               
+	' Release...: 202                                                                                                                                                               
 	' Date......: 09/03/21
 	'
 	' History
@@ -219,9 +219,9 @@ Version=10.5
 	' Amendee...: D Morris
 	' Details...: Bugfix: Correct problem with Google Play reports v1.0.0.200 as an internal test release.
 	'
-	' Date......: 
-	' Release...: 
-	' Overview..: 
+	' Date......: 09/03/21
+	' Release...: 202
+	' Overview..: Uses clsCommunications class.
 	' Amendee...: D Morris
 	' Details...: New: clsCommunications_v1, srvTestSequence_v1.
 	'		      Mod: Starter_v94, hHome_v20, clsConnect_v14, clsNotifications_v6, _v4, clsSyncDatabase_v3,
@@ -243,8 +243,8 @@ Version=10.5
 #Region  Project Attributes
 
 	#ApplicationLabel: SuperOrder
-	#VersionCode: 201
-	#VersionName: 1.0.0.201-
+	#VersionCode: 202
+	#VersionName: 1.0.0.202
 	#SupportedOrientations: portrait
 	#CanInstallToExternalStorage: False
 	
